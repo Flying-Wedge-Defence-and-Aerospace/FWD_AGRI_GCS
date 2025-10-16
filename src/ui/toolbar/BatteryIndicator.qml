@@ -24,7 +24,7 @@ Item {
     id:             _root
     anchors.top:    parent.top
     anchors.bottom: parent.bottom
-    width:          batteryIndicatorRow.width * 2.6
+    width:          batteryIndicatorRow.width * 3.5
     height: 10
 
     property bool showIndicator: true
@@ -70,12 +70,12 @@ Item {
         Row {
             anchors.top:    parent.top
             anchors.bottom: parent.bottom
-            //spacing: 5
+            spacing: 5
 
             function getBatteryColor() {
                 switch (battery.chargeState.rawValue) {
                 case MAVLink.MAV_BATTERY_CHARGE_STATE_OK:
-                    return /*qgcPal.text*/ "black"
+                    return /*qgcPal.text*/ "white"
                 case MAVLink.MAV_BATTERY_CHARGE_STATE_LOW:
                     return qgcPal.colorOrange
                 case MAVLink.MAV_BATTERY_CHARGE_STATE_CRITICAL:
@@ -84,7 +84,7 @@ Item {
                 case MAVLink.MAV_BATTERY_CHARGE_STATE_UNHEALTHY:
                     return qgcPal.colorRed
                 default:
-                    return /*qgcPal.text*/ "black"
+                    return /*qgcPal.text*/ "white"
                 }
             }
 
@@ -106,21 +106,21 @@ Item {
             QGCColoredImage {
                 anchors.top:        parent.top
                 anchors.bottom:     parent.bottom
-                width:              height > 0 ? height : 30
+                width:              height > 0 ? height - 10 : 15
                 sourceSize.width:   width
                 source:             /*"qrc:/qmlimages/Battery.svg"*/ "/res/battery_icon"
                 opacity:            (_activeVehicle && _activeVehicle.gps.count.value >= 0) ? 1 : 0.5
                 fillMode:           Image.PreserveAspectFit
-                color:              /*getBatteryColor()*/ _activeVehicle ? getBatteryColor() : "black"
+                color:              /*getBatteryColor()*/ _activeVehicle ? getBatteryColor() : "white"
             }
 
             QGCLabel {
                 text:                   /*getBatteryPercentageText()*/ _activeVehicle ? getBatteryPercentageText() : "N/A"
                 //font.pointSize:         ScreenTools.mediumFontPointSize
-                color:                  /*getBatteryColor()*/ _activeVehicle ? getBatteryColor() : "black"
+                color:                  /*getBatteryColor()*/ _activeVehicle ? getBatteryColor() : "white"
                 anchors.verticalCenter: parent.verticalCenter
                 font.bold: true
-                font.pointSize: 12
+                font.pointSize: ScreenTools.isMobile ? 6 : 11
 
                 ToolTip.visible: batteryDet.containsMouse
                 ToolTip.text: "Battery Percentage"
@@ -148,7 +148,7 @@ Item {
                 anchors.bottom:     parent.bottom
                 width:              height > 0 ? height : 30
                 sourceSize.width:   width
-                color: "black"
+                color: "white"
                 opacity: 0.5
                 fillMode: Image.PreserveAspectFit
             }
@@ -156,10 +156,11 @@ Item {
 
             QGCLabel {
                 text: "N/A"
-                font.pointSize: ScreenTools.mediumFontPointSize
-                color: "black"
+                //font.pointSize: ScreenTools.mediumFontPointSize
+                color: "white"
                 font.bold: true
                 anchors.verticalCenter: parent.verticalCenter
+                font.pointSize: ScreenTools.isMobile ? 8 : 8
 
                 ToolTip.visible: batteryInfo.containsMouse
                 ToolTip.text: "Battery Percentage"
@@ -284,92 +285,3 @@ Item {
         }
     }
 }
-
-
-                                // Component {
-                                //     id: batteryPopup
-
-                                //     Rectangle {
-                                //         width:          mainLayout.width   + mainLayout.anchors.margins * 2
-                                //         height:         mainLayout.height  + mainLayout.anchors.margins * 2
-                                //         radius:         ScreenTools.defaultFontPixelHeight / 2
-                                //         color:          /*qgcPal.window*/ "#2c3e50"
-                                //         border.color:   qgcPal.text
-
-                                //         ColumnLayout {
-                                //             id:                 mainLayout
-                                //             anchors.margins:    ScreenTools.defaultFontPixelWidth
-                                //             anchors.top:        parent.top
-                                //             anchors.right:      parent.right
-                                //             spacing:            ScreenTools.defaultFontPixelHeight
-
-                                //             QGCLabel {
-                                //                 Layout.alignment:   Qt.AlignCenter
-                                //                 text:               qsTr("Battery Status")
-                                //                 font.family:        ScreenTools.demiboldFontFamily
-                                //                 font.bold: true
-                                //                 font.pointSize: 12
-                                //             }
-
-                                //             RowLayout {
-                                //                 spacing: ScreenTools.defaultFontPixelWidth
-
-                                //                 ColumnLayout {
-                                //                     Repeater {
-                                //                         model: _activeVehicle ? _activeVehicle.batteries : 0
-
-                                //                         ColumnLayout {
-                                //                             spacing: 10
-
-                                //                             property var batteryValuesAvailable: nameAvailableLoader.item
-
-                                //                             Loader {
-                                //                                 id:                 nameAvailableLoader
-                                //                                 sourceComponent:    batteryValuesAvailableComponent
-
-                                //                                 property var battery: object
-                                //                             }
-
-                                //                             QGCLabel { text: qsTr("<u> Battery %1 </u>").arg(object.id.rawValue); font.bold: true; color: "yellow"}
-                                //                             QGCLabel { text: qsTr("Charge State");                          visible: batteryValuesAvailable.chargeStateAvailable; font.bold: true }
-                                //                             QGCLabel { text: qsTr("Remaining");                             visible: batteryValuesAvailable.timeRemainingAvailable; font.bold: true }
-                                //                             QGCLabel { text: qsTr("Remaining"); font.bold: true }
-                                //                             QGCLabel { text: qsTr("Voltage"); font.bold: true }
-                                //                             QGCLabel { text: qsTr("Consumed");                              visible: batteryValuesAvailable.mahConsumedAvailable; font.bold: true }
-                                //                             QGCLabel { text: qsTr("Temperature");                           visible: batteryValuesAvailable.temperatureAvailable; font.bold: true }
-                                //                             QGCLabel { text: qsTr("Function");                              visible: batteryValuesAvailable.functionAvailable; font.bold: true }
-                                //                         }
-                                //                     }
-                                //                 }
-
-                                //                 ColumnLayout {
-                                //                     Repeater {
-                                //                         model: _activeVehicle ? _activeVehicle.batteries : 0
-
-                                //                         ColumnLayout {
-                                //                             spacing: 10
-
-                                //                             property var batteryValuesAvailable: valueAvailableLoader.item
-
-                                //                             Loader {
-                                //                                 id:                 valueAvailableLoader
-                                //                                 sourceComponent:    batteryValuesAvailableComponent
-
-                                //                                 property var battery: object
-                                //                             }
-
-                                //                             QGCLabel { text: "" }
-                                //                             QGCLabel { text: object.chargeState.enumStringValue;                                        visible: batteryValuesAvailable.chargeStateAvailable }
-                                //                             QGCLabel { text: object.timeRemainingStr.value;                                             visible: batteryValuesAvailable.timeRemainingAvailable }
-                                //                             QGCLabel { text: object.percentRemaining.valueString + " " + object.percentRemaining.units }
-                                //                             QGCLabel { text: object.voltage.valueString + " " + object.voltage.units }
-                                //                             QGCLabel { text: object.mahConsumed.valueString + " " + object.mahConsumed.units;           visible: batteryValuesAvailable.mahConsumedAvailable }
-                                //                             QGCLabel { text: object.temperature.valueString + " " + object.temperature.units;           visible: batteryValuesAvailable.temperatureAvailable }
-                                //                             QGCLabel { text: object.function.enumStringValue;                                           visible: batteryValuesAvailable.functionAvailable }
-                                //                         }
-                                //                     }
-                                //                 }
-                                //             }
-                                //         }
-                                //     }
-                                // }

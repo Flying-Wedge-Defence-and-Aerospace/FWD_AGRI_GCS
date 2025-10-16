@@ -1,5 +1,6 @@
 import QtQuick          2.3
 import QtQuick.Controls 1.2
+import QtQuick.Layouts 1.3
 
 import QGroundControl.FactSystem    1.0
 import QGroundControl.FactControls  1.0
@@ -21,7 +22,7 @@ Item {
     property Fact flightMode5: controller.getParameterFact(-1, _roverFirmware ? "MODE5" : "FLTMODE5")
     property Fact flightMode6: controller.getParameterFact(-1, _roverFirmware ? "MODE6" : "FLTMODE6")
 
-    Column {
+    ColumnLayout {
         anchors.fill:       parent
 
         VehicleSummaryRow {
@@ -29,9 +30,23 @@ Item {
             valueText: flightMode1.enumStringValue
         }
 
+        Rectangle {
+            Layout.fillWidth: true
+            height: 1
+            color: "white"
+            opacity: 0.3
+        }
+
         VehicleSummaryRow {
             labelText: qsTr("Flight Mode 2")
             valueText: flightMode2.enumStringValue
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            height: 1
+            color: "white"
+            opacity: 0.3
         }
 
         VehicleSummaryRow {
@@ -39,9 +54,23 @@ Item {
             valueText: flightMode3.enumStringValue
         }
 
+        Rectangle {
+            Layout.fillWidth: true
+            height: 1
+            color: "white"
+            opacity: 0.3
+        }
+
         VehicleSummaryRow {
             labelText: qsTr("Flight Mode 4")
             valueText: flightMode4.enumStringValue
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            height: 1
+            color: "white"
+            opacity: 0.3
         }
 
         VehicleSummaryRow {
@@ -49,9 +78,23 @@ Item {
             valueText: flightMode5.enumStringValue
         }
 
+        Rectangle {
+            Layout.fillWidth: true
+            height: 1
+            color: "white"
+            opacity: 0.3
+        }
+
         VehicleSummaryRow {
             labelText: qsTr("Flight Mode 6")
             valueText: flightMode6.enumStringValue
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            height: 1
+            color: "white"
+            opacity: 0.3
         }
     }
 }

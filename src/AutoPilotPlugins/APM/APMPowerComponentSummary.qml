@@ -9,6 +9,7 @@
 
 import QtQuick          2.3
 import QtQuick.Controls 1.2
+import QtQuick.Layouts 1.3
 
 import QGroundControl.FactSystem    1.0
 import QGroundControl.FactControls  1.0
@@ -29,12 +30,19 @@ Item {
     property Fact _batt2Capacity:           controller.getParameterFact(-1, "BATT2_CAPACITY", false /* reportMissing */)
     property bool _battCapacityAvailable:   controller.parameterExists(-1, "BATT_CAPACITY")
 
-    Column {
+    ColumnLayout {
         anchors.fill:       parent
 
         VehicleSummaryRow {
             labelText: qsTr("Batt1 monitor")
             valueText: _batt1Monitor.enumStringValue
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            height: 1
+            color: "white"
+            opacity: 0.3
         }
 
         VehicleSummaryRow {
@@ -43,10 +51,24 @@ Item {
             visible:    _batt1MonitorEnabled
         }
 
+        Rectangle {
+            Layout.fillWidth: true
+            height: 1
+            color: "white"
+            opacity: 0.3
+        }
+
         VehicleSummaryRow {
             labelText:  qsTr("Batt2 monitor")
             valueText:  _batt2MonitorAvailable ? _batt2Monitor.enumStringValue : ""
             visible:    _batt2MonitorAvailable
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            height: 1
+            color: "white"
+            opacity: 0.3
         }
 
         VehicleSummaryRow {

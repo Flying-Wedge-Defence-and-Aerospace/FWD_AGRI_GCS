@@ -34,6 +34,7 @@ Rectangle {
             icon.source:        "/qmlimages/PaperPlane.svg"
             checked:            false
             onClicked: {
+                console.log("PlanToolBar.qml file button clicked")
                 checked = false
                 mainWindow.showFlyView()
             }

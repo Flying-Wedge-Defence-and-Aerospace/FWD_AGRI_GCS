@@ -116,47 +116,6 @@ Item {
             property point arrowBase1: Qt.point(0, 0)
             property point arrowBase2: Qt.point(0, 0)
 
-            // onPaint: {
-            //     var panelX = _arrowPointWidth
-            //     var panelY = 0
-            //     var panelWidth = parent.width - _arrowPointWidth
-            //     var panelHeight = parent.height
-            //     var r = 10
-
-            //     var context = getContext("2d")
-            //     context.reset()
-            //     context.beginPath()
-
-            //     context.moveTo(panelX + r, panelY)
-            //     context.lineTo(panelX + panelWidth - r, panelY)
-            //     context.quadraticCurveTo(panelX + panelWidth, panelY, panelX + panelWidth, panelY + r)
-            //     context.lineTo(panelX + panelWidth, panelY + panelHeight - r)
-            //     context.quadraticCurveTo(panelX + panelWidth, panelY + panelHeight, panelX + panelWidth - r, panelY + panelHeight)
-            //     context.lineTo(panelX + r, panelY + panelHeight)
-            //     context.quadraticCurveTo(panelX, panelY + panelHeight, panelX, panelY + panelHeight - r)
-            //     context.lineTo(panelX, panelY + r)
-            //     context.quadraticCurveTo(panelX, panelY, panelX + r, panelY)
-
-            //     context.moveTo(panelX, panelY)                              // top left
-            //     context.lineTo(panelX + panelWidth, panelY)                 // top right
-            //     context.lineTo(panelX + panelWidth, panelX + panelHeight)   // bottom right
-            //     context.lineTo(panelX, panelY + panelHeight)                // bottom left
-            //     context.lineTo(arrowBase2.x, arrowBase2.y)
-            //     context.lineTo(arrowPoint.x, arrowPoint.y)
-            //     context.lineTo(arrowBase1.x, arrowBase1.y)
-            //     context.lineTo(panelX, panelY)                              // top left
-
-            //     context.strokeStyle = /*"#00E676"*/ "white"
-            //     context.lineWidth = 5
-            //     context.stroke()
-
-            //     context.closePath()
-            //     // context.fillStyle = qgcPal.windowShade
-            //     context.fillStyle = "#2c3e50"
-            //     context.fill()
-            // }
-
-
             onPaint: {
                 var panelX = _arrowPointWidth
                 var panelY = 0
@@ -190,7 +149,7 @@ Item {
                 context.stroke()
 
                 ctx.closePath()
-                ctx.fillStyle = /*qgcPal.windowShade*/ "#black"
+                ctx.fillStyle = /*qgcPal.windowShade*/ "#66800000"
                 ctx.fill()
             }
 

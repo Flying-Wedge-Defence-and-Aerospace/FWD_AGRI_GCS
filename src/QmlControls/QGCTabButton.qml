@@ -54,7 +54,7 @@ T.TabButton {
         //                                      control.palette.mid, control.down ? 0.5 : 0.0)
 
         color: Color.blend(
-            control.checked ? "#3498DB" : "#2C3E50",   // Blue when checked, dark navy otherwise
+            control.checked ? "#90a010" : "#800000",   // Blue when checked, dark navy otherwise
             control.down ? "#1ABC9C" : "#BDC3C7",      // Teal highlight when pressed, light gray otherwise
             control.down ? 0.5 : 0.2                   // Blend ratio
         )

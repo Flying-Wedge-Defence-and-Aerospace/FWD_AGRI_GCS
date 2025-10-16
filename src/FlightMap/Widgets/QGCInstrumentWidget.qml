@@ -31,14 +31,14 @@ ColumnLayout {
 
     Rectangle {
         id:                 visualInstrument
-        height:             (_outerRadius * 2) + 60 /*- 100*/ // size of that
+        height:             ScreenTools.isMobile ? (_outerRadius * 1.3) : (_outerRadius * 2) + 60 /*- 100*/ // size of that
         //width: 460
         // Layout.fillWidth:   true
         width: attitude.width + compass.width + _spacing + (_topBottomMargin * 2) + 20
         radius:             20
-        color:              Qt.rgba(0.2, 0.4, 0.8, 0.65)
-        border.color: "yellow"
-        border.width: 1
+        color:              /*Qt.rgba(0.2, 0.4, 0.8, 0.65)*/ "#66800000"
+        border.color: "orange"
+        border.width: 2
 
         DeadMouseArea { anchors.fill: parent }
 
@@ -46,7 +46,7 @@ ColumnLayout {
             id:                     attitude
             anchors.leftMargin:     _topBottomMargin
             anchors.left:           parent.left
-            size:                   (_innerRadius * 2) + 50 /*- 100*/  // size of that
+            size:                   ScreenTools.isMobile ? (_innerRadius * 1.3) : (_innerRadius * 2) + 50 /*- 100*/  // size of that
             vehicle:                globals.activeVehicle
             anchors.verticalCenter: parent.verticalCenter
         }
@@ -55,7 +55,7 @@ ColumnLayout {
             id:                     compass
             anchors.leftMargin:     _spacing + 20
             anchors.left:           attitude.right
-            size:                   (_innerRadius * 2) + 50 /*- 100*/   // size of that
+            size:                   ScreenTools.isMobile ? (_innerRadius * 1.3) : (_innerRadius * 2) + 50 /*- 100*/   // size of that
             vehicle:                globals.activeVehicle
             anchors.verticalCenter: parent.verticalCenter
         }

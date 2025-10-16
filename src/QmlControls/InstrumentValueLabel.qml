@@ -35,13 +35,13 @@ ColumnLayout {
     QGCColoredImage {
         id:                         valueIcon
         Layout.alignment:           _verticalOrientation ? Qt.AlignHCenter : Qt.AlignVCenter
-        height:                     _tightHeight * 0.75
-        width:                      _tightHeight * 0.85
+        height:                     _tightHeight /** 0.75*/ * 1.1
+        width:                      _tightHeight /** 0.85*/ * 1.25
         sourceSize.height:          height
         fillMode:                   Image.PreserveAspectFit
         mipmap:                     true
         smooth:                     true
-        color:                     /* _color*/ "black"
+        color:                     /* _color*/ "white"
         opacity:                    instrumentValueData.currentOpacity
         visible:                    _iconVisible
 
@@ -50,9 +50,9 @@ ColumnLayout {
 
         function updateIcon() {
             if (instrumentValueData.rangeType === InstrumentValueData.IconSelectRange) {
-                valueIcon.source = instrumentValueData.currentIcon != "" ? iconPrefix + instrumentValueData.currentIcon : "";
+                valueIcon.source = instrumentValueData.currentIcon !== "" ? iconPrefix + instrumentValueData.currentIcon : "";
             } else if (instrumentValueData.icon) {
-                valueIcon.source = instrumentValueData.icon != "" ? iconPrefix + instrumentValueData.icon : "";
+                valueIcon.source = instrumentValueData.icon !== "" ? iconPrefix + instrumentValueData.icon : "";
             } else {
                 valueIcon.source = ""
             }
@@ -76,9 +76,9 @@ ColumnLayout {
     QGCLabel {
         Layout.alignment:   _verticalOrientation ? Qt.AlignHCenter : Qt.AlignVCenter
         height:             _tightHeight
-        font.pointSize:     ScreenTools.smallFontPointSize
+        font.pointSize:     /*ScreenTools.smallFontPointSize*/ 15
         text:               instrumentValueData.text
-        color:              /*_color*/ "black"
+        color:              /*_color*/ "white"
         opacity:            instrumentValueData.currentOpacity
         visible:            !_iconVisible
     }

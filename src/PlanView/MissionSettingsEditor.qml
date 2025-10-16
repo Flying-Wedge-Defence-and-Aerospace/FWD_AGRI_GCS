@@ -16,7 +16,7 @@ Rectangle {
     id:                 valuesRect
     width:              availableWidth
     height:             valuesColumn.height + (_margin * 2)
-    color:              /*qgcPal.windowShadeDark*/ "#2c3e50"
+    color:              /*qgcPal.windowShadeDark*/ /*"#2c3e50"*/ "#77800000"
     visible:            missionItem.isCurrentItem
     radius:             _radius
 
@@ -92,6 +92,7 @@ Rectangle {
                 QGCLabel {
                     id:     altModeLabel
                     text:   QGroundControl.altitudeModeShortDescription(_missionController.globalAltitudeMode)
+                    color: "white"
                 }
                 QGCColoredImage {
                     height:     ScreenTools.defaultFontPixelHeight / 2
@@ -292,6 +293,7 @@ Rectangle {
                     text:                       qsTr("Set To Map Center")
                     onClicked:                  missionItem.coordinate = map.center
                     anchors.horizontalCenter:   parent.horizontalCenter
+                    backRadius: 7
                 }
             }
         } // Column

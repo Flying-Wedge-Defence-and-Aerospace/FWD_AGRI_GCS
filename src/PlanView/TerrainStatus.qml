@@ -18,7 +18,7 @@ import QGroundControl.Palette       1.0
 Rectangle {
     id:         root
     radius:     ScreenTools.defaultFontPixelWidth * 1
-    color:      /*qgcPal.window*/ "#2c3e50"
+    color:      /*qgcPal.window*/ "#77800000"
     opacity:    0.80
     clip:       true
 

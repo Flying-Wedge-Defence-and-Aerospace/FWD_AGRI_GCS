@@ -1280,6 +1280,7 @@ Rectangle {
                     QGCLabel {
                         text:               QGroundControl.qgcVersion
                         font.italic: true
+                        font.pointSize: 14
                         Layout.alignment:   Qt.AlignHCenter
                     }
                 } // settingsColumn

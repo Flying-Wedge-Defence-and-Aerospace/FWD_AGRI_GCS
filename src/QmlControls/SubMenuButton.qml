@@ -49,9 +49,9 @@ Button {
             color: !_rootButton.enabled
                        ? "gray"                          // disabled
                        : control.checked
-                         ? "#1aa1a1"                     // ✅ active (clicked / summary panel open)
+                         ? "#90a010"                     // ✅ active (clicked / summary panel open)
                          : _rootButton.hovered
-                           ? "#16c2c2"                   // hover (slightly different teal if you want)
+                           ? "#90a010"                   // hover (slightly different teal if you want)
                            : "#2c3e50"                   // normal enabled
 
             Behavior on color { ColorAnimation { duration: 150 } }

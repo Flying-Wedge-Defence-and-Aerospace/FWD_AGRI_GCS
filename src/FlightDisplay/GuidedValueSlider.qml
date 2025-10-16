@@ -17,7 +17,7 @@ import QGroundControl.Palette       1.0
 
 Rectangle {
     id:                 _root
-    border.color: "yellow"
+    border.color: "orange"
     border.width: 2
 
     property var  _flyViewSettings:     QGroundControl.settingsManager.flyViewSettings

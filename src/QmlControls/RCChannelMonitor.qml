@@ -68,10 +68,12 @@ Item {
             Rectangle {
                 id: indicator
                 anchors.verticalCenter: parent.verticalCenter
-                width:                  parent.height * 0.75
-                height:                 width
+                // width:                  parent.height * 0.75
+                // height:                 width
+                width: parent.height * 0.2
+                height: width * 4
                 x:                      (((reversed ? _pwmMax - rcValue : rcValue - _pwmMin) / _pwmRange) * parent.width) - (width / 2)
-                radius:                 width / 2
+                //radius:                 width / 2
                 color:                  qgcPal.text
                 visible:                mapped
             }
@@ -114,6 +116,7 @@ Item {
         QGCLabel {
             Layout.columnSpan:  parent.columns
             text:               qsTr("Channel Monitor")
+            font.bold: true
         }
 
         Connections {

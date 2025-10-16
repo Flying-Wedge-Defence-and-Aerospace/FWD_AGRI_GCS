@@ -31,10 +31,10 @@ RowLayout {
    property bool   _healthAndArmingChecksSupported: _activeVehicle ? _activeVehicle.healthAndArmingCheckReport.supported : false
 
    Rectangle {
-      color: mainStatusLabel._mainStatusBGColor
-      width: 200
+      color: /*mainStatusLabel._mainStatusBGColor*/ "transparent"
+      width: 170
       height: 30
-      radius: 10
+      // radius: 10
       //Layout.preferredHeight: parent.height * 1
       //Layout.fillHeight: true
       // anchors.topMargin: 20
@@ -44,9 +44,11 @@ RowLayout {
          id:             mainStatusLabel
          text:           mainStatusText()
          font.bold: true
-         font.pointSize: /*_vehicleInAir ? ScreenTools.defaultFontPointSize : ScreenTools.largeFontPointSize*/ 12
+         font.pointSize: ScreenTools.isMobile ? 8.5 : 11
+         //font.pointSize: /*_vehicleInAir ? ScreenTools.defaultFontPointSize : ScreenTools.largeFontPointSize*/ 11
          property color _mainStatusBGColor: "#696969"
          anchors.centerIn: parent
+         color: "white"
 
 
          property string _commLostText:      qsTr("Communication Lost")
@@ -149,21 +151,6 @@ RowLayout {
       Layout.preferredWidth:  ScreenTools.defaultFontPixelWidth * ScreenTools.largeFontPointRatio * 1.5
       height:                 1
    }
-
-   // FlightModeMenuIndicator {
-   //    id:                     flightModeMenu
-   //    Layout.preferredHeight: _root.height
-   //    fontPointSize:          _vehicleInAir ?  ScreenTools.largeFontPointSize : ScreenTools.defaultFontPointSize
-   //    visible:                _activeVehicle
-   // }
-
-   // QGCButton {
-   //    id: disconnectButton
-   //    text: "Disconnect"
-   //    backRadius: 7
-   //    onClicked: _activeVehicle.closeVehicle()
-   //    visible: _activeVehicle && _communicationLost
-   // }
 
    Item {
       Layout.preferredWidth:  ScreenTools.defaultFontPixelWidth * ScreenTools.largeFontPointRatio * 1.5

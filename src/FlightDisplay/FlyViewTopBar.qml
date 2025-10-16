@@ -24,8 +24,8 @@ import QGroundControl.Vehicle       1.0
 
 Item {
     id: root
-    width: 800
-    height: 40
+    width: ScreenTools.isMobile ? ScreenTools.defaultFontPixelWidth * 30 : ScreenTools.defaultFontPixelWidth * 115
+    height: ScreenTools.isMobile ? ScreenTools.defaultFontPixelHeight - 12 : ScreenTools.defaultFontPixelHeight * 2
 
     property var activeVehicle: QGroundControl.multiVehicleManager.activeVehicle
 
@@ -80,12 +80,14 @@ Item {
         id: centerBar
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
-        width: 800
-        height: 40
-        color: "#66FFFFFF"
-        radius: height - 35
+        width: ScreenTools.isMobile ? ScreenTools.defaultFontPixelWidth * 47 : ScreenTools.defaultFontPixelWidth * 115
+        height: ScreenTools.isMobile ? ScreenTools.defaultFontPixelHeight + 15 : ScreenTools.defaultFontPixelHeight * 2
+        //color: /*"#66FFFFFF"*/ "#8B0000"
+        color: "#77800000"
+        radius: ScreenTools.isMobile ? 10 : height - 30
         border.width: 2
-        border.color: "red"
+        border.color: "orange"
+        //opacity: 0.5
 
         RowLayout {
             id: widgetLayout
@@ -94,10 +96,10 @@ Item {
 
             Loader {
                 id: messageIndicatorLoader
-                //Layout.leftMargin: 12
+                Layout.leftMargin: 12
                 Layout.fillHeight: true
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                //Layout.preferredWidth: 75
+                Layout.preferredWidth: ScreenTools.isMobile ? 120 : 65
                 source: "qrc:/toolbar/GPSIndicator.qml"
                 //visible: item && item.showIndicator
             }
@@ -110,10 +112,10 @@ Item {
 
             Loader {
                 id: batteryIndicatorLoader
-                //Layout.leftMargin: 12
+                Layout.leftMargin: ScreenTools.isMobile? 20 : 12
                 Layout.fillHeight: true
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                //Layout.preferredWidth: 90
+                Layout.preferredWidth: ScreenTools.isMobile ? 145 : 75
                 source: "qrc:/toolbar/BatteryIndicator.qml"
                 //visible: item && item.showIndicator
             }
@@ -128,9 +130,9 @@ Item {
                 id: mainIndicator
                 Layout.fillHeight: true
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                Layout.preferredWidth: 120
-                //Layout.fillWidth:  true
-                //Layout.leftMargin: 15
+                Layout.preferredWidth: 150
+                Layout.fillWidth:  true
+                Layout.leftMargin: ScreenTools.isMobile ? 45 : 15
             }
 
             Rectangle {
@@ -169,18 +171,19 @@ Item {
             Item {
                     id: centerContainer
                     //Layout.fillWidth: true
-                    width: 140
+                    width: ScreenTools.isMobile? 200 : 160
                     Layout.alignment: Qt.AlignVCenter
                     height: parent.height
 
                     QGCLabel {
                         id: modeLabel
                         anchors.centerIn: parent
-                        text: activeVehicle ? activeVehicle.flightMode : qsTr("FLIGHT MODE: N/A")
-                        color: "black"
+                        text: activeVehicle ? activeVehicle.flightMode : qsTr("GUIDED_NOGPS")
+                        color: "white"
                         font.bold: true
-                        font.pointSize: 12
-                        font.family: "Times New Roman"
+                        font.pointSize: ScreenTools.isMobile ? 8 : 11
+                        //font.pointSize: 11
+                        //font.family: "Times New Roman"
 
                         ToolTip.visible: flightMode.containsMouse
                         ToolTip.text: "Mode"
@@ -205,26 +208,27 @@ Item {
                 Layout.fillHeight: true
             }
 
-            // QGCLabel {
-            //     text: _activeVehicle ? _activeVehicle.firmwareTypeString + " - " + _activeVehicle.vehicleTypeString
-            //                          : qsTr("No Vehicle")
-            //     color: "black"
-            //     font.bold: true
-            //     font.family: "Times New Roman"
-            //     font.capitalization: Font.AllUppercase
-            //     horizontalAlignment: Text.AlignHCenter
-            //     Layout.fillWidth: true
-            //     font.pointSize: 11
+            QGCLabel {
+                text: _activeVehicle ? /*_activeVehicle.firmwareTypeString + " - " +*/ _activeVehicle.vehicleTypeString
+                                     : qsTr("No Vehicle")
+                color: "white"
+                font.bold: true
+                //font.family: "Times New Roman"
+                font.capitalization: Font.AllUppercase
+                horizontalAlignment: Text.AlignHCenter
+                Layout.fillWidth: true
+                font.pointSize: ScreenTools.isMobile ? 8 : 10
+                //font.pointSize: 10
 
-            //     ToolTip.visible: vehicleName.containsMouse
-            //     ToolTip.text: "Vehicle Type"
+                ToolTip.visible: vehicleName.containsMouse
+                ToolTip.text: "Vehicle Type"
 
-            //     MouseArea {
-            //         id: vehicleName
-            //         anchors.fill: parent
-            //         hoverEnabled: true
-            //     }
-            // }
+                MouseArea {
+                    id: vehicleName
+                    anchors.fill: parent
+                    hoverEnabled: true
+                }
+            }
         }
     }
 }

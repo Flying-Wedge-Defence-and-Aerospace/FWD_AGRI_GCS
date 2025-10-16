@@ -1,5 +1,6 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
+import QtQuick.Layouts 1.3
 
 import QGroundControl.FactSystem 1.0
 import QGroundControl.FactControls 1.0
@@ -16,7 +17,7 @@ Item {
     property Fact _frameType:           controller.getParameterFact(-1, "FRAME_TYPE", false)
     property bool _frameTypeAvailable:  controller.parameterExists(-1, "FRAME_TYPE")
 
-    Column {
+    ColumnLayout {
         anchors.fill:       parent
 
         VehicleSummaryRow {
@@ -25,15 +26,36 @@ Item {
 
         }
 
+        Rectangle {
+            Layout.fillWidth: true
+            height: 1
+            color: "white"
+            opacity: 0.3
+        }
+
         VehicleSummaryRow {
             labelText:  qsTr("Frame Type")
             valueText:  visible ? _frameType.enumStringValue : ""
             visible:    _frameTypeAvailable
         }
 
+        Rectangle {
+            Layout.fillWidth: true
+            height: 1
+            color: "white"
+            opacity: 0.3
+        }
+
         VehicleSummaryRow {
             labelText: qsTr("Firmware Version")
             valueText: globals.activeVehicle.firmwareMajorVersion == -1 ? qsTr("Unknown") : globals.activeVehicle.firmwareMajorVersion + "." + globals.activeVehicle.firmwareMinorVersion + "." + globals.activeVehicle.firmwarePatchVersion + globals.activeVehicle.firmwareVersionTypeString
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            height: 1
+            color: "white"
+            opacity: 0.3
         }
     }
 }

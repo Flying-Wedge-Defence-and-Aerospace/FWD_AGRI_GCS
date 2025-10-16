@@ -44,4 +44,5 @@ FlyViewTopBar                   1.0 FlyViewTopBar.qml
 MessageToolBar                  1.0 MessageToolBar.qml
 MapTools                        1.0 MapTools.qml
 MapLayers                       1.0 MapLayers.qml
+ProfileDetails                  1.0 ProfileDetails.qml
 

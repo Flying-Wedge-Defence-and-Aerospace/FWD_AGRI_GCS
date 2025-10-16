@@ -28,7 +28,7 @@ Rectangle {
     color:          /*qgcPal.window*/ "black"
 
     property real _minSummaryW:     ScreenTools.isTinyScreen ? ScreenTools.defaultFontPixelWidth * 28 : ScreenTools.defaultFontPixelWidth * 36
-    property real _summaryBoxWidth: _minSummaryW + 40
+    property real _summaryBoxWidth: _minSummaryW
     property real _summaryBoxSpace: ScreenTools.defaultFontPixelWidth * 2
 
     function computeSummaryBoxSize() {
@@ -95,7 +95,7 @@ Rectangle {
                 id:         _flowCtl
                 width:      _summaryRoot.width
                 columns: 4
-                spacing:    /*_summaryBoxSpace*/35
+                spacing:    _summaryBoxSpace
 
                 Repeater {
                     model: QGroundControl.multiVehicleManager.activeVehicle ? QGroundControl.multiVehicleManager.activeVehicle.autopilot.vehicleComponents : undefined
@@ -104,14 +104,14 @@ Rectangle {
                     Rectangle {
                         id: rectBox
                         width:      320
-                        height:     ScreenTools.defaultFontPixelHeight * 13 + 100
+                        height:     ScreenTools.defaultFontPixelHeight * 13 + 60
                         color:      /*qgcPal.windowShade*/"black"
                         visible:    modelData.summaryQmlSource.toString() !== ""
-                        border.width: 3
+                        border.width: 1
                         border.color: qgcPal.text
                         radius: 10
                         Component.onCompleted: {
-                            border.color = /*Qt.rgba(border.color.r, border.color.g, border.color.b, 0.1)*/ "green"
+                            border.color = /*Qt.rgba(border.color.r, border.color.g, border.color.b, 0.1)*/ "white"
                         }
 
                         readonly property real titleHeight: ScreenTools.defaultFontPixelHeight * 2
@@ -121,8 +121,10 @@ Rectangle {
                             id:     titleBar
                             width:  parent.width
                             height: titleHeight
+                            //radius: 5
                             backRadius: 5
                             text:   capitalizeWords(modelData.name)
+                            font.bold: true
 
 
                             // Setup indicator
@@ -139,7 +141,7 @@ Rectangle {
                             }
 
                             onClicked : {
-                                //console.log(modelData.setupSource)
+                                console.log(modelData.setupSource)
                                 if (modelData.setupSource !== "") {
                                     setupView.showVehicleComponentPanel(modelData)
                                 }

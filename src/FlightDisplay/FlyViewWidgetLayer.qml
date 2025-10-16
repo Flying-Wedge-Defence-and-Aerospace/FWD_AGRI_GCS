@@ -55,7 +55,7 @@ Item {
         leftEdgeBottomInset:    virtualJoystickMultiTouch.visible ? virtualJoystickMultiTouch.leftEdgeBottomInset : parentToolInsets.leftEdgeBottomInset
         rightEdgeTopInset:      instrumentPanel ? instrumentPanel.rightEdgeTopInset : 0
         // rightEdgeCenterInset:   (telemetryPanel.rightEdgeCenterInset > photoVideoControl.rightEdgeCenterInset) ? telemetryPanel.rightEdgeCenterInset : photoVideoControl.rightEdgeCenterInset
-        rightEdgeCenterInset: (telemetryPanel.rightEdgeCenterInset > photoVideoControl.rightEdgeCenterInset)
+            rightEdgeCenterInset: (telemetryPanel.rightEdgeCenterInset > photoVideoControl.rightEdgeCenterInset)
                               ? telemetryPanel.rightEdgeCenterInset
                               : photoVideoControl.rightEdgeCenterInset
 

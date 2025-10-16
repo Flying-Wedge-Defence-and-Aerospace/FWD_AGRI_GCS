@@ -39,7 +39,9 @@ Item {
                 width: parent.width
 
                 QGCLabel {
-
+                    font.italic: true
+                    font.pointSize: 8
+                    color: "lightYellow"
                     text:  sensorParams.rgCompassAvailable[index] ?
                                 (sensorParams.rgCompassCalibrated[index] ?
                                      getPriority(index) +
@@ -50,13 +52,13 @@ Item {
                                 qsTr("Not installed")
 
                     function getPriority (index) {
-                        if (sensorParams.rgCompassId[index].value == sensorParams.rgCompassPrio[0].value) {
+                        if (sensorParams.rgCompassId[index].value === sensorParams.rgCompassPrio[0].value) {
                             return "Primary"
                         }
-                        if (sensorParams.rgCompassId[index].value == sensorParams.rgCompassPrio[1].value) {
+                        if (sensorParams.rgCompassId[index].value === sensorParams.rgCompassPrio[1].value) {
                             return "Secondary"
                         }
-                        if (sensorParams.rgCompassId[index].value == sensorParams.rgCompassPrio[2].value) {
+                        if (sensorParams.rgCompassId[index].value === sensorParams.rgCompassPrio[2].value) {
                             return "Tertiary"
                         }
                         return "Unused"
@@ -69,8 +71,14 @@ Item {
 
                     fact: sensorParams.rgCompassPrio[index]
                 }
+
+                // Rectangle {
+                //     Layout.fillWidth: true
+                //     height: 1
+                // }
             }
         }
+
 
         VehicleSummaryRow {
             labelText: qsTr("Accelerometer(s):")
@@ -88,14 +96,6 @@ Item {
         VehicleSummaryRow {
             labelText: qsTr("Barometer(s):")
             valueText: sensorParams.baroIdAvailable ? "" : qsTr("Not Supported(Over APM 4.1)")
-        }
-
-        Repeater {
-            model: sensorParams.rgBaroId.length
-            APMSensorIdDecoder {
-                fact:          sensorParams.rgBaroId[index]
-                anchors.right: parent.right
-            }
         }
     }
 }

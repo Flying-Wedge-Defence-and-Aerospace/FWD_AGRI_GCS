@@ -11,7 +11,7 @@ Rectangle {
     implicitWidth:  label.contentWidth + (_diameter * 2.5) + (_border * 4)
     implicitHeight: label.height * 2.5
     radius:         height /2
-    color:          qgcPal.windowShade
+    color:          /*qgcPal.windowShade*/ "#55000000"
     border.color: "yellow"
     border.width: 1
 
@@ -62,6 +62,7 @@ Rectangle {
         horizontalAlignment:        Text.AlignHCenter
         text:                       confirmText
         color:                      qgcPal.buttonText
+        font.bold: true
     }
 
     Rectangle {

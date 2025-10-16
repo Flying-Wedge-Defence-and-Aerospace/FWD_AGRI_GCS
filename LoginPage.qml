@@ -3,23 +3,56 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import QtGraphicalEffects 1.15
 
+import QGroundControl                       1.0
+import QGroundControl.ScreenTools 1.0
+
 Rectangle {
-    width: 480
-    height: 640
-    color: "#ffffff"
 
     property int currentPage: 0
-    //property string userName: usernameField.text
     signal loginSuccess()
     signal registerSuccess()
 
-    Rectangle {
-        anchors.fill: parent
-        gradient: Gradient {
-            GradientStop { position: 0.0; color: /*"#2980b9"*/ "#2c3e50" }
-            GradientStop { position: 1.0; color: "#6dd5fa" }
-        }
+
+    anchors.fill: parent
+    // gradient: Gradient {
+    //     GradientStop { position: 0.0; color: /*"#2980b9"*/ "#2c3e50" }
+    //     GradientStop { position: 1.0; color: "#6dd5fa" }
+    // }
+
+    // gradient: Gradient {
+    //     GradientStop { position: 0.0; color: "#8B0000" }   // dark red
+    //     GradientStop { position: 1.0; color: "#FF6347" }   // tomato red
+    // }
+
+    // gradient: Gradient {
+    //     GradientStop { position: 0.0; color: "#DC143C" }   // crimson
+    //     GradientStop { position: 1.0; color: "#FF7F7F" }   // light pinkish red
+    // }
+
+    // gradient: Gradient {
+    //     GradientStop { position: 0.0; color: "#2c0505" }   // dark maroon
+    //     GradientStop { position: 1.0; color: "#ff4b2b" }   // bright red-orange
+    // }
+
+    // gradient: Gradient {
+    //     GradientStop { position: 0.0; color: "#8b0000" }   // dark red
+    //     GradientStop { position: 0.4; color: "#dc143c" }   // crimson
+    //     GradientStop { position: 0.8; color: "#ff4040" }   // light red highlight
+    //     GradientStop { position: 1.0; color: "#8b0000" }   // back to dark
+    // }
+
+    // gradient: Gradient {
+    //     GradientStop { position: 0.0; color: "#3b0a0a" }  // dark maroon
+    //     GradientStop { position: 0.5; color: "#800000" }  // deep red
+    //     GradientStop { position: 1.0; color: "#b22222" }  // firebrick red
+    // }
+
+    gradient: Gradient {
+        GradientStop { position: 0.0; color: "#2b0000" }   // very dark burgundy
+        GradientStop { position: 0.5; color: "#800020" }   // burgundy
+        GradientStop { position: 1.0; color: "#c72c41" }   // rose red
     }
+
 
     DropShadow {
         anchors.fill: loginCard
@@ -33,16 +66,28 @@ Rectangle {
 
     Rectangle {
         id: loginCard
-        width: 340
-        height: loader.item ? loader.item.height + 60 : 400
+        // width: ScreenTools.defaultFontPixelWidth * 30
+        // width: ScreenTools.isMobile ? ScreenTools.defaultFontPixelWidth * 20
+        //                             : ScreenTools.defaultFontPixelWidth * 55
+
+        // height: ScreenTools.isMobile ? ScreenTools.defaultFontPixelHeight * 10
+        //                              : ScreenTools.defaultFontPixelHeight * 25
+
+        // width: Screen.width * (ScreenTools.isMobile ? 0.8 : 0.6)
+        // height: Screen.height * (ScreenTools.isMobile ? 0.5 : 0.6)
+
+        //height: loader.item ? loader.item.height + 60 : 400
+        width: parent.width * (ScreenTools.isMobile ? 0.2 : 0.2)
+        height: parent.height * (ScreenTools.isMobile ? 0.5 : 0.45)
+
         radius: 16
         // color: "#119f8f"
         color: "#ffffff"
         anchors.centerIn: parent
 
-        Behavior on height {
-            NumberAnimation { duration: 250; easing.type: Easing.InOutQuad }
-        }
+        // Behavior on height {
+        //     NumberAnimation { duration: 250; easing.type: Easing.InOutQuad }
+        // }
 
         Loader {
             id: loader
@@ -54,25 +99,27 @@ Rectangle {
         }
     }
 
-
     Component {
         id: loginPage
         ColumnLayout {
             spacing: 20
-            width: loader.formWidth
-            height: 380
+            // width: loader.formWidth
+            // height: loginPage.height
 
             Rectangle {
-                width: 70
-                height: 70
+                width: ScreenTools.isMobile ? ScreenTools.defaultFontPixelWidth * 5
+                                            : ScreenTools.defaultFontPixelWidth * 10
+                height: ScreenTools.isMobile ? ScreenTools.defaultFontPixelHeight * 2
+                                             : ScreenTools.defaultFontPixelHeight * 3
                 radius: 35
                 color: "#ecf0f1"
                 Layout.alignment: Qt.AlignHCenter
 
                 Image {
                     source: "/res/usericon"
-                    anchors.fill: parent
-                    anchors.margins: 10
+                    anchors.centerIn: parent
+                    width: parent.width - 20
+                            height: parent.height - 20
                     fillMode: Image.PreserveAspectFit
                 }
             }
@@ -106,7 +153,7 @@ Rectangle {
 
             Rectangle {
                 Layout.fillWidth: true
-                height: 40
+                height: emailField.height
                 color: "#ecf0f1"
                 radius: 8
 
@@ -142,20 +189,11 @@ Rectangle {
                 }
             }
 
-            // TextField {
-            //     id: passwordField
-            //     placeholderText: "🔑 Password"
-            //     echoMode: TextInput.Password
-            //     Layout.fillWidth: true
-            //     font.pixelSize: 16
-            //     background: Rectangle { color: "#ecf0f1"; radius: 8 }
-            //     padding: 10
-            // }
-
             Button {
                 id: loginButton
                 text: "Log In"
-                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignHCenter
+                //Layout.fillWidth: true
                 font.pixelSize: 16
 
                 background: Rectangle { implicitHeight: 40; radius: 8; color: "#3498db" }
@@ -225,12 +263,13 @@ Rectangle {
                 }
             }
 
-            Text {
+            Label {
                 text: "No account? <u>Register</u>"
                 color: "blue"
-                textFormat: Text.RichText
+                //textFormat: Text.RichText
                 horizontalAlignment: Text.AlignHCenter
                 Layout.alignment: Qt.AlignHCenter
+                font.pixelSize: ScreenTools.isMobile ? 20 : 12
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
@@ -244,8 +283,6 @@ Rectangle {
         id: registerPage
         ColumnLayout {
             spacing: 20
-            width: loader.formWidth
-            height: 460
 
             Label {
                 text: "Register"
@@ -276,7 +313,7 @@ Rectangle {
 
             Rectangle {
                 Layout.fillWidth: true
-                height: 40
+                height: regPassword.height
                 color: "#ecf0f1"
                 radius: 8
 
@@ -312,20 +349,9 @@ Rectangle {
                 }
             }
 
-
-            // TextField {
-            //     id: regPassword
-            //     placeholderText: "🔑 Password"
-            //     echoMode: TextInput.Password
-            //     Layout.fillWidth: true
-            //     font.pixelSize: 16
-            //     background: Rectangle { color: "#ecf0f1"; radius: 8 }
-            //     padding: 10
-            // }
-
             Rectangle {
                 Layout.fillWidth: true
-                height: 40
+                height: regConfirmPassword.height
                 color: "#ecf0f1"
                 radius: 8
 
@@ -422,6 +448,7 @@ Rectangle {
             Text {
                 text: "<u>Back to Login</u>"
                 color: "blue"
+                font.pixelSize: ScreenTools.isMobile ? 20 : 12
                 textFormat: Text.RichText
                 horizontalAlignment: Text.AlignHCenter
                 Layout.alignment: Qt.AlignHCenter
@@ -433,31 +460,4 @@ Rectangle {
             }
         }
     }
-
-
-    Dialog {
-        id: errorDialog
-        title: "Error"
-        modal: true
-        standardButtons: Dialog.Ok
-        onAccepted: errorDialog.close()
-
-        onVisibleChanged: {
-            if (visible) {
-                x = (parent.width - width) / 2
-                y = (parent.height - height) / 2
-            }
-        }
-
-        ColumnLayout {
-            anchors.fill: parent
-            Label {
-                id: errorDialogText
-                text: "Invalid username or password"
-                wrapMode: Text.WordWrap
-                Layout.fillWidth: true
-            }
-        }
-    }
-
 }

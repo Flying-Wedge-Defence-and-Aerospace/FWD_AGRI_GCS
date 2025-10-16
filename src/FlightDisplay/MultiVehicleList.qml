@@ -101,7 +101,7 @@ Item {
             // anchors.right: parent.right
             anchors.rightMargin: 1
             height:     innerColumn.y + innerColumn.height + _margin
-            color:      /*qgcPal.missionItemEditor*/ Qt.rgba(0.8, 0.8, 0.8, 0.6)
+            color:      /*qgcPal.missionItemEditor*/ /*Qt.rgba(0.8, 0.8, 0.8, 0.6)*/ "#77800000"
             opacity:    _rectOpacity
             radius:     _margin
 

@@ -88,7 +88,7 @@
         <file alias="zoom-in">resources/zoom-in.png</file>
         <file alias="zoom-out">resources/zoom-out.png</file>
         <file alias="layers">resources/layers.png</file>
-        <file alias="profile_icon">resources/user.png</file>
+        <file alias="profile_icon">resources/user_profile.png</file>
         <file alias="compass_icon">resources/compass.png</file>
         <file alias="accelerometer_icon">resources/accelerometer.png</file>
         <file alias="levelHorizon_icon">resources/level_horizon.png</file>
@@ -112,6 +112,8 @@
         <file alias="pipResize">resources/pip_bl.svg</file>
         <file alias="pip">resources/PiP_bl.svg</file>
         <file alias="videoBackground">resources/waiting_for_video.png</file>
+        <file alias="paramHide">resources/paramHide.png</file>
+        <file alias="paramShow">resources/paramShow.png</file>
         <file>resources/icons/qgroundcontrol.ico</file>
     </qresource>
     <qresource prefix="/res/firmware">

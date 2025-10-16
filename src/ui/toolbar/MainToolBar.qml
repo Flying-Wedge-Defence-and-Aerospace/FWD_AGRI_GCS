@@ -21,16 +21,18 @@ import QGroundControl.Controllers           1.0
 
 Rectangle {
     id:     _root
-    color:  /*qgcPal.toolbarBackground*//*_mainStatusBGColor*/ "#2c3e50"
+    color:  /*qgcPal.toolbarBackground*//*_mainStatusBGColor*/ "#800000"
     // border.width: 1
     // border.color: "white"
-    signal toolSelectClicked  
+    signal toolSelectClicked
     signal logOutRequested
 
     property int currentToolbar: planViewToolbar
+    property bool planViewVisible: false
 
-    readonly property int flyViewToolbar:   0
-    readonly property int planViewToolbar:  1
+
+    readonly property int flyViewToolbar:   1
+    readonly property int planViewToolbar:  0
     readonly property int simpleToolbar:    2
 
     property var    _activeVehicle:     QGroundControl.multiVehicleManager.activeVehicle
@@ -58,103 +60,11 @@ Rectangle {
     }
 
 
-    // RowLayout {
-    //     id:                     viewButtonRow
-    //     anchors.top:            parent.top
-    //     anchors.bottom:         parent.bottom
-    //     anchors.left:           parent.left
-    //     anchors.right:          parent.right
-    //     anchors.bottomMargin:   1
-    //     spacing:                ScreenTools.defaultFontPixelWidth / 2
-
-    //     // Left logo button
-    //     QGCToolBarButton {
-    //         id:                     currentButton
-    //         Layout.preferredHeight: viewButtonRow.height
-    //         icon.source:            "/res/FWD_only_logo"
-    //         // anchors.left: parent.left
-    //         // anchors.leftMargin: 15
-    //         Layout.alignment:       Qt.AlignVCenter | Qt.AlignLeft
-    //         Layout.leftMargin:      15
-    //         logo:                   true
-    //     }
-
-    //     QGCFlickable {
-    //         id: toolsFlickable
-    //         anchors.leftMargin:     ScreenTools.defaultFontPixelWidth * ScreenTools.largeFontPointRatio * 1.5
-    //         anchors.left:           currentButton.right
-    //         anchors.bottomMargin:   1
-    //         anchors.top:            parent.top
-    //         anchors.bottom:         parent.bottom
-    //         anchors.right:          parent.right
-    //         contentWidth:           indicatorLoader.x + indicatorLoader.width
-    //         flickableDirection:     Flickable.HorizontalFlick
-
-    //         Loader {
-    //             id:                 indicatorLoader
-    //             anchors.left:       parent.left
-    //             anchors.top:        parent.top
-    //             anchors.bottom:     parent.bottom
-    //             source:             (currentToolbar == planViewToolbar ? "qrc:/qml/PlanToolBarIndicators.qml" : "")
-    //         }
-    //     }
-
-    //     // Flexible spacer before the center text
-    //     // Item {
-    //     //     Layout.fillWidth: true
-    //     // }
-
-    //     // Center text
-    //     QGCLabel {
-    //         text: "FWD AGRI GCS"
-    //         font.bold: true
-    //         font.pointSize: ScreenTools.largeFontPointSize
-    //         color: "white"
-    //         //Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
-    //     }
-
-    //     // Flexible spacer after the center text
-    //     Item {
-    //         Layout.fillWidth: true
-    //     }
-
-    //     QGCToolBarButton {
-    //         id: profileIcon
-    //         Layout.preferredWidth: viewButtonRow.height
-    //         icon.source: "/res/profile_icon"
-    //         logo: true
-    //         Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-    //         // onClicked: mainWindow.showProfilePage()
-    //         Layout.leftMargin: 10
-
-    //         onClicked: {
-    //             if (settingsPopup.visible) {
-    //                 settingsPopup.close()
-    //             } else {
-    //                 settingsPopup.open()
-    //             }
-    //         }
-    //     }
-
-    //     // Right settings button
-    //     QGCToolBarButton {
-    //         id: settingsButton
-    //         Layout.preferredHeight: viewButtonRow.height
-    //         icon.source:            "/res/settings_icon"
-    //         logo:                   true
-    //         onClicked:              mainWindow.showSettingsPage()
-    //         Layout.alignment:       Qt.AlignVCenter | Qt.AlignLeft
-    //         //Layout.leftMargin:      15
-    //         // anchors.right: parent.right
-    //         // anchors.rightMargin: 15
-    //     }
-    // }
-
     RowLayout {
         id:                     viewButtonRow
         anchors.fill:           parent
         anchors.bottomMargin:   1
-        spacing:                ScreenTools.defaultFontPixelWidth / 2
+        //spacing:                ScreenTools.defaultFontPixelWidth / 2
 
         // Left logo
         QGCToolBarButton {
@@ -171,6 +81,7 @@ Rectangle {
             id: planIndicatorsSlot
             Layout.preferredWidth: 120   // <-- set a fixed width big enough for PlanToolBarIndicators
             Layout.preferredHeight: viewButtonRow.height
+            visible: planViewVisible
 
             Loader {
                 id: planIndicatorsLoader
@@ -186,7 +97,7 @@ Rectangle {
 
         // Center label (always at same place)
         QGCLabel {
-            text: "FWD DKS GCS"
+            text: "FWD GCS"
             font.bold: true
             font.pointSize: ScreenTools.largeFontPointSize
             color: "white"
@@ -201,10 +112,10 @@ Rectangle {
             id: profileIcon
             Layout.preferredWidth: viewButtonRow.height
             icon.source: "/res/profile_icon"
-            visible: currentToolbar === planViewToolbar
+            //visible: currentToolbar === planViewToolbar
             logo: true
-            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-            Layout.leftMargin: 10
+            //Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+            //Layout.leftMargin: -2
 
             onClicked: {
                 if (settingsPopup.visible) {
@@ -219,10 +130,12 @@ Rectangle {
         QGCToolBarButton {
             id: settingsButton
             Layout.preferredHeight: viewButtonRow.height
+            Layout.leftMargin: -15
             icon.source: "/res/settings_icon"
             logo: true
-            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+            //Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
             onClicked: mainWindow.showSettingsPage()
+
         }
     }
 
@@ -252,6 +165,7 @@ Rectangle {
                 text: "Pilot Details"
                 anchors.horizontalCenter: parent.horizontalCenter
                 color: "yellow"
+                font.bold: true
 
             }
 
@@ -269,31 +183,22 @@ Rectangle {
                 }
             }
 
-            // QGCButton {
-            //     text: "Logout"
-            //     backRadius: 7
-            //     anchors.horizontalCenter: parent.horizontalCenter
-            //     onClicked: {
-            //         console.log("Logout clicked")
-            //         settingsPopup.close()
-            //         if(currentToolbar === planViewToolbar) {
-            //             logOutRequested()
-            //         } else {
-            //             console.log("Go to plan view for logout")
-            //         }
-            //     }
-            // }
-
-            // QGCLabel {
-            //     text: "If you want to logout Go to plan view and also there are no active vehicle connection"
-            //     font.italic: true
-            //     color: "yellow"
-            //     font.pointSize: 10
-            //     wrapMode: Text.WordWrap
-            //     anchors.horizontalCenter: parent.horizontalCenter
-            //     width: parent.width - 20  // subtract margins
-            // }
-
+            QGCButton {
+                text: "Logout"
+                backRadius: 7
+                anchors.horizontalCenter: parent.horizontalCenter
+                onClicked: {
+                    //console.log("Logout clicked")
+                    //console.log("Current toolbar", currentToolbar)
+                    settingsPopup.close()
+                    logOutRequested()
+                    // if(currentToolbar === planViewToolbar) {
+                    //     logOutRequested()
+                    // } else {
+                    //     console.log("Go to plan view for logout")
+                    // }
+                }
+            }
         }
     }
 

@@ -20,7 +20,7 @@ QGCFlickable {
         width:  parent.width
         height: innerEditorRect.y + innerEditorRect.height + (_margin * 2)
         radius: _radius
-        color:  qgcPal.missionItemEditor
+        color:  /*qgcPal.missionItemEditor*/ "#77800000"
 
         QGCLabel {
             id:                 editorLabel
@@ -29,7 +29,8 @@ QGCFlickable {
             anchors.top:        parent.top
             text:               qsTr("RALLY POINTS")
             font.bold: true
-            font.pointSize: 13
+            font.pointSize: ScreenTools.isMobile ? 10 : 13
+            color: "white"
         }
 
         Rectangle {
@@ -39,7 +40,7 @@ QGCFlickable {
             anchors.right:      parent.right
             anchors.top:        editorLabel.bottom
             height:             infoLabel.height + (_margin * 2)
-            color:              qgcPal.windowShadeDark
+            color:              /*qgcPal.windowShadeDark*/ "#77800000"
             radius:             _radius
 
             QGCLabel {

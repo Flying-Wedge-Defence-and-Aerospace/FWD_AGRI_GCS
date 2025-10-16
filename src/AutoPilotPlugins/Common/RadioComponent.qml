@@ -145,9 +145,11 @@ SetupPage {
                     Rectangle {
                         id: indicator
                         anchors.verticalCenter: parent.verticalxCenter
-                        width:                  parent.height * 0.75
-                        height:                 width
-                        radius:                 width / 2
+                        // width:                  parent.height * 0.75
+                        // height:                 width
+                        width: parent.height * 0.3
+                        height: width * 3
+                        //radius:                 width / 2
                         color:                  qgcPal.text
                         visible:                mapped
                         x:                      (((reversed ? _pwmMax - rcValue : rcValue - _pwmMin) / _pwmRange) * parent.width) - (width / 2)

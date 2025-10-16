@@ -686,13 +686,13 @@ Item {
         // Right pane for mission editing controls
         Rectangle {
             id:                 rightPanel
-            height:             parent.height - 300
-            width:              _rightPanelWidth + 60
-            color:              /*qgcPal.window*/ "#2c3e50"
+            height:             ScreenTools.isMobile ? parent.height : parent.height - 300
+            width:              ScreenTools.isMobile ? _rightPanelWidth - 30 :_rightPanelWidth + 60
+            color:              /*qgcPal.window*/ /*"#2c3e50"*/ "#99800000"
             opacity:            layerTabBar.visible ? 0.2 : 0
             anchors.verticalCenter: parent.verticalCenter
             anchors.right:      parent.right
-            anchors.rightMargin: _toolsMargin
+            anchors.rightMargin: ScreenTools.isMobile ? _toolsMargin + 10 : _toolsMargin
             radius: 10
         }
         //-------------------------------------------------------
@@ -1047,244 +1047,7 @@ Item {
                         }
                     }
                 }
-
-
-                // Repeater {
-                //     model: _planMasterController.planCreators
-
-                //     Rectangle {
-                //         id:     button
-                //         width:  ScreenTools.defaultFontPixelHeight * 7
-                //         height: planCreatorNameLabel.y + planCreatorNameLabel.height
-                //         color:  "green"//button.pressed || button.highlighted ? qgcPal.buttonHighlight : qgcPal.button
-
-                //         property bool highlighted: mouseArea.containsMouse
-                //         property bool pressed:     mouseArea.pressed
-
-                //         Image {
-                //             id:                 planCreatorImage
-                //             anchors.left:       parent.left
-                //             anchors.right:      parent.right
-                //             source:             object.imageResource
-                //             sourceSize.width:   width
-                //             fillMode:           Image.PreserveAspectFit
-                //             mipmap:             true
-                //         }
-
-                //         QGCLabel {
-                //             id:                     planCreatorNameLabel
-                //             anchors.top:            planCreatorImage.bottom
-                //             anchors.left:           parent.left
-                //             anchors.right:          parent.right
-                //             horizontalAlignment:    Text.AlignHCenter
-                //             text:                   object.name
-                //             color:                  button.pressed || button.highlighted ? qgcPal.buttonHighlightText : qgcPal.buttonText
-                //         }
-
-                //         QGCMouseArea {
-                //             id:                 mouseArea
-                //             anchors.fill:       parent
-                //             hoverEnabled:       true
-                //             preventStealing:    true
-                //             onClicked:          {
-                //                 if (_planMasterController.containsItems) {
-                //                     createPlanRemoveAllPromptDialog.createObject(mainWindow, { mapCenter: _mapCenter(), planCreator: object }).open()
-                //                 } else {
-                //                     object.createPlan(_mapCenter())
-                //                 }
-                //                 dropPanel.hide()
-                //             }
-
-                //             function _mapCenter() {
-                //                 var centerPoint = Qt.point(editorMap.centerViewport.left + (editorMap.centerViewport.width / 2), editorMap.centerViewport.top + (editorMap.centerViewport.height / 2))
-                //                 return editorMap.toCoordinate(centerPoint, false /* clipToViewPort */)
-                //             }
-                //         }
-                //     }
-                // }
             }
-
-            // SectionHeader {
-            //     id:                 storageSection
-            //     Layout.fillWidth:   true
-            //     text:               qsTr("Storage")
-            // }
-
-            // QGCLabel {
-            //     id:                 storageSection
-            //     Layout.fillWidth:   true
-            //     text:               qsTr("STORAGE")
-            //     //showSpacer:         false
-            //     font.bold: true
-            //     font.pixelSize: 16
-            // }
-
-            // GridLayout {
-            //     columns:            3
-            //     rowSpacing:         _margin
-            //     columnSpacing:      ScreenTools.defaultFontPixelWidth
-            //     visible:            storageSection.visible
-
-            //     QGCButton {
-            //         text:               qsTr("Open...")
-            //         Layout.fillWidth:   true
-            //         enabled:            !_planMasterController.syncInProgress
-            //         onClicked: {
-            //             dropPanel.hide()
-            //             if (_planMasterController.dirty) {
-            //                 showLoadFromFileOverwritePrompt(columnHolder._overwriteText)
-            //             } else {
-            //                 _planMasterController.loadFromSelectedFile()
-            //             }
-            //         }
-            //     }
-
-            //     QGCButton {
-            //         text:               qsTr("Save")
-            //         Layout.fillWidth:   true
-            //         enabled:            !_planMasterController.syncInProgress && _planMasterController.currentPlanFile !== ""
-            //         onClicked: {
-            //             dropPanel.hide()
-            //             if(_planMasterController.currentPlanFile !== "") {
-            //                 _planMasterController.saveToCurrent()
-            //             } else {
-            //                 _planMasterController.saveToSelectedFile()
-            //             }
-            //         }
-            //     }
-
-            //     QGCButton {
-            //         text:               qsTr("Save As...")
-            //         Layout.fillWidth:   true
-            //         enabled:            !_planMasterController.syncInProgress && _planMasterController.containsItems
-            //         onClicked: {
-            //             dropPanel.hide()
-            //             _planMasterController.saveToSelectedFile()
-            //         }
-            //     }
-
-            //     QGCButton {
-            //         Layout.columnSpan:  3
-            //         Layout.fillWidth:   true
-            //         text:               qsTr("Save Mission Waypoints As KML...")
-            //         enabled:            !_planMasterController.syncInProgress && _visualItems.count > 1
-            //         onClicked: {
-            //             // First point does not count
-            //             if (_visualItems.count < 2) {
-            //                 mainWindow.showMessageDialog(qsTr("KML"), qsTr("You need at least one item to create a KML."))
-            //                 return
-            //             }
-            //             dropPanel.hide()
-            //             _planMasterController.saveKmlToSelectedFile()
-            //         }
-            //     }
-            // }
-
-            // ColumnLayout {
-            //     id: storageSectionHolder
-            //     spacing: _margin
-
-            //     property bool expanded: true   // collapsed by default
-
-            //     // Header row (clickable title)
-            //     Rectangle {
-            //         id: header
-            //         Layout.fillWidth: true
-            //         height: 40
-            //         color: "gray"    // dark background for title
-            //         radius: 4
-
-            //         QGCLabel {
-            //             id: storageSection
-            //             anchors.verticalCenter: parent.verticalCenter
-            //             anchors.left: parent.left
-            //             anchors.leftMargin: 10
-            //             text: qsTr("STORAGE")
-            //             font.bold: true
-            //             font.pixelSize: 16
-            //             color: "white"
-            //         }
-
-            //         QGCMouseArea {
-            //             anchors.fill: parent
-            //             onClicked: storageSectionHolder.expanded = !storageSectionHolder.expanded
-            //         }
-
-            //         // Small arrow indicator
-            //         Text {
-            //             anchors.verticalCenter: parent.verticalCenter
-            //             anchors.right: parent.right
-            //             anchors.rightMargin: 10
-            //             text: storageSectionHolder.expanded ? "▲" : "▼"
-            //             color: "white"
-            //             font.pixelSize: 14
-            //         }
-            //     }
-
-            //     // Dropdown content (buttons)
-            //     GridLayout {
-            //         id: dropdownContent
-            //         Layout.fillWidth: true
-            //         columns: 3
-            //         rowSpacing: _margin
-            //         columnSpacing: ScreenTools.defaultFontPixelWidth
-            //         visible: storageSectionHolder.expanded    // show/hide when expanded
-
-            //         QGCButton {
-            //             text: qsTr("Open...")
-            //             Layout.fillWidth: true
-            //             enabled: !_planMasterController.syncInProgress
-            //             onClicked: {
-            //                 dropPanel.hide()
-            //                 if (_planMasterController.dirty) {
-            //                     showLoadFromFileOverwritePrompt(columnHolder._overwriteText)
-            //                 } else {
-            //                     _planMasterController.loadFromSelectedFile()
-            //                 }
-            //             }
-            //         }
-
-            //         QGCButton {
-            //             text: qsTr("Save")
-            //             Layout.fillWidth: true
-            //             enabled: !_planMasterController.syncInProgress && _planMasterController.currentPlanFile !== ""
-            //             onClicked: {
-            //                 dropPanel.hide()
-            //                 if(_planMasterController.currentPlanFile !== "") {
-            //                     _planMasterController.saveToCurrent()
-            //                 } else {
-            //                     _planMasterController.saveToSelectedFile()
-            //                 }
-            //             }
-            //         }
-
-            //         QGCButton {
-            //             text: qsTr("Save As...")
-            //             Layout.fillWidth: true
-            //             enabled: !_planMasterController.syncInProgress && _planMasterController.containsItems
-            //             onClicked: {
-            //                 dropPanel.hide()
-            //                 _planMasterController.saveToSelectedFile()
-            //             }
-            //         }
-
-            //         QGCButton {
-            //             Layout.columnSpan: 3
-            //             Layout.fillWidth: true
-            //             text: qsTr("Save Mission Waypoints As KML...")
-            //             enabled: !_planMasterController.syncInProgress && _visualItems.count > 1
-            //             onClicked: {
-            //                 if (_visualItems.count < 2) {
-            //                     mainWindow.showMessageDialog(qsTr("KML"), qsTr("You need at least one item to create a KML."))
-            //                     return
-            //                 }
-            //                 dropPanel.hide()
-            //                 _planMasterController.saveKmlToSelectedFile()
-            //             }
-            //         }
-            //     }
-            // }
-
 
             ColumnLayout {
                 id: storageSectionHolder
@@ -1295,7 +1058,7 @@ Item {
                     id: header
                     Layout.fillWidth: true
                     height: 30
-                    color: "black"
+                    color: "transparent"
                     radius: 4
 
                     QGCLabel {
@@ -1308,19 +1071,19 @@ Item {
                         color: "white"
                     }
 
-                    QGCMouseArea {
-                        anchors.fill: parent
-                        onClicked: storageSectionHolder.expanded = !storageSectionHolder.expanded
-                    }
+                    // QGCMouseArea {
+                    //     anchors.fill: parent
+                    //     onClicked: storageSectionHolder.expanded = !storageSectionHolder.expanded
+                    // }
 
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.right: parent.right
-                        anchors.rightMargin: 10
-                        text: storageSectionHolder.expanded ? "▼" : "▲"
-                        color: "white"
-                        font.pointSize: 14
-                    }
+                    // Text {
+                    //     anchors.verticalCenter: parent.verticalCenter
+                    //     anchors.right: parent.right
+                    //     anchors.rightMargin: 10
+                    //     text: storageSectionHolder.expanded ? "▼" : "▲"
+                    //     color: "white"
+                    //     font.pointSize: 14
+                    // }
                 }
 
                 Item {
@@ -1411,7 +1174,7 @@ Item {
                     id: vehicleHeader
                     Layout.fillWidth: true
                     height: 30
-                    color: "black"
+                    color: "transparent"
                     radius: 4
 
                     QGCLabel {
@@ -1424,19 +1187,19 @@ Item {
                         color: "white"
                     }
 
-                    QGCMouseArea {
-                        anchors.fill: parent
-                        onClicked: vehicleSectionHeader.expanded = !vehicleSectionHeader.expanded
-                    }
+                    // QGCMouseArea {
+                    //     anchors.fill: parent
+                    //     onClicked: vehicleSectionHeader.expanded = !vehicleSectionHeader.expanded
+                    // }
 
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.right: parent.right
-                        anchors.rightMargin: 10
-                        text: vehicleSectionHeader.expanded ? "▼" : "▲"
-                        color: "white"
-                        font.pointSize: 14
-                    }
+                    // Text {
+                    //     anchors.verticalCenter: parent.verticalCenter
+                    //     anchors.right: parent.right
+                    //     anchors.rightMargin: 10
+                    //     text: vehicleSectionHeader.expanded ? "▼" : "▲"
+                    //     color: "white"
+                    //     font.pointSize: 14
+                    // }
                 }
 
                 Item {

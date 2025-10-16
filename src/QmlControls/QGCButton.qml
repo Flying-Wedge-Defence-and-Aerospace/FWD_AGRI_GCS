@@ -48,7 +48,7 @@ Button {
         //        Qt.rgba(0.2, 0.6, 0.9, 1) :   // bright blue
         //        (primary ? Qt.rgba(0.15, 0.45, 0.75, 1) : Qt.rgba(0.3, 0.3, 0.3, 1))
 
-        color: _showHighlight ? "#1aa1a1" : (primary ? "gray" : "#3a3a3a")
+        color: _showHighlight ? "#90a010" : (primary ? "gray" : "#3a3a3a")
 
 
         // color: !_rootButton.enabled

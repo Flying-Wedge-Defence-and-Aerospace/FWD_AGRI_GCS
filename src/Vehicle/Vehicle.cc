@@ -600,7 +600,7 @@ QString Vehicle::vehicleTypeString() const
     } else if (fixedWing()) {
         return tr("Fixed Wing");
     } else if (multiRotor()) {
-        return tr("Multi-Rotor");
+        return tr("Multi - Rotor");
     } else if (vtol()) {
         return tr("VTOL");
     } else if (rover()) {

@@ -27,7 +27,7 @@ QGCFlickable {
         anchors.right:  parent.right
         height: geoFenceItems.y + geoFenceItems.height + (_margin * 2)
         radius: _radius
-        color:  qgcPal.missionItemEditor
+        color:  /*qgcPal.missionItemEditor*/ "#77800000"
 
         QGCLabel {
             id:                 geoFenceLabel
@@ -36,8 +36,9 @@ QGCFlickable {
             anchors.top:        parent.top
             text:               qsTr("GEOFENCE")
             font.bold: true
-            font.pointSize: 13
+            font.pointSize: ScreenTools.isMobile ? 10 : 13
             anchors.leftMargin: ScreenTools.defaultFontPixelWidth
+            color: "white"
         }
 
         Rectangle {
@@ -47,7 +48,7 @@ QGCFlickable {
             anchors.right:      parent.right
             anchors.top:        geoFenceLabel.bottom
             height:             fenceColumn.y + fenceColumn.height + (_margin * 2)
-            color:              /*qgcPal.windowShadeDark*/ "#2c3e50"
+            color:              /*qgcPal.windowShadeDark*/ /*"#2c3e50"*/ "#77800000"
             radius:             _radius
 
             Column {
@@ -140,12 +141,13 @@ QGCFlickable {
                         //     }
                         // }
 
-                    RowLayout {
+                    ColumnLayout {
 
                         QGCButton {
                             Layout.alignment: Qt.AlignLeft
                             text:               qsTr("Polygon Fence")
                             backRadius: 10
+                            width: 30
                             //Layout.fillWidth: true
                             // anchors.left: parent.left
                             // anchors.leftMargin: 20

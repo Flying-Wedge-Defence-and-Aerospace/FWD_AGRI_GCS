@@ -8,12 +8,12 @@ import QGroundControl.Palette       1.0
 import QGroundControl.ScreenTools   1.0
 
 Item {
-    anchors.fill:   parent
+	anchors.fill:   parent
 
-    FactPanelController { id: controller; }
+	FactPanelController { id: controller; }
 
-    property Fact _nullFact
-    property Fact _rcMapFltmode:    controller.parameterExists(-1, "RC_MAP_FLTMODE") ? controller.getParameterFact(-1, "RC_MAP_FLTMODE") : _nullFact
+	property Fact _nullFact
+	property Fact _rcMapFltmode:    controller.parameterExists(-1, "RC_MAP_FLTMODE") ? controller.getParameterFact(-1, "RC_MAP_FLTMODE") : _nullFact
 
 	Column {
 		anchors.fill:       parent
@@ -28,5 +28,5 @@ Item {
 				valueText: controller.getParameterFact(-1, "COM_FLTMODE" + (index + 1)).enumStringValue
 			}
 		}
-    }
+	}
 }

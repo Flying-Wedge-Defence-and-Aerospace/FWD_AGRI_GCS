@@ -183,6 +183,52 @@ SetupPage {
                                     visible:        airframeCheckBox.checked && object.frameTypeSupported
                                 }
 
+                                // QGCComboBox {
+                                //     id: combo
+                                //     Layout.fillWidth: true
+
+                                //     // Filter the original model to only show X and Plus
+                                //     model: object.frameTypeEnumStrings.filter(function(item) {
+                                //         return item === "X" || item === "Plus";
+                                //     })
+
+                                //     visible: airframeCheckBox.checked && object.frameTypeSupported
+                                //     onActivated: {
+                                //         // Match the selected string back to the original value
+                                //         let originalIndex = object.frameTypeEnumStrings.indexOf(combo.currentText)
+                                //         if (originalIndex !== -1) {
+                                //             _frameType.rawValue = object.frameTypeEnumValues[originalIndex]
+                                //         }
+                                //     }
+
+                                //     property bool valid: true
+
+                                //     function checkFrameType(value) {
+                                //         return value === _frameType.rawValue
+                                //     }
+
+                                //     function selectFrameType() {
+                                //         // Find the index in the filtered model
+                                //         let currentString = object.frameTypeEnumStrings.find((item, idx) => object.frameTypeEnumValues[idx] === _frameType.rawValue)
+                                //         let filteredIndex = model.indexOf(currentString)
+                                //         if (filteredIndex === -1 && combo.visible) {
+                                //             combo.valid = false
+                                //         } else {
+                                //             combo.currentIndex = filteredIndex
+                                //             combo.valid = true
+                                //         }
+                                //     }
+
+                                //     Component.onCompleted: selectFrameType()
+
+                                //     Connections {
+                                //         target: _frameTypeAvailable ? _frameType : null
+                                //         ignoreUnknownSignals: true
+                                //         onRawValueChanged: combo.selectFrameType()
+                                //     }
+                                // }
+
+
                                 QGCComboBox {
                                     id:                 combo
                                     Layout.fillWidth:   true

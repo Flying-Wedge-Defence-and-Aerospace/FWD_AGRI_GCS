@@ -30,25 +30,34 @@ ApplicationWindow {
 
     property bool loggedIn: false
     property bool linkDisconnected: false
+    property bool loggedOut: false
+
+    Keys.onReleased: (event) => {
+        if (event.key === Qt.Key_Escape && toolDrawer.visible) {
+            toolDrawer.visible = false
+            event.accepted = true
+        }
+    }
 
     Loader {
         id: pageLoader
         anchors.fill: parent
         source: mainWindow.loggedIn ? "" : "LoginPage.qml"
-        onLoaded: {
-            if (!mainWindow.loggedIn && item && item.onLoginSuccess) {
-                item.onLoginSuccess.connect(() => {
-                    mainWindow.loggedIn = true
-                    // if(mainWindow.linkDisconnected === true)
-                    // {
-                    //     QGroundControl.toolbox.settingsManager().autoConnectSettings()
-                    //     mainWindow.linkDisconnected = false
-                    // }
-                    // flightViewLoader.source = "qrc:/qml/QGroundControl/FlightDisplay/FlyView.qml"
-                })
+
+        Connections {
+            target: pageLoader.item
+            ignoreUnknownSignals: true
+            onLoginSuccess: {
+                //console.log("Login success signal received")
+                mainWindow.loggedIn = true
+                //toolbar.currentToolbar = toolbar.planViewToolbar
+                // Hide LoginPage
+                pageLoader.source = ""
+                planView.visible = true
             }
         }
     }
+
 
     Component.onCompleted: {
         //-- Full screen on mobile or tiny screens
@@ -164,11 +173,13 @@ ApplicationWindow {
             mainWindow.showPreFlightChecklistIfNeeded()
         }
         viewSwitch(toolbar.flyViewToolbar)
+        planView.visible = false
         flightView.visible = true
     }
 
     function showPlanView() {
         viewSwitch(toolbar.planViewToolbar)
+        flightView.visible = false
         planView.visible = true
     }
 
@@ -179,18 +190,6 @@ ApplicationWindow {
         toolDrawer.toolIcon     = toolIcon
         toolDrawer.visible      = true
     }
-
-    // function showAnalyzeTool() {
-    //     showTool(qsTr("Analyze Tools"), "AnalyzeView.qml", "/qmlimages/Analyze.svg")
-    // }
-
-    // function showSetupTool() {
-    //     showTool(qsTr("Vehicle Setup"), "SetupView.qml", "/qmlimages/Gears.svg")
-    // }
-
-    // function showSettingsTool() {
-    //     showTool(qsTr("Application Settings"), "AppSettings.qml", "/res/FWD_only_logo")
-    // }
 
     function showSettingsPage() {
         showTool(qsTr("Settings"), "Settings.qml", "/res/settings_icon")
@@ -227,13 +226,14 @@ ApplicationWindow {
     function logOutProfile() {
         _forceClose = true
         firstRunPromptManager.clearNextPromptSignal()
-        // QGroundControl.linkManager.shutdown()
-        // QGroundControl.videoManager.stopVideo();
         mainWindow.linkDisconnected = true
         mainWindow.loggedIn = false
+        //console.log("Mainwindow.loggedIn", mainWindow.loggedIn)
+        mainWindow.loggedOut = true
+        planView.visible = false
+        flightView.visible = false
         //Qt.quit()
         pageLoader.source = "LoginPage.qml"
-
     }
 
     function finishCloseProcess() {
@@ -295,6 +295,7 @@ ApplicationWindow {
                 StandardButton.Ok)/* | StandardButton.No,*/
                 //function() { logOutProfile() })
         } else {
+            //console.log("Logic comes here")
             logOutProfile()
         }
     }
@@ -321,7 +322,6 @@ ApplicationWindow {
         height:     ScreenTools.toolbarHeight
         visible:    !(QGroundControl.videoManager.fullScreen && flightView.visible) && loggedIn
         userName:   mainWindow.loggedInUser
-
         onLogOutRequested: {
             checkForActiveConnectionsForLogout()
         }
@@ -331,175 +331,19 @@ ApplicationWindow {
         visible: QGroundControl.settingsManager.flyViewSettings.showLogReplayStatusBar.rawValue && loggedIn
     }
 
-
-    // function showToolSelectDialog() {
-    //     if (!mainWindow.preventViewSwitch()) {
-    //         toolSelectDialogComponent.createObject(mainWindow).open()
-    //     }
-    // }
-
-    // Component {
-    //     id: toolSelectDialogComponent
-
-    //     QGCPopupDialog {
-    //         id:         toolSelectDialog
-    //         title:      qsTr("Select Tool")
-    //         buttons:    StandardButton.Close
-
-    //         property real _toolButtonHeight:    ScreenTools.defaultFontPixelHeight * 3
-    //         property real _margins:             ScreenTools.defaultFontPixelWidth
-
-    //         ColumnLayout {
-    //             width:  innerLayout.width + (toolSelectDialog._margins * 2)
-    //             height: innerLayout.height + (toolSelectDialog._margins * 2)
-
-    //             ColumnLayout {
-    //                 id:             innerLayout
-    //                 Layout.margins: toolSelectDialog._margins
-    //                 spacing:        ScreenTools.defaultFontPixelWidth
-
-    //                 SubMenuButton {
-    //                     id:                 setupButton
-    //                     height:             toolSelectDialog._toolButtonHeight
-    //                     Layout.fillWidth:   true
-    //                     text:               qsTr("Vehicle Setup")
-    //                     imageColor:         /*qgcPal.text*/ showHighlight ? "#2c3e50" /*qgcPal.buttonHighlight*/ : qgcPal.windowShade
-    //                     imageResource:      "/qmlimages/Gears.svg"
-    //                     onClicked: {
-    //                         if (!mainWindow.preventViewSwitch()) {
-    //                             //toolSelectDialog.close()
-    //                             mainWindow.showSetupTool()
-    //                         }
-    //                     }
-    //                 }
-
-    //                 SubMenuButton {
-    //                     id:                 analyzeButton
-    //                     height:             toolSelectDialog._toolButtonHeight
-    //                     Layout.fillWidth:   true
-    //                     text:               qsTr("Analyze Tools")
-    //                     imageResource:      "/qmlimages/Analyze.svg"
-    //                     imageColor:         qgcPal.text
-    //                     visible:            QGroundControl.corePlugin.showAdvancedUI
-    //                     onClicked: {
-    //                         if (!mainWindow.preventViewSwitch()) {
-    //                             //toolSelectDialog.close()
-    //                             mainWindow.showAnalyzeTool()
-    //                         }
-    //                     }
-    //                 }
-
-    //                 SubMenuButton {
-    //                     id:                 settingsButton
-    //                     height:             toolSelectDialog._toolButtonHeight
-    //                     Layout.fillWidth:   true
-    //                     text:               qsTr("Application Settings")
-    //                     imageResource:      "/res/FWD_only_logo"
-    //                     imageColor:         /*"transparent"*/ showHighlight ? "#2c3e50" /*qgcPal.buttonHighlight*/ : qgcPal.windowShade
-    //                     visible:            !QGroundControl.corePlugin.options.combineSettingsAndSetup
-    //                     onClicked: {
-    //                         if (!mainWindow.preventViewSwitch()) {
-    //                             //toolSelectDialog.close()
-    //                             mainWindow.showSettingsTool()
-    //                         }
-    //                     }
-    //                 }
-
-    //                 ColumnLayout {
-    //                     width:                  innerLayout.width
-    //                     spacing:                0
-    //                     Layout.alignment:       Qt.AlignHCenter
-
-    //                     QGCLabel {
-    //                         id:                     versionLabel
-    //                         text:                   qsTr("%1 Version").arg(QGroundControl.appName)
-    //                         font.pointSize:         ScreenTools.smallFontPointSize
-    //                         wrapMode:               QGCLabel.WordWrap
-    //                         Layout.maximumWidth:    parent.width
-    //                         Layout.alignment:       Qt.AlignHCenter
-    //                     }
-
-    //                     QGCLabel {
-    //                         text:                   QGroundControl.qgcVersion
-    //                         font.pointSize:         ScreenTools.smallFontPointSize
-    //                         wrapMode:               QGCLabel.WrapAnywhere
-    //                         Layout.maximumWidth:    parent.width
-    //                         Layout.alignment:       Qt.AlignHCenter
-
-    //                         QGCMouseArea {
-    //                             id:                 easterEggMouseArea
-    //                             anchors.topMargin:  -versionLabel.height
-    //                             anchors.fill:       parent
-
-    //                             onClicked: {
-    //                                 if (mouse.modifiers & Qt.ControlModifier) {
-    //                                     QGroundControl.corePlugin.showTouchAreas = !QGroundControl.corePlugin.showTouchAreas
-    //                                     showTouchAreasNotification.open()
-    //                                 } else if (ScreenTools.isMobile || mouse.modifiers & Qt.ShiftModifier) {
-    //                                     if(!QGroundControl.corePlugin.showAdvancedUI) {
-    //                                         advancedModeOnConfirmation.open()
-    //                                     } else {
-    //                                         advancedModeOffConfirmation.open()
-    //                                     }
-    //                                 }
-    //                             }
-
-    //                             // This allows you to change this on mobile
-    //                             onPressAndHold: {
-    //                                 QGroundControl.corePlugin.showTouchAreas = !QGroundControl.corePlugin.showTouchAreas
-    //                                 showTouchAreasNotification.open()
-    //                             }
-
-    //                             MessageDialog {
-    //                                 id:                 showTouchAreasNotification
-    //                                 title:              qsTr("Debug Touch Areas")
-    //                                 text:               qsTr("Touch Area display toggled")
-    //                                 standardButtons:    StandardButton.Ok
-    //                             }
-
-    //                             MessageDialog {
-    //                                 id:                 advancedModeOnConfirmation
-    //                                 title:              qsTr("Advanced Mode")
-    //                                 text:               QGroundControl.corePlugin.showAdvancedUIMessage
-    //                                 standardButtons:    StandardButton.Yes | StandardButton.No
-    //                                 onYes: {
-    //                                     QGroundControl.corePlugin.showAdvancedUI = true
-    //                                     advancedModeOnConfirmation.close()
-    //                                 }
-    //                             }
-
-    //                             MessageDialog {
-    //                                 id:                 advancedModeOffConfirmation
-    //                                 title:              qsTr("Advanced Mode")
-    //                                 text:               qsTr("Turn off Advanced Mode?")
-    //                                 standardButtons:    StandardButton.Yes | StandardButton.No
-    //                                 onYes: {
-    //                                     QGroundControl.corePlugin.showAdvancedUI = false
-    //                                     advancedModeOffConfirmation.close()
-    //                                 }
-    //                             }
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-
-
     FlyView {
-        id:             flightView
-        visible: false
-        //visible:        loggedIn ? true : false
-        anchors.fill:   parent
+        id: flightView
+        anchors.fill: parent
+        visible: mainWindow.loggedIn && toolbar.currentToolbar === toolbar.flyViewToolbar
     }
 
     PlanView {
-        id:             planView
-        anchors.fill:   parent
-        //visible: false
-        visible:        loggedIn ? true : false
+        id: planView
+        anchors.fill: parent
+        visible: mainWindow.loggedIn && toolbar.currentToolbar === toolbar.planViewToolbar
     }
+
+
 
     Drawer {
         id:             toolDrawer
@@ -520,66 +364,6 @@ ApplicationWindow {
         onClosed: {
             toolDrawer.toolSource = ""
         }
-        
-        // Rectangle {
-        //     id:             toolDrawerToolbar
-        //     anchors.left:   parent.left
-        //     anchors.right:  parent.right
-        //     anchors.top:    parent.top
-        //     height:         ScreenTools.toolbarHeight
-        //     color:          qgcPal.toolbarBackground
-
-        //     RowLayout {
-        //         anchors.leftMargin: ScreenTools.defaultFontPixelWidth
-        //         anchors.left:       parent.left
-        //         anchors.top:        parent.top
-        //         anchors.bottom:     parent.bottom
-        //         spacing:            ScreenTools.defaultFontPixelWidth
-
-        //         QGCColoredImage {
-        //             id:                     backIcon
-        //             width:                  ScreenTools.defaultFontPixelHeight * 2
-        //             height:                 ScreenTools.defaultFontPixelHeight * 2
-        //             fillMode:               Image.PreserveAspectFit
-        //             mipmap:                 true
-        //             color:                  qgcPal.text
-        //         }
-
-        //         QGCLabel {
-        //             id:     backTextLabel
-        //             text:   qsTr("Back")
-        //         }
-
-        //         // QGCLabel {
-        //         //     font.pointSize: ScreenTools.largeFontPointSize
-        //         //     text:           "<"
-        //         // }
-
-        //         QGCColoredImage {
-        //             id:                     toolIcon
-        //             width:                  ScreenTools.defaultFontPixelHeight * 2
-        //             height:                 ScreenTools.defaultFontPixelHeight * 2
-        //             fillMode:               Image.PreserveAspectFit
-        //             mipmap:                 true
-        //             color:                  qgcPal.text
-        //         }
-
-        //         QGCLabel {
-        //             id:             toolbarDrawerText
-        //             font.pointSize: ScreenTools.largeFontPointSize
-        //         }
-        //     }
-
-        //     QGCMouseArea {
-        //         anchors.top:        parent.top
-        //         anchors.bottom:     parent.bottom
-        //         x:                  parent.mapFromItem(backIcon, backIcon.x, backIcon.y).x
-        //         width:              (backTextLabel.x + backTextLabel.width) - backIcon.x
-        //         onClicked: {
-        //             toolDrawer.visible      = false
-        //         }
-        //     }
-        // }
 
         Rectangle {
             id:             toolDrawerToolbar
@@ -589,13 +373,10 @@ ApplicationWindow {
             height:         ScreenTools.toolbarHeight
             color:          qgcPal.toolbarBackground
 
-            focus: true
-                Keys.onReleased: (event) => {
-                    if (event.key === Qt.Key_Escape) {
-                        toolDrawer.visible = false
-                        event.accepted = true
-                    }
-                }
+            Shortcut {
+                sequence: "Esc"
+                onActivated: toolDrawer.visible = false
+            }
 
             RowLayout {
                 anchors.left:   parent.left

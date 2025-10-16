@@ -471,6 +471,7 @@ SetupPage {
                 id:         flashBootloaderButton
                 text:       qsTr("Flash ChibiOS Bootloader")
                 visible:    firmwarePage.advanced
+                backRadius: 7
                 onClicked:  globals.activeVehicle.flashBootloader()
             }
 

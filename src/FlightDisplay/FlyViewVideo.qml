@@ -22,6 +22,15 @@ Item {
     property int    _track_rec_y:       0
 
     property Item pipState: videoPipState
+
+    // QGCButton {
+    //     text: "Hide"
+    //     anchors.left: parent.left
+    //     anchors.top: parent.top
+    //     z: 100
+    //     visible: QGroundControl.videoManager.fullScreen
+    // }
+
     QGCPipState {
         id:         videoPipState
         pipOverlay: _pipOverlay

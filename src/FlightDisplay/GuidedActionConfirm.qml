@@ -21,8 +21,10 @@ Rectangle {
     width:      ScreenTools.defaultFontPixelWidth * 50
     height:     mainLayout.height + (_margins * 6)
     radius:     /*ScreenTools.defaultFontPixelWidth / 4*/ 10
-    color:      /*qgcPal.window*/ "#2c3e50"
+    color:      /*qgcPal.window*/ "#77800000"
     visible:    false
+    border.color: "orange"
+    border.width: 2
 
     property var    guidedController
     property var    guidedValueSlider
@@ -96,6 +98,9 @@ Rectangle {
             Layout.topMargin: 10
             wrapMode:               Text.WordWrap
             font.pointSize:         ScreenTools.mediumFontPointSize
+            font.bold: true
+            font.italic: true
+            color: "yellow"
         }
 
         QGCCheckBox {

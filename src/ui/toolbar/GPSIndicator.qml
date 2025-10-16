@@ -21,7 +21,7 @@ import QGroundControl.Palette               1.0
 //-- GPS Indicator
 Item {
     id:             _root
-    width:          (gpsValuesColumn.x + gpsValuesColumn.width) * 2.5
+    width:          (gpsValuesColumn.x + gpsValuesColumn.width) * 4
     anchors.top:    parent.top
     anchors.bottom: parent.bottom
 
@@ -88,14 +88,14 @@ Item {
 
     QGCColoredImage {
         id:                 gpsIcon
-        width:              height - 10
+        width:              height - 15
         anchors.top:        parent.top
         anchors.bottom:     parent.bottom
         source:             "/res/gps_icon"
         fillMode:           Image.PreserveAspectFit
         sourceSize.height:  height
         opacity:            (_activeVehicle && _activeVehicle.gps.count.value >= 0) ? 1 : 0.5
-        color:              /*qgcPal.buttonText*/ "black"
+        color:              /*qgcPal.buttonText*/ "white"
     }
 
     Column {
@@ -110,12 +110,12 @@ Item {
             id: hdopPar
             anchors.horizontalCenter:   hdopValue.horizontalCenter
             //visible:                    _activeVehicle && !isNaN(_activeVehicle.gps.hdop.value)
-            color:                      /*qgcPal.buttonText*/ "black"
+            color:                      /*qgcPal.buttonText*/ "white"
             //text:                       _activeVehicle ? _activeVehicle.gps.count.valueString : ""
             text:                       _activeVehicle && !isNaN(_activeVehicle.gps.count.value)
                                                 ? _activeVehicle.gps.count.valueString
                                                 : "N/A"
-            font.pointSize: 10
+            font.pointSize: ScreenTools.isMobile ? 6.8 : 8
             font.bold: true
 
             ToolTip.visible: count.containsMouse
@@ -131,13 +131,13 @@ Item {
         QGCLabel {
             id:         hdopValue
             //visible:    _activeVehicle && !isNaN(_activeVehicle.gps.hdop.value)
-            color:      /*qgcPal.buttonText*/ "black"
+            color:      /*qgcPal.buttonText*/ "white"
             //text:       _activeVehicle ? _activeVehicle.gps.hdop.value.toFixed(1) : ""
             text:       _activeVehicle && !isNaN(_activeVehicle.gps.hdop.value)
                                 ? _activeVehicle.gps.hdop.value.toFixed(1)
                                 : "N/A"
             font.bold: true
-            font.pointSize: 10
+            font.pointSize: ScreenTools.isMobile ? 6.8 : 8
 
             ToolTip.visible: hdop.containsMouse
             ToolTip.text: "HDOP value"

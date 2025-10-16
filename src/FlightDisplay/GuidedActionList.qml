@@ -24,7 +24,7 @@ Rectangle {
     width:      actionColumn.width  + (_margins * 4)
     height:     actionColumn.height + (_margins * 4)
     radius:     _margins / 2
-    color:      qgcPal.window
+    color:     /* qgcPal.window*/"#55800000"
     opacity:    0.9
     visible:    false
 
@@ -103,7 +103,14 @@ Rectangle {
 
         QGCLabel {
             text:               qsTr("Select Action")
+            font.bold: true
+            color: "yellow"
             Layout.alignment:   Qt.AlignHCenter
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            height: 1
         }
 
         QGCFlickable {
@@ -138,6 +145,7 @@ Rectangle {
                             Layout.minimumWidth:    _actionWidth
                             Layout.maximumWidth:    _actionWidth
                             Layout.fillHeight:      true
+                            font.bold: true
                         }
 
                         QGCButton {

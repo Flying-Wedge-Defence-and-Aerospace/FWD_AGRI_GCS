@@ -38,6 +38,8 @@ Item {
     property var planController:    _planController
     property var guidedController:  _guidedController
 
+    property bool logOut: false
+
     PlanMasterController {
         id:                     _planController
         flyView:                true
@@ -70,7 +72,7 @@ Item {
 
     property bool   _armed:             _activeVehicle ? _activeVehicle.armed : false
     //property real   _margins:           ScreenTools.defaultFontPixelWidth
-    property real   _spacing:           ScreenTools.defaultFontPixelWidth /
+    property real   _spacing:           ScreenTools.defaultFontPixelWidth
 
     function _calcCenterViewPort() {
         var newToolInset = Qt.rect(0, 0, width, height)
@@ -154,7 +156,7 @@ Item {
 
     GuidedActionList {
         id:                         guidedActionList
-        anchors.margins:            _margins
+        anchors.margins:            _margins + 40
         anchors.bottom:             parent.bottom
         anchors.horizontalCenter:   parent.horizontalCenter
         z:                          QGroundControl.zOrderTopMost
@@ -171,7 +173,7 @@ Item {
         z:                  QGroundControl.zOrderTopMost
         radius:             ScreenTools.defaultFontPixelWidth / 2
         width:              ScreenTools.defaultFontPixelWidth * 10
-        color:              qgcPal.window
+        color:              /*qgcPal.window*/ "#55800000"
         visible:            false
     }
 
@@ -203,8 +205,8 @@ Item {
         pipZOrder:              _pipItemZorder
         show:                   !QGroundControl.videoManager.fullScreen &&
                                     (videoControl.pipState.state === videoControl.pipState.pipState || mapControl.pipState.state === mapControl.pipState.pipState)
-        onVideoClose: photoVideoControl.visible = false
-        onVideoOpen: photoVideoControl.visible = true
+        //onVideoClose: photoVideoControl.visible = false
+        //onVideoOpen: photoVideoControl.visible = true
     }
 
     MultiVehicleList {
@@ -235,14 +237,14 @@ Item {
     }
 
 
-    PhotoVideoControl {
-        id: photoVideoControl
-        anchors.right: videoControl.left
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 5
-        anchors.rightMargin: 5
-        width: _rightPanelWidth
-    }
+    // PhotoVideoControl {
+    //     id: photoVideoControl
+    //     anchors.right: videoControl.left
+    //     anchors.bottom: parent.bottom
+    //     anchors.bottomMargin: 5
+    //     anchors.rightMargin: 5
+    //     width: _rightPanelWidth
+    // }
 
     FlyViewInstrumentPanel {
         id:                         instrumentPanel
@@ -251,43 +253,35 @@ Item {
         visible:                    /*QGroundControl.corePlugin.options.flyView.showInstrumentPanel && multiVehiclePanelSelector.showSingleVehiclePanel*/true
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.rightMargin: 125
-        anchors.topMargin: 80
-        // availableHeight:            parent.height - y - _toolsMargin
-        // anchors.top:                parent.top
-        // anchors.left:              parent.left
-        // anchors.topMargin:        50
-        //anchors.margins:            _toolsMargin
-
-        // property real rightEdgeTopInset:    visible ? parent.width - x : 0
-        // property real topEdgeRightInset:    visible ? y + height : 0
+        anchors.rightMargin: ScreenTools.isMobile ? -150 : 125
+        anchors.topMargin: 120
     }
 
     ParameterDetails {
         id: parameterDetailsPanel
         anchors.right: parent.right
         anchors.top: instrumentPanel.bottom
-        anchors.rightMargin: 10
+        anchors.rightMargin: ScreenTools.isMobile ? 49 : 10
         anchors.topMargin: 20
-        visible: _activeVehicle !== null
+        //visible: _activeVehicle !== null
     }
 
     FlyViewTopBar {
         id: topBar
         anchors.top: parent.top
-        anchors.topMargin: 15
+        anchors.topMargin: ScreenTools.isMobile ? 25 : 15
         anchors.horizontalCenter: parent.horizontalCenter
-        visible: _activeVehicle !== null
+        //visible: _activeVehicle !== null
     }
 
     MessageToolBar {
         id: messageBar
         anchors.top: parent.top
         anchors.left: topBar.right
-        anchors.topMargin: 19
-        anchors.leftMargin: 20
-        z: 100   // make sure it’s above topBar
-        visible: _activeVehicle !== null
+        anchors.topMargin: 17
+        anchors.leftMargin: ScreenTools.isMobile ? 125 : 25
+        //z: 100   // make sure it’s above topBar
+        //visible: _activeVehicle !== null
     }
 
     MapTools {
@@ -296,100 +290,13 @@ Item {
         anchors.left: parent.left
         anchors.leftMargin: 10
         anchors.bottomMargin: 20
+
+        onToggleComponents: {
+            parameterDetailsPanel.visible = !hidden
+            instrumentPanel.visible = !hidden
+            telemetryPanel.visible = !hidden
+        }
     }
-
-
-    // Rectangle {
-    //     id: valuesSection
-    //     width: parent.width * 0.16
-    //     // anchors.top: vehicleDetailsSection.bottom
-    //     // anchors.right: parent.right
-    //     // anchors.rightMargin: 20
-    //     // anchors.topMargin: 30
-    //     color: "#80CCCCCC"
-
-    //     property bool expanded: false
-    //     property int collapsedHeight: 40
-    //     property int expandedHeight: 220
-
-    //     x: parent.width - width - 20   // initial position
-    //     y: 370                          // initial position
-
-    //     height: expanded ? expandedHeight : collapsedHeight
-
-    //     Behavior on height {
-    //         NumberAnimation { duration: 250; easing.type: Easing.InOutQuad }
-    //     }
-
-    //     Rectangle {
-    //         id: header2
-    //         width: parent.width
-    //         height: 40
-    //         color: "#80CCCCCC"
-
-    //         RowLayout {
-    //             anchors.fill: parent
-    //             anchors.margins: 10
-    //             spacing: 10
-
-    //             Text {
-    //                 text: "Values"
-    //                 font.bold: true
-    //                 font.pointSize: 13
-    //                 color: "black"
-    //                 Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-    //             }
-
-    //             Item { Layout.fillWidth: true }
-
-    //             Text {
-    //                 id: arrow2
-    //                 text: valuesSection.expanded ? "▲" : "▼"
-    //                 font.pointSize: 14
-    //                 color: "black"
-    //                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-    //             }
-    //         }
-
-    //         MouseArea {    // enable this mouse area to drag the component anywhere in the screen
-    //             anchors.fill: parent
-    //             drag.target: valuesSection
-    //             drag.axis: Drag.XAndYAxis
-
-    //             onClicked: {
-    //                 // only toggle expand if it was a click, not a drag
-    //                 if (!drag.active) {
-    //                     valuesSection.expanded = !valuesSection.expanded
-    //                 }
-    //             }
-    //         }
-
-    //         // MouseArea {
-    //         //     anchors.fill: parent
-    //         //     onClicked: valuesSection.expanded = !valuesSection.expanded
-    //         // }
-    //     }
-
-    //     Loader {
-    //         id: contentLoader1
-    //         anchors.top: header2.bottom
-    //         anchors.left: parent.left
-    //         anchors.right: parent.right
-    //         anchors.margins: 10
-    //         active: valuesSection.expanded
-
-    //         sourceComponent: Column {
-    //             id: content2
-    //             spacing: 10
-    //             anchors.margins: 10
-
-    //             TelemetryValuesBar {
-    //                 id: telemetryPanel
-    //                 anchors.left: parent.left
-    //             }
-    //         }
-    //     }
-    // }
 
     Rectangle {
         id: messagesSection
@@ -399,14 +306,27 @@ Item {
         // anchors.rightMargin: 5
         // anchors.bottomMargin: 5
         color: Qt.rgba(0.9, 0.9, 0.9, 0.6)
+        border.color: "black"
+        border.width: 1
         visible: messageBar.showMessages
 
-        x: telemetryPanel.x - 350
-        y: telemetryPanel.y - 165   // places below timeDate
+        /*x: telemetryPanel.x - 350
+        y: telemetryPanel.y - 165  */ // places below timeDate
 
         property bool expanded: false
         property int collapsedHeight: 40
         property int expandedHeight: 200
+
+        onVisibleChanged: {
+            if (visible) {
+               x = 10
+               y = parent.height - height - 10
+            }
+        }
+
+        onHeightChanged: {
+           y = parent.height - height - 10
+        }
 
         height: /*expanded ? */expandedHeight /*: collapsedHeight*/
 
@@ -419,6 +339,8 @@ Item {
             width: parent.width
             height: 40
             color: "#80CCCCCC"
+            border.color: "black"
+            border.width: 1
 
             RowLayout {
                 anchors.fill: parent
@@ -431,21 +353,13 @@ Item {
                     font.pointSize: 13
                     color: "black"
                     Layout.alignment: Qt.AlignVCenter | Qt.AlignCenter
-                    //anchors.verticalCenter: parent.verticalCenter
                 }
             }
 
-            MouseArea {    // enable this mouse area to drag the component anywhere in the screen
+            MouseArea {
                 anchors.fill: parent
                 drag.target: messagesSection
                 drag.axis: Drag.XAndYAxis
-
-                // onClicked: {
-                //     // only toggle expand if it was a click, not a drag
-                //     if (!drag.active) {
-                //         valuesSection.expanded = !valuesSection.expanded
-                //     }
-                // }
             }
         }
 
@@ -574,35 +488,6 @@ Item {
        anchors.top: parent.top
        anchors.topMargin: 75
     }
-
-
-    // Rectangle {
-    //     id: timeDate
-    //     width: 120
-    //     height: 27
-    //     // color: "#2c3e50"
-    //     color: "#80CCCCCC"
-    //     anchors.horizontalCenter: parent.horizontalCenter
-    //     anchors.bottom: parent.bottom
-    //     // anchors.rightMargin: 5
-    //     // anchors.bottomMargin: 5
-
-    //     Timer {
-    //         interval: 1000
-    //         running: true
-    //         repeat: true
-    //         onTriggered: clockLabel.text = Qt.formatDateTime(new Date(), "hh:mm:ss | dd-MM-yyyy")
-    //     }
-
-    //     QGCLabel {
-    //         id: clockLabel
-    //         anchors.centerIn: parent
-    //         text: Qt.formatDateTime(new Date, "hh:mm:ss | dd-MM-yyyy")
-    //         font.pointSize: 8
-    //         font.bold: true
-    //         color: "black"
-    //     }
-    // }
 
     TelemetryValuesBar {
         id: telemetryPanel

@@ -15,6 +15,9 @@ DEFINES += QGC_GST_MICROHARD_DISABLED
 
 CONFIG += qml_debug
 
+# Enable AddressSanitizer
+# QMAKE_CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer
+# QMAKE_LFLAGS += -fsanitize=address
 
 exists($${OUT_PWD}/qgroundcontrol.pro) {
     error("You must use shadow build (e.g. mkdir build; cd build; qmake ../qgroundcontrol.pro).")

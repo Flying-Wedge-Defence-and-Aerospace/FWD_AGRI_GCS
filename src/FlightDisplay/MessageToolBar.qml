@@ -1,209 +1,3 @@
-// import QtQuick                  2.12
-// import QtQuick.Controls         2.15
-// import QtQuick.Dialogs          1.3
-// import QtQuick.Layouts          1.12
-
-// import QtLocation               5.3
-// import QtPositioning            5.3
-// import QtQuick.Window           2.2
-// import QtQml.Models             2.1
-
-// import QtGraphicalEffects 1.0
-
-// import QGroundControl               1.0
-// import QGroundControl.MultiVehicleManager   1.0
-// import QGroundControl.Controllers   1.0
-// import QGroundControl.Controls      1.0
-// import QGroundControl.FactSystem    1.0
-// import QGroundControl.FlightDisplay 1.0
-// import QGroundControl.FlightMap     1.0
-// import QGroundControl.Palette       1.0
-// import QGroundControl.ScreenTools   1.0
-// import QGroundControl.Vehicle       1.0
-
-
-// Item {
-//     id: root
-//     width: 33
-//     height: 33
-
-//     property int messageCount: 0
-//     property bool   _isMessageImportant:    _activeVehicle ? !_activeVehicle.messageTypeNormal && !_activeVehicle.messageTypeNone : false
-
-//     function dropMessageIndicator() {
-//         mainWindow.showIndicatorPopup(root, vehicleMessagesPopup);
-//         root.messageCount = 0
-//     }
-
-    // function formatMessage(message) {
-    //     message = message.replace(new RegExp("<#E>", "g"), "color: " + qgcPal.warningText + "; font: " + (ScreenTools.defaultFontPointSize.toFixed(0) - 1) + "pt monospace;");
-    //     message = message.replace(new RegExp("<#I>", "g"), "color: " + qgcPal.warningText + "; font: " + (ScreenTools.defaultFontPointSize.toFixed(0) - 1) + "pt monospace;");
-    //     message = message.replace(new RegExp("<#N>", "g"), "color: " + qgcPal.text + "; font: " + (ScreenTools.defaultFontPointSize.toFixed(0) - 1) + "pt monospace;");
-    //     return message;
-    // }
-
-//     // Connections {
-//     //     target: _activeVehicle
-//     //     onMessageCountChanged: {
-//     //         root.messageCount = _activeVehicle.messageCount
-//     //     }
-//     // }
-
-//     Rectangle {
-//         id: backgroundRect
-//         anchors.fill: parent
-//         radius: 8
-//         color: "black"
-
-//         Image {
-//             anchors.fill: parent
-//             //source: "/res/message_icon"
-//             source: (_activeVehicle && _activeVehicle.messageCount > 0 && _isMessageImportant)
-//                         ? "/qmlimages/Yield.svg"
-//                         : "/res/message_icon"
-//             anchors.margins: 6
-//             fillMode: Image.PreserveAspectFit
-//         }
-
-//         Rectangle {
-//                 id: badge
-//                 width: parent.width * 0.4
-//                 height: width
-//                 radius: width / 2
-//                 color: "red"
-//                 // border.color: "white"
-//                 // border.width: 1
-//                 anchors.top: parent.top
-//                 anchors.right: parent.right
-//                 anchors.margins: -4   // move a little outside if you want overlap
-
-//                 visible: messageCount > 0
-
-//                 QGCLabel {
-//                     anchors.centerIn: parent
-//                     //text: "99+"    // your number here
-//                     text: messageCount > 99 ? "99+" : messageCount
-//                     color: "white"
-//                     font.pixelSize: Math.max(8, parent.width * 0.4)
-//                     font.bold: true
-//                 }
-//             }
-
-//         MouseArea {
-//             anchors.fill: parent
-//             onClicked: dropMessageIndicator()
-//         }
-//     }
-
-//     Component {
-//         id: vehicleMessagesPopup
-
-//         Rectangle {
-//             width:          mainWindow.width  * 0.500
-//             height:         mainWindow.height * 0.666
-//             radius:         ScreenTools.defaultFontPixelHeight / 2
-//             color:          /*qgcPal.window*/ "#2c3e50"
-//             border.color:   qgcPal.text
-
-
-//             Component.onCompleted: {
-//                 messageText.text = formatMessage(_activeVehicle.formattedMessages)
-//                 //-- Hack to scroll to last message
-//                 for (var i = 0; i < _activeVehicle.messageCount; i++)
-//                     messageFlick.flick(0,-5000)
-//                 _activeVehicle.resetAllMessages()
-//             }
-
-//             Connections {
-//                 target: _activeVehicle
-//                 onNewFormattedMessage :{
-//                     messageText.append(formatMessage(formattedMessage))
-//                     //notificationPopup.showMessage(formattedMessage)
-//                     //-- Hack to scroll down
-//                     root.messageCount += 1
-//                     messageFlick.flick(0,-500)
-//                 }
-//             }
-
-            // QGCLabel {
-            //     anchors.centerIn:   parent
-            //     text:               qsTr("No Messages")
-            //     visible:            messageText.length === 0
-            // }
-
-//             //-- Clear Messages
-            // QGCColoredImage {
-            //     anchors.bottom:     parent.bottom
-            //     anchors.right:      parent.right
-            //     anchors.margins:    ScreenTools.defaultFontPixelHeight * 0.5
-            //     height:             ScreenTools.isMobile ? ScreenTools.defaultFontPixelHeight * 1.5 : ScreenTools.defaultFontPixelHeight
-            //     width:              height
-            //     sourceSize.height:   height
-            //     source:             "/res/TrashDelete.svg"
-            //     fillMode:           Image.PreserveAspectFit
-            //     mipmap:             true
-            //     smooth:             true
-            //     color:              qgcPal.text
-            //     visible:            messageText.length !== 0
-            //     MouseArea {
-            //         anchors.fill:   parent
-            //         onClicked: {
-            //             if (_activeVehicle) {
-            //                 _activeVehicle.clearMessages()
-            //                 mainWindow.hideIndicatorPopup()
-            //             }
-            //         }
-            //     }
-            // }
-
-            // FactPanelController {
-            //     id: controller
-            // }
-
-//             QGCFlickable {
-//                 id:                 messageFlick
-//                 anchors.margins:    ScreenTools.defaultFontPixelHeight
-//                 anchors.fill:       parent
-//                 contentHeight:      messageText.height
-//                 contentWidth:       messageText.width
-//                 pixelAligned:       true
-
-//                 TextEdit {
-//                     id:                 messageText
-//                     readOnly:           true
-//                     textFormat:         TextEdit.RichText
-//                     selectByMouse:      true
-//                     color:              qgcPal.text
-//                     selectionColor:     qgcPal.text
-//                     selectedTextColor:  qgcPal.window
-//                     property var fact:  null
-                    // onLinkActivated: {
-                    //     if (link.startsWith('param://')) {
-                    //         var paramName = link.substr(8);
-                    //         fact = controller.getParameterFact(-1, paramName, true)
-                    //         if (fact != null) {
-                    //             paramEditorDialogComponent.createObject(mainWindow).open()
-                    //         }
-                    //     } else {
-                    //         Qt.openUrlExternally(link);
-                    //     }
-                    // }
-//                 }
-                // Component {
-                //     id: paramEditorDialogComponent
-
-                //     ParameterEditorDialog {
-                //         title:          qsTr("Edit Parameter")
-                //         fact:           messageText.fact
-                //         destroyOnClose: true
-                //     }
-                // }
-//             }
-//         }
-//     }
-// }
-
-
 import QtQuick                  2.12
 import QtQuick.Controls         2.15
 import QtQuick.Dialogs          1.3
@@ -235,6 +29,7 @@ Item {
     signal changeMessageIcon
 
     property int messageCount: 0
+    property bool showDetailsChecked: false
 
     // property bool isMessageImportant: _activeVehicle
     //                                   ? !_activeVehicle.messageTypeNormal && !_activeVehicle.messageTypeNone
@@ -279,12 +74,21 @@ Item {
                     ? "/qmlimages/Yield.svg"
                     : "/res/message_icon"
 
+            ToolTip.visible: message.containsMouse
+            ToolTip.text: "Messages"
+
+            MouseArea {
+                id: message
+                anchors.fill: parent
+                hoverEnabled: true
+            }
+
         }
 
         // Badge for message count
         Rectangle {
             id: badge
-            width: parent.width * 0.4
+            width: parent.width * 0.45
             height: width
             radius: width / 2
             color: "red"
@@ -398,18 +202,19 @@ Item {
 
                     QGCRadioButton {
                         id: details
-                        checked: false
+                        checked: showDetailsChecked
                         Layout.alignment: Qt.AlignVCenter
 
                         MouseArea {
                             anchors.fill: parent
-                            onClicked: details.checked = !details.checked  // toggle on each click
+                            onClicked: {
+                                details.checked = !details.checked  // toggle on each click
+                                showDetailsChecked = details.checked
+                            }
                         }
 
                         onCheckedChanged: root.showMessages = checked
                     }
-
-
                 }
             }
 

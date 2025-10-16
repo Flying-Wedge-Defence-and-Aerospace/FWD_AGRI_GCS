@@ -96,21 +96,21 @@ Button {
                 anchors.horizontalCenter:   parent.horizontalCenter
                 visible:                    source != "" && !modelData.fullColorIcon
                 
-                QGCColoredImage {
-                    id:                         innerImageSecondColor
-                    source:                     modelData.alternateIconSource
-                    height:                     contentLayoutItem.height * imageScale
-                    width:                      contentLayoutItem.width  * imageScale
-                    smooth:                     true
-                    mipmap:                     true
-                    color:                      /*_currentContentColorSecondary*/ "white"
-                    fillMode:                   Image.PreserveAspectFit
-                    antialiasing:               true
-                    sourceSize.height:          height
-                    sourceSize.width:           width
-                    anchors.horizontalCenter:   parent.horizontalCenter
-                    visible:                    source != "" && modelData.biColorIcon
-                }
+                // QGCColoredImage {
+                //     id:                         innerImageSecondColor
+                //     source:                     modelData.alternateIconSource
+                //     height:                     contentLayoutItem.height * imageScale
+                //     width:                      contentLayoutItem.width  * imageScale
+                //     smooth:                     true
+                //     mipmap:                     true
+                //     color:                      /*_currentContentColorSecondary*/ "white"
+                //     fillMode:                   Image.PreserveAspectFit
+                //     antialiasing:               true
+                //     sourceSize.height:          height
+                //     sourceSize.width:           width
+                //     anchors.horizontalCenter:   parent.horizontalCenter
+                //     visible:                    source != "" && modelData.biColorIcon
+                // }
             }
 
             QGCLabel {
@@ -124,33 +124,6 @@ Button {
             }
         }
     }
-
-    // background: Rectangle {
-    //     id:             buttonBkRect
-    //     color:          /*(control.checked || control.pressed) ?
-    //                         qgcPal.buttonHighlight :
-    //                         (control.hovered ? qgcPal.toolStripHoverColor : qgcPal.toolbarBackground)*/ /*"darkred"*/ "black"
-    //     anchors.fill:   parent
-    //     //radius: 100                         // round corners (adjust value)
-    //     border.width:2                   // thickness of border
-    //     border.color: "white"
-    // }
-
-    // background: Rectangle {
-    //     id: buttonBkRect
-    //     anchors.fill: parent
-    //     radius: 8
-    //     border.width: 2
-    //     // Border + fill change with enabled/disabled
-    //     border.color: control.enabled ? "white" : "#5D6D7E"
-    //     color: control.enabled ? "#000000" : "#7F8C8D"   // enabled / disabled
-
-    //     // (optional) nice fade when state changes
-    //     Behavior on color        { ColorAnimation { duration: 150 } }
-    //     Behavior on border.color { ColorAnimation { duration: 150 } }
-    //     // (optional) dim the whole button when disabled
-    //     opacity: control.enabled ? 1.0 : 0.7
-    // }
 
     background: Rectangle {
         id: buttonBkRect

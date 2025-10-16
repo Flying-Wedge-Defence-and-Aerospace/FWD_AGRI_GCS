@@ -47,39 +47,41 @@ Item {
 
     property double _thermalHeightFactor: 0.85 //-- TODO
 
-        Image {
-            id:             noVideo
-            anchors.fill:   parent
-            source:         "/res/videoBackground"
-            fillMode:       Image.PreserveAspectCrop
-            visible:        !(QGroundControl.videoManager.decoding)
 
-            Rectangle {
-                anchors.centerIn:   parent
-                width:              noVideoLabel.contentWidth + ScreenTools.defaultFontPixelHeight
-                height:             noVideoLabel.contentHeight + ScreenTools.defaultFontPixelHeight
-                radius:             ScreenTools.defaultFontPixelWidth / 2
-                color:              "black"
-                opacity:            0.5
-                border.color: "black"
-                border.width: 2
-            }
+    Image {
+        id:             noVideo
+        anchors.fill:   parent
+        source:         "/res/videoBackground"
+        fillMode:       Image.PreserveAspectCrop
+        visible:        !(QGroundControl.videoManager.decoding)
 
-            QGCLabel {
-                id:                 noVideoLabel
-                text:               QGroundControl.settingsManager.videoSettings.streamEnabled.rawValue ? qsTr("WAITING FOR VIDEO..!") : qsTr("VIDEO DISABLED")
-                font.family:        ScreenTools.demiboldFontFamily
-                color:              "white"
-                font.pointSize:     /*useSmallFont ? ScreenTools.smallFontPointSize : ScreenTools.largeFontPointSize*/ 8
-                anchors.centerIn:   parent
-                font.bold: true
-            }
+        Rectangle {
+            anchors.centerIn:   parent
+            width:              noVideoLabel.contentWidth + ScreenTools.defaultFontPixelHeight
+            height:             noVideoLabel.contentHeight + ScreenTools.defaultFontPixelHeight
+            radius:             ScreenTools.defaultFontPixelWidth / 2
+            color:              "black"
+            opacity:            0.5
+            border.color: "black"
+            border.width: 2
         }
+
+        QGCLabel {
+            id:                 noVideoLabel
+            text:               QGroundControl.settingsManager.videoSettings.streamEnabled.rawValue ? qsTr("WAITING FOR VIDEO..!") : qsTr("VIDEO DISABLED")
+            font.family:        ScreenTools.demiboldFontFamily
+            color:              "white"
+            font.pointSize:     /*useSmallFont ? ScreenTools.smallFontPointSize : ScreenTools.largeFontPointSize*/ 8
+            anchors.centerIn:   parent
+            font.bold: true
+        }
+    }
 
     Rectangle {
         id:             videoBackground
         anchors.fill:   parent
         color:          "black"
+        //visible: true
         visible:        QGroundControl.videoManager.decoding
         function getWidth() {
             //-- Fit Width or Stretch
@@ -216,6 +218,15 @@ Item {
                 }
             }
             property int zoom: 0
+        }
+
+        PhotoVideoControl {
+            id: photoVideoControl
+            anchors.right: videoControl.left
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 5
+            anchors.rightMargin: 5
+            width: _rightPanelWidth
         }
     }
 }
