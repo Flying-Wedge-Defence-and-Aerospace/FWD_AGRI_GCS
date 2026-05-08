@@ -49,6 +49,10 @@
         <file alias="FlightDisplayViewUVC.qml">src/FlightDisplay/FlightDisplayViewUVC.qml</file>
         <file alias="FWLandingPatternEditor.qml">src/PlanView/FWLandingPatternEditor.qml</file>
         <file alias="GeneralSettings.qml">src/ui/preferences/GeneralSettings.qml</file>
+        <file alias="FlyViewSettings.qml">src/ui/preferences/FlyViewSettings.qml</file>
+        <file alias="PlanViewSettings.qml">src/ui/preferences/PlanViewSettings.qml</file>
+        <file alias="VideoSettings.qml">src/ui/preferences/VideoSettings.qml</file>
+        <file alias="ADSBServerSettings.qml">src/ui/preferences/ADSBServerSettings.qml</file>
         <file alias="GeoTagPage.qml">src/AnalyzeView/GeoTagPage.qml</file>
         <file alias="HelpSettings.qml">src/ui/preferences/HelpSettings.qml</file>
         <file alias="JoystickConfig.qml">src/VehicleSetup/JoystickConfig.qml</file>
@@ -60,6 +64,7 @@
         <file alias="LogDownloadPage.qml">src/AnalyzeView/LogDownloadPage.qml</file>
         <file alias="LogReplaySettings.qml">src/ui/preferences/LogReplaySettings.qml</file>
         <file alias="MainRootWindow.qml">src/ui/MainRootWindow.qml</file>
+        <file alias="SettingsDrawer.qml">src/ui/SettingsDrawer.qml</file>
         <file alias="MavlinkConsolePage.qml">src/AnalyzeView/MavlinkConsolePage.qml</file>
         <file alias="MAVLinkInspectorPage.qml">src/AnalyzeView/MAVLinkInspectorPage.qml</file>
         <file alias="MavlinkSettings.qml">src/ui/preferences/MavlinkSettings.qml</file>
@@ -143,6 +148,7 @@
         <file alias="QGroundControl/Controls/QGCFlickable.qml">src/QmlControls/QGCFlickable.qml</file>
         <file alias="QGroundControl/Controls/QGCFlickableHorizontalIndicator.qml">src/QmlControls/QGCFlickableHorizontalIndicator.qml</file>
         <file alias="QGroundControl/Controls/QGCFlickableVerticalIndicator.qml">src/QmlControls/QGCFlickableVerticalIndicator.qml</file>
+        <file alias="QGroundControl/Controls/QGCToggleSwitch.qml">src/QmlControls/QGCToggleSwitch.qml</file>
         <file alias="QGroundControl/Controls/QGCGroupBox.qml">src/QmlControls/QGCGroupBox.qml</file>
         <file alias="QGroundControl/Controls/QGCLabel.qml">src/QmlControls/QGCLabel.qml</file>
         <file alias="QGroundControl/Controls/QGCListView.qml">src/QmlControls/QGCListView.qml</file>
@@ -203,10 +209,14 @@
         <file alias="QGroundControl/FactControls/FactTextFieldRow.qml">src/FactSystem/FactControls/FactTextFieldRow.qml</file>
         <file alias="QGroundControl/FactControls/FactTextFieldSlider.qml">src/FactSystem/FactControls/FactTextFieldSlider.qml</file>
         <file alias="QGroundControl/FactControls/FactValueSlider.qml">src/FactSystem/FactControls/FactValueSlider.qml</file>
+        <file alias="QGroundControl/FactControls/FactToggleSwitch.qml">src/FactSystem/FactControls/FactToggleSwitch.qml</file>
         <file alias="QGroundControl/FactControls/qmldir">src/QmlControls/QGroundControl/FactControls/qmldir</file>
         <file alias="QGroundControl/FlightDisplay/FlightDisplayViewVideo.qml">src/FlightDisplay/FlightDisplayViewVideo.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlightDisplayViewWidgets.qml">src/FlightDisplay/FlightDisplayViewWidgets.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyView.qml">src/FlightDisplay/FlyView.qml</file>
+        <file alias="QGroundControl/FlightDisplay/SubSystems.qml">src/FlightDisplay/SubSystems.qml</file>
+        <file alias="QGroundControl/FlightDisplay/ConfigPanel.qml">src/FlightDisplay/ConfigPanel.qml</file>
+        <file alias="QGroundControl/FlightDisplay/AndroidTelemetry.qml">src/FlightDisplay/AndroidTelemetry.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyViewCustomLayer.qml">src/FlightDisplay/FlyViewCustomLayer.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyViewInstrumentPanel.qml">src/FlightDisplay/FlyViewInstrumentPanel.qml</file>
         <file alias="QGroundControl/FlightDisplay/FlyViewMap.qml">src/FlightDisplay/FlyViewMap.qml</file>
@@ -231,10 +241,6 @@
         <file alias="QGroundControl/FlightDisplay/GuidedToolStripAction.qml">src/FlightDisplay/GuidedToolStripAction.qml</file>
         <file alias="QGroundControl/FlightDisplay/MultiVehicleList.qml">src/FlightDisplay/MultiVehicleList.qml</file>
         <file alias="QGroundControl/FlightDisplay/ParameterDetails.qml">src/FlightDisplay/ParameterDetails.qml</file>
-        <file alias="QGroundControl/FlightDisplay/FlyViewTopBar.qml">src/FlightDisplay/FlyViewTopBar.qml</file>
-        <file alias="QGroundControl/FlightDisplay/MessageToolBar.qml">src/FlightDisplay/MessageToolBar.qml</file>
-        <file alias="QGroundControl/FlightDisplay/MapTools.qml">src/FlightDisplay/MapTools.qml</file>
-        <file alias="QGroundControl/FlightDisplay/MapLayers.qml">src/FlightDisplay/MapLayers.qml</file>
         <file alias="QGroundControl/FlightDisplay/PreFlightBatteryCheck.qml">src/FlightDisplay/PreFlightBatteryCheck.qml</file>
         <file alias="QGroundControl/FlightDisplay/PreFlightGPSCheck.qml">src/FlightDisplay/PreFlightGPSCheck.qml</file>
         <file alias="QGroundControl/FlightDisplay/PreFlightRCCheck.qml">src/FlightDisplay/PreFlightRCCheck.qml</file>
@@ -245,6 +251,7 @@
         <file alias="QGroundControl/FlightDisplay/ProximityRadarVideoView.qml">src/FlightDisplay/ProximityRadarVideoView.qml</file>
         <file alias="QGroundControl/FlightDisplay/TerrainProgress.qml">src/FlightDisplay/TerrainProgress.qml</file>
         <file alias="QGroundControl/FlightDisplay/TelemetryValuesBar.qml">src/FlightDisplay/TelemetryValuesBar.qml</file>
+        <file alias="QGroundControl/FlightDisplay/ConfigPanel.qml">src/FlightDisplay/ConfigPanel.qml</file>
         <file alias="QGroundControl/FlightDisplay/VehicleWarnings.qml">src/FlightDisplay/VehicleWarnings.qml</file>
         <file alias="QGroundControl/FlightDisplay/ObstacleDistanceOverlay.qml">src/FlightDisplay/ObstacleDistanceOverlay.qml</file>
         <file alias="QGroundControl/FlightDisplay/ObstacleDistanceOverlayMap.qml">src/FlightDisplay/ObstacleDistanceOverlayMap.qml</file>

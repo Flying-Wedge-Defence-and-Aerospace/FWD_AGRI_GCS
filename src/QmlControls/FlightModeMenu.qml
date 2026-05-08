@@ -18,6 +18,7 @@ import QGroundControl.ScreenTools   1.0
 QGCLabel {
     id:     _root
     text:   currentVehicle ? currentVehicle.flightMode : qsTr("N/A", "No data to display")
+    font.bold: true
 
     property var    currentVehicle:         QGroundControl.multiVehicleManager.activeVehicle
     property real   mouseAreaLeftMargin:    0

@@ -17,7 +17,7 @@ Rectangle {
     id:         _root
     height:     childrenRect.y + childrenRect.height + _margin
     width:      availableWidth
-    color:      /*qgcPal.windowShadeDark*/ "#2c3e50"
+    color:      qgcPal.windowShadeDark
     radius:     _radius
 
     property bool   transectAreaDefinitionComplete: true
@@ -69,7 +69,6 @@ Rectangle {
             horizontalAlignment:    Text.AlignHCenter
             text:                   transectAreaDefinitionHelp
             font.italic: true
-            color: "yellow"
             font.pointSize: 8
             visible:                !transectAreaDefinitionComplete || _missionItem.wizardMode
         }

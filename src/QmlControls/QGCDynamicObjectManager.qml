@@ -15,7 +15,7 @@ Item {
     Component.onDestruction: destroyObjects()
 
     function createObject(sourceComponent, parentObject, addMapItem) {
-        var obj = sourceComponent.createObject(parentObject)
+        var obj = sourceComponent.createObject(parentObject) //PlanEditToolbar
         if (obj.status === Component.Error) {
             console.log(obj.errorString())
         }

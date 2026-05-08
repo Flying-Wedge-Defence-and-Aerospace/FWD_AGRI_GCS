@@ -179,7 +179,8 @@ SetupPage {
                                 QGCLabel {
                                     text:           qsTr("Frame Type")
                                     font.pointSize: ScreenTools.smallFontPointSize
-                                    color:          qgcPal.buttonHighlightText
+                                    color:          /*qgcPal.buttonHighlightText*/ "yellow"
+                                    font.bold: true
                                     visible:        airframeCheckBox.checked && object.frameTypeSupported
                                 }
 

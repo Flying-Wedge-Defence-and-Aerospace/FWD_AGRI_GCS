@@ -28,7 +28,7 @@ Item {
 
     property var    _activeVehicle:     QGroundControl.multiVehicleManager.activeVehicle
     property bool   _rcRSSIAvailable:   _activeVehicle ? _activeVehicle.rcRSSI > 0 && _activeVehicle.rcRSSI <= 100 : false
-    visible: _activeVehicle && _activeVehicle.supportsRadio && _rcRSSIAvailable
+    //visible: _activeVehicle && _activeVehicle.supportsRadio && _rcRSSIAvailable
 
     Component {
         id: rcRSSIInfo

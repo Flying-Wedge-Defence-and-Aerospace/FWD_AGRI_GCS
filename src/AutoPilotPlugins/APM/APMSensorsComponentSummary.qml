@@ -41,7 +41,6 @@ Item {
                 QGCLabel {
                     font.italic: true
                     font.pointSize: 8
-                    color: "lightYellow"
                     text:  sensorParams.rgCompassAvailable[index] ?
                                 (sensorParams.rgCompassCalibrated[index] ?
                                      getPriority(index) +

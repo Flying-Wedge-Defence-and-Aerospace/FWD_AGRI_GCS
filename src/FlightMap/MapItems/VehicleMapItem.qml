@@ -16,6 +16,7 @@ import QGroundControl               1.0
 import QGroundControl.ScreenTools   1.0
 import QGroundControl.Vehicle       1.0
 import QGroundControl.Controls      1.0
+import QGroundControl.Palette       1.0
 
 /// Marker for displaying a vehicle location on the map
 MapQuickItem {
@@ -37,6 +38,8 @@ MapQuickItem {
     property bool   _adsbVehicle:   vehicle ? false : true
     property var    _map:           map
     property bool   _multiVehicle:  QGroundControl.multiVehicleManager.vehicles.count > 1
+
+    QGCPalette { id: qgcPal }
 
     sourceItem: Item {
         id:         vehicleItem
@@ -137,6 +140,31 @@ MapQuickItem {
             }
         }
 
+        // Rectangle {
+        //     id: vehicleLabelRect
+        //     anchors.top: parent.bottom
+        //     anchors.horizontalCenter: parent.horizontalCenter
+        //     width: vehicleLabel.implicitWidth + ScreenTools.defaultFontPixelWidth
+        //     height: vehicleLabel.implicitHeight + ScreenTools.defaultFontPixelHeight
+        //     color: qgcPal.window
+        //     radius: ScreenTools.defaultFontPixelWidth / 2
+
+        //     QGCMapLabel {
+        //         id:                         vehicleLabel
+        //         anchors.centerIn: parent
+        //         map:                        _map
+        //         text:                       vehicleLabelText
+        //         font.pointSize:             _adsbVehicle ? ScreenTools.defaultFontPointSize : ScreenTools.smallFontPointSize
+        //         visible:                    _adsbVehicle ? !isNaN(altitude) : _multiVehicle
+        //         property string vehicleLabelText: visible ?
+        //                                               (_adsbVehicle ?
+        //                                                    QGroundControl.unitsConversion.metersToAppSettingsHorizontalDistanceUnits(altitude).toFixed(0) + " " + QGroundControl.unitsConversion.appSettingsHorizontalDistanceUnitsString + "\n" + callsign :
+        //                                                    (_multiVehicle ? qsTr("Vehicle %1").arg(vehicle.id) : "")) :
+        //                                               ""
+
+        //     }
+        // }
+
         QGCMapLabel {
             id:                         vehicleLabel
             anchors.top:                parent.bottom
@@ -152,5 +180,6 @@ MapQuickItem {
                                                   ""
 
         }
+
     }
 }

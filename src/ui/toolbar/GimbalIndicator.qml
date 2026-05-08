@@ -43,7 +43,7 @@ Item {
         Rectangle {
             width:          mainLayout.width   + mainLayout.anchors.margins * 2          
             height:         mainLayout.height  + mainLayout.anchors.margins * 2
-            color:          /*qgcPal.window*/ "#2c3e50"
+            color:          qgcPal.window
             radius:         panelRadius
 
             GridLayout {
@@ -390,7 +390,7 @@ Item {
     MouseArea {
         anchors.fill: parent
         onClicked: {
-            mainWindow.showIndicatorPopup(_root, gimbalControlsPopup, false)
+            mainWindow.showIndicatorPopup(_root, gimbalControlsPopup, false, "top")
         }
     }
 }

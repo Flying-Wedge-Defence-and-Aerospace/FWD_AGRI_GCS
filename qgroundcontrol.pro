@@ -33,7 +33,7 @@ message(Qt version $$[QT_VERSION])
 
 include(QGCCommon.pri)
 
-TARGET   = QGroundControl
+TARGET   = FWD_AGRI_GCS
 TEMPLATE = app
 QGCROOT  = $$PWD
 
@@ -61,6 +61,8 @@ WindowsBuild {
     RC_ICONS = resources/icons/qgroundcontrol.ico
     CONFIG += resources_big
 }
+
+android: ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
 
 #
 # Branding
@@ -362,7 +364,7 @@ CustomBuild {
         RESOURCES += $$PWD/resources/InstrumentValueIcons/InstrumentValueIcons.qrc
     }
 } else {
-    DEFINES += QGC_APPLICATION_NAME=\"\\\"FWDGCS\\\"\"
+    DEFINES += QGC_APPLICATION_NAME=\"\\\"FWD_AGRI_GCS\\\"\"
     DEFINES += QGC_ORG_NAME=\"\\\"QGroundControl.org\\\"\"
     DEFINES += QGC_ORG_DOMAIN=\"\\\"org.qgroundcontrol\\\"\"
     RESOURCES += \

@@ -87,7 +87,6 @@ Item {
                     text:               pageDescription
                     font.pointSize: 12
                     //font.bold: true
-                    color: "white"
                     visible:            pageDescription !== "" && !ScreenTools.isShortScreen
                 }
             }

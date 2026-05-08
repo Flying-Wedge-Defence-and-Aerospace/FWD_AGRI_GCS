@@ -17,7 +17,7 @@ import QGroundControl.Palette       1.0
 Rectangle {
     id:             _root
     height:         editorLoader.visible ? (editorLoader.y + editorLoader.height + _innerMargin) : (topRowLayout.y + topRowLayout.height + _margin)
-    color:          /*_currentItem ? qgcPal.missionItemEditor : qgcPal.windowShade*/ "#77800000"
+    color:          _currentItem ? qgcPal.missionItemEditor : qgcPal.windowShade /*"#77800000"*/
     radius:         _radius
     opacity:        _currentItem ? 1.0 : 0.7
     border.width:   _readyForSave ? 0 : 2
@@ -178,8 +178,8 @@ Rectangle {
             text:                   missionItem.commandName
             //font.capitalization: Font.AllUppercase
             font.bold: true
-            font.pointSize: 12
-            color:                  /*_outerTextColor*/ "white"
+            font.pointSize: ScreenTools.mediumFontPointSize
+            color:                  _outerTextColor
         }
     }
 

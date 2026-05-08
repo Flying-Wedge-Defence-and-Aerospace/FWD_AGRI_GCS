@@ -15,6 +15,7 @@ add_custom_target(FactControlsQml
 		FactTextFieldRow.qml
 		FactTextFieldSlider.qml
 		FactValueSlider.qml
+		FactToggleSwitch.qml
 )
 
 target_link_libraries(FactControls qgc)

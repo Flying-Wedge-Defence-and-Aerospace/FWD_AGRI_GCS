@@ -24,6 +24,8 @@ Item {
     anchors.top:    parent.top
     anchors.bottom: parent.bottom
 
+    QGCPalette { id: qgcPal}
+
     property bool showIndicator: QGroundControl.settingsManager.remoteIDSettings.enable.value
 
     property var    _activeVehicle:     QGroundControl.multiVehicleManager.activeVehicle
@@ -110,8 +112,8 @@ Item {
             width:          remoteIDCol.width + ScreenTools.defaultFontPixelWidth  * 3
             height:         remoteIDCol.height + ScreenTools.defaultFontPixelHeight * 2 + (emergencyButtonItem.visible ? emergencyButtonItem.height : 0)
             radius:         ScreenTools.defaultFontPixelHeight * 0.5
-            color:          /*qgcPal.window*/ "#2c3e50"
-            border.color:   /*qgcPal.text*/ "yellow"
+            color:          qgcPal.window
+            border.color:   qgcPal.text
 
             Column {
                 id:                         remoteIDCol
@@ -342,8 +344,9 @@ Item {
     Image {
         id:                 remoteIDIcon
         width:              height
-        anchors.top:        parent.top
-        anchors.bottom:     parent.bottom
+        // anchors.top:        parent.top
+        // anchors.bottom:     parent.bottom
+        anchors.fill: parent
         source:             getRIDIcon()
         fillMode:           Image.PreserveAspectFit
         sourceSize.height:  height
@@ -352,7 +355,7 @@ Item {
     MouseArea {
         anchors.fill:   parent
         onClicked: {
-            mainWindow.showIndicatorPopup(_root, remoteIDInfo)
+            mainWindow.showIndicatorPopup(_root, remoteIDInfo, "bottom")
         }
     }
 }

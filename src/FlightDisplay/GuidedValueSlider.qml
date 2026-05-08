@@ -17,8 +17,6 @@ import QGroundControl.Palette       1.0
 
 Rectangle {
     id:                 _root
-    border.color: "orange"
-    border.width: 2
 
     property var  _flyViewSettings:     QGroundControl.settingsManager.flyViewSettings
     property real _vehicleAltitude:     _activeVehicle ? _activeVehicle.altitudeRelative.rawValue : 0

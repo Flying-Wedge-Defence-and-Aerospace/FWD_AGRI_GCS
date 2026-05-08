@@ -113,7 +113,7 @@ Popup {
         Rectangle {
             anchors.margins:    _root.padding
             anchors.fill:       parent
-            color:              /*_pal.window*/ "#2c3e50"
+            color:              _pal.window
             radius: 10
         }
     }
@@ -230,7 +230,7 @@ Popup {
     Rectangle {
         width:  titleRowLayout.width
         height: titleRowLayout.height
-        color:  /*qgcPal.windowShade*/ "#2c3e50"
+        color:  qgcPal.windowShade
         radius: 10
     }
 

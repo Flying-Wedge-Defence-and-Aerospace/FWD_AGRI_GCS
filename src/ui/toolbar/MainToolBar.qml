@@ -22,14 +22,17 @@ import QGroundControl.Controllers           1.0
 Rectangle {
     id:     _root
     color:  /*qgcPal.toolbarBackground*//*_mainStatusBGColor*/ "#800000"
-    // border.width: 1
-    // border.color: "white"
     signal toolSelectClicked
     signal logOutRequested
 
     property int currentToolbar: planViewToolbar
     property bool planViewVisible: false
 
+    // Visibility toggle properties
+    property bool telemetryVisible: true
+    property bool hudVisible: true
+    property bool toolStripVisible: true
+    property bool videoVisible: true
 
     readonly property int flyViewToolbar:   1
     readonly property int planViewToolbar:  0
@@ -47,41 +50,99 @@ Rectangle {
         }
     }
 
-    QGCPalette { id: qgcPal }
+    Component {
+        id: flightModeMenu
 
-    /// Bottom single pixel divider
-    Rectangle {
-        anchors.left:   parent.left
-        anchors.right:  parent.right
-        anchors.bottom: parent.bottom
-        height:         1
-        //color:          "black"
-        visible:        qgcPal.globalTheme === QGCPalette.Light
+        Rectangle {
+            width:          flickable.width + (ScreenTools.defaultFontPixelWidth * 2)
+            height:         flickable.height + (ScreenTools.defaultFontPixelWidth * 2)
+            radius:         ScreenTools.defaultFontPixelHeight * 0.5
+            color:          qgcPal.window
+            border.color:   qgcPal.text
+
+            QGCFlickable {
+                id:                     flickable
+                anchors.margins:        ScreenTools.defaultFontPixelWidth
+                anchors.top:            parent.top
+                anchors.left:           parent.left
+                width:                  mainLayout.width
+                height:                 _fullWindowHeight <= mainLayout.height ? _fullWindowHeight : mainLayout.height
+                flickableDirection:     Flickable.VerticalFlick
+                contentHeight:          mainLayout.height
+                contentWidth:           mainLayout.width
+
+                property real _fullWindowHeight: mainWindow.contentItem.height - (indicatorPopup.padding * 2) - (ScreenTools.defaultFontPixelWidth * 2)
+
+                ColumnLayout {
+                    id:         mainLayout
+                    spacing:    ScreenTools.defaultFontPixelWidth / 2
+
+                    Repeater {
+                        model: _activeVehicle ? _activeVehicle.flightModes : []
+
+                        QGCButton {
+                            text:               modelData
+                            backRadius:         7
+                            Layout.fillWidth:   true
+                            onClicked: {
+                                _activeVehicle.flightMode = text
+                                mainWindow.hideIndicatorPopup()
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
+    QGCPalette { id: qgcPal }
+
+    QGCColoredImage {
+        id: mainLogo
+        height:                     ScreenTools.isMobile ? ScreenTools.defaultFontPixelHeight * 7 : ScreenTools.defaultFontPixelHeight * 9
+        width:                      height + ScreenTools.defaultFontPixelHeight * 1.5
+        source:                     "/res/FWD_logo"
+        color:                      "white"
+        anchors.left:   parent.left
+        anchors.leftMargin: ScreenTools.defaultFontPixelWidth * 2
+        anchors.verticalCenter:     parent.verticalCenter
+    }
+
+    QGCFlickable {
+        id: toolsFlickable
+        anchors.left: mainLogo.right
+        anchors.leftMargin: ScreenTools.defaultFontPixelWidth * 3
+        anchors.top:            parent.top
+        anchors.bottom:         parent.bottom
+        //anchors.right:          parent.right
+        width: ScreenTools.defaultFontPixelWidth * 23
+        contentWidth:           indicatorLoader.item ? indicatorLoader.implicitWidth : 0
+        flickableDirection:     Flickable.HorizontalFlick
+        visible: ScreenTools.isMobile && currentToolbar === flyViewToolbar
+
+        Loader {
+            id:                 indicatorLoader
+            anchors.left:       parent.left
+            anchors.top:        parent.top
+            anchors.bottom:     parent.bottom
+            source:             /*currentToolbar === flyViewToolbar ?*/
+                                    "qrc:/toolbar/MainToolBarIndicators.qml" /*:
+                                    (currentToolbar == planViewToolbar ? "qrc:/qml/PlanToolBarIndicators.qml" : "")*/
+        }
+    }
 
     RowLayout {
         id:                     viewButtonRow
-        anchors.fill:           parent
-        anchors.bottomMargin:   1
-        //spacing:                ScreenTools.defaultFontPixelWidth / 2
+        anchors.left:   mainLogo.right
+        anchors.leftMargin: ScreenTools.defaultFontPixelWidth * 2.5
+        anchors.top:    parent.top
+        anchors.bottom: parent.bottom
 
-        // Left logo
-        QGCToolBarButton {
-            id: currentButton
-            Layout.preferredHeight: viewButtonRow.height
-            icon.source: "/res/FWD_only_logo"
-            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-            Layout.leftMargin: 15
-            logo: true
-        }
-
-        // Fixed slot for plan indicators
         Item {
             id: planIndicatorsSlot
-            Layout.preferredWidth: 120   // <-- set a fixed width big enough for PlanToolBarIndicators
+            Layout.preferredWidth: 120
             Layout.preferredHeight: viewButtonRow.height
-            visible: planViewVisible
+            //visible: planViewVisible
 
             Loader {
                 id: planIndicatorsLoader
@@ -91,114 +152,343 @@ Rectangle {
                           : ""
             }
         }
+    }
 
-        // Flexible spacer before center text
-        Item { Layout.fillWidth: true }
+    RowLayout {
+        id:             toolsRightLayout
+        anchors.right:  parent.right
+        anchors.top:    parent.top
+        anchors.bottom: parent.bottom
+        spacing:        ScreenTools.isMobile ? 0 : ScreenTools.defaultFontPixelWidth * 2.5
+        visible: /*currentToolbar === flyViewToolbar &&*/ ScreenTools.isMobile === false
 
-        // Center label (always at same place)
-        QGCLabel {
-            text: "FWD GCS"
-            font.bold: true
-            font.pointSize: ScreenTools.largeFontPointSize
-            color: "white"
-            Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+        Loader {
+            id:                     mvsd
+            Layout.fillHeight:      true
+            Layout.alignment:       Qt.AlignHCenter | Qt.AlignVCenter
+            Layout.preferredWidth:  item ? item.implicitWidth : 0
+            Layout.preferredHeight: item ? item.implicitHeight : 0
+            source:                 "qrc:/toolbar/MultiVehicleSelector.qml"
+            visible:                QGroundControl.multiVehicleManager.vehicles.count >= 2
         }
 
-        // Flexible spacer after center text
-        Item { Layout.fillWidth: true }
+        Rectangle {
+            Layout.preferredHeight: parent.height * 0.8
+            Layout.alignment: Qt.AlignVCenter
+            width: ScreenTools.isMobile ? ScreenTools.defaultFontPixelWidth * 0.1 : ScreenTools.defaultFontPixelWidth * 0.2
+        }
 
-        // Profile icon
-        QGCToolBarButton {
-            id: profileIcon
-            Layout.preferredWidth: viewButtonRow.height
-            icon.source: "/res/profile_icon"
-            //visible: currentToolbar === planViewToolbar
-            logo: true
-            //Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-            //Layout.leftMargin: -2
+        QGCColoredImage {
+            id:                     linkButton
+            Layout.fillHeight:      true
+            Layout.alignment:       Qt.AlignHCenter | Qt.AlignVCenter
+            Layout.preferredWidth:  ScreenTools.defaultFontPixelWidth * 4
+            source:                 "/res/con_icon"
+            color:                  "white"
+            fillMode:               Image.PreserveAspectFit
 
-            onClicked: {
-                if (settingsPopup.visible) {
-                    settingsPopup.close()
-                } else {
-                    settingsPopup.open()
+            QGCMouseArea {
+                id: linkButtonMouseArea
+                anchors.fill: parent
+                onClicked: mainWindow.showCommLinksSettings()
+            }
+        }
+
+        Rectangle {
+            Layout.preferredHeight: parent.height * 0.8
+            Layout.alignment: Qt.AlignVCenter
+            width: ScreenTools.isMobile ? ScreenTools.defaultFontPixelWidth * 0.1 : ScreenTools.defaultFontPixelWidth * 0.2
+        }
+
+
+        Loader {
+            id:                     batteryIndicatorLoader
+            Layout.fillHeight:      true
+            Layout.alignment:       Qt.AlignHCenter | Qt.AlignVCenter
+            Layout.preferredWidth:  item ? item.implicitWidth : 0
+            Layout.preferredHeight: item ? item.implicitHeight : 0
+            source:                 "qrc:/toolbar/BatteryIndicator.qml"
+        }
+
+        Rectangle {
+            Layout.preferredHeight: parent.height * 0.8
+            Layout.alignment: Qt.AlignVCenter
+            width: ScreenTools.isMobile ? ScreenTools.defaultFontPixelWidth * 0.1 : ScreenTools.defaultFontPixelWidth * 0.2
+        }
+
+        Loader {
+            id:                     gpsIndicatorLoader1
+            Layout.fillHeight:      true
+            Layout.alignment:       Qt.AlignHCenter | Qt.AlignVCenter
+            Layout.preferredWidth:  item ? item.implicitWidth : 0
+            Layout.preferredHeight: item ? item.implicitHeight : 0
+            source:                 "qrc:/toolbar/GPSIndicator.qml"
+        }
+
+        Rectangle {
+            Layout.preferredHeight: parent.height * 0.8
+            Layout.alignment: Qt.AlignVCenter
+            width: ScreenTools.defaultFontPixelWidth * 0.2
+        }
+
+        ColumnLayout {
+            id: statusModeLayout
+            //spacing:
+            Layout.fillHeight: true
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+            Layout.fillWidth: false
+
+            Item {
+                Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 0.1
+                Layout.fillWidth: true
+            }
+
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredWidth: 120
+
+                MainStatusIndicator {
+                    anchors.centerIn: parent
+                    Layout.fillHeight: true
+                }
+            }
+
+            Item {
+                Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 0.2
+                Layout.fillWidth: true
+            }
+
+            QGCLabel {
+                id:                 modeLabel
+                //anchors.centerIn:   parent
+                Layout.alignment: Qt.AlignHCenter
+                text:               _activeVehicle ? _activeVehicle.flightMode : qsTr("N/A")
+                color:              "white"
+                font.pointSize:     ScreenTools.isMobile ? 8 : 11
+                font.bold: true
+                ToolTip.visible:    flightMode.containsMouse
+                ToolTip.text:       "Mode"
+
+                MouseArea {
+                    id:             flightMode
+                    anchors.fill:   parent
+                    hoverEnabled:   true
+                    onClicked: {
+                        if (_activeVehicle) {
+                            mainWindow.showIndicatorPopup(modeLabel, flightModeMenu, "top")
+                        }
+                    }
                 }
             }
         }
 
-        // Right settings button
-        QGCToolBarButton {
-            id: settingsButton
-            Layout.preferredHeight: viewButtonRow.height
-            Layout.leftMargin: -15
-            icon.source: "/res/settings_icon"
-            logo: true
-            //Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-            onClicked: mainWindow.showSettingsPage()
+        Rectangle {
+            Layout.preferredHeight: parent.height * 0.8
+            Layout.alignment: Qt.AlignVCenter
+            width: ScreenTools.defaultFontPixelWidth * 0.2
+            // Layout.alignment: Qt.AlignVCenter
+        }
 
+        Loader {
+            id:                     messageIndicatorLoader
+            Layout.fillHeight:      true
+            Layout.alignment:       Qt.AlignHCenter | Qt.AlignVCenter
+            Layout.preferredWidth:  item ? item.implicitWidth : 0
+            Layout.preferredHeight: item ? item.implicitHeight : 0
+            source:                 "qrc:/toolbar/MessageIndicator.qml"
+        }
+
+        Rectangle {
+            Layout.preferredHeight: parent.height * 0.8
+            Layout.alignment: Qt.AlignVCenter
+            width: ScreenTools.defaultFontPixelWidth * 0.2
+        }
+
+        QGCColoredImage {
+            id: settingsButton
+            height: parent.height * 0.6
+            width: ScreenTools.defaultFontPixelWidth * 4
+            //Layout.leftMargin: -15
+            source: "/res/hb_icon"
+
+            QGCMouseArea {
+                anchors.fill: parent
+                onClicked: mainWindow.settingsDrawer.visible = !mainWindow.settingsDrawer.visible
+            }
+        }
+
+        Item {
+            Layout.fillWidth: true
         }
     }
 
+    RowLayout {
+        id:             toolsRightLayoutAnd
+        anchors.right:  parent.right
+        anchors.top:    parent.top
+        anchors.bottom: parent.bottom
+        spacing:        ScreenTools.defaultFontPixelWidth * 2
+        visible: currentToolbar === flyViewToolbar && ScreenTools.isMobile === true
 
-    Popup {
-        id: settingsPopup
-        x: settingsButton.x - 150   // position below the button
-        y: settingsButton.y + settingsButton.height
-        width: 180
-        modal: false
-        focus: true
-
-        background: Rectangle {
-            color: "#2c3e50"
-            radius: 8
-            border.color: "white"
-            border.width: 1
+        Rectangle {
+            Layout.preferredHeight: parent.height * 0.8
+            Layout.alignment: Qt.AlignVCenter
+            width: ScreenTools.defaultFontPixelWidth * 0.1
+            opacity: 0.5
+            visible: mvs.visible
         }
 
-        Column {
-            anchors.fill: parent
-            anchors.margins: 10
-            spacing: 15
-            anchors.horizontalCenter: parent.horizontalCenter
+        Loader {
+            id:                     mvs
+            Layout.fillHeight:      true
+            Layout.alignment:       Qt.AlignHCenter | Qt.AlignVCenter
+            Layout.preferredWidth:  item ? item.implicitWidth : 0
+            Layout.preferredHeight: item ? item.implicitHeight : 0
+            source:                 "qrc:/toolbar/MultiVehicleSelector.qml"
+            visible:                QGroundControl.multiVehicleManager.vehicles.count >= 2
+        }
 
-            QGCLabel {
-                text: "Pilot Details"
-                anchors.horizontalCenter: parent.horizontalCenter
-                color: "yellow"
-                font.bold: true
+        Rectangle {
+            Layout.preferredHeight: parent.height * 0.8
+            Layout.alignment: Qt.AlignVCenter
+            width: ScreenTools.defaultFontPixelWidth * 0.1
+            opacity: 0.5
+        }
 
+        QGCColoredImage {
+            id:                     linkButton1
+            Layout.fillHeight:      true
+            Layout.alignment:       Qt.AlignHCenter | Qt.AlignVCenter
+            Layout.preferredWidth:  ScreenTools.defaultFontPixelWidth * 4
+            source:                 "/res/con_icon"
+            color:                  "white"
+            fillMode:               Image.PreserveAspectFit
+
+            QGCMouseArea {
+                id: linkButtonMouseArea1
+                anchors.fill: parent
+                onClicked: mainWindow.showCommLinksSettings()
             }
+        }
 
-            Row {
-                spacing: 15
-                anchors.horizontalCenter: parent.horizontalCenter
-                QGCLabel {
-                    text: "Username:"
-                    color: "white"
-                    font.bold: true
-                }
-                QGCLabel {
-                    text: userName
-                    color: "white"
-                }
-            }
+        Rectangle {
+            Layout.preferredHeight: parent.height * 0.8
+            Layout.alignment: Qt.AlignVCenter
+            width: ScreenTools.defaultFontPixelWidth * 0.1
+            opacity: 0.5
+        }
 
-            QGCButton {
-                text: "Logout"
-                backRadius: 7
-                anchors.horizontalCenter: parent.horizontalCenter
+        Loader {
+            id:                     batteryIndicatorLoaderAnd
+            Layout.fillHeight:      true
+            Layout.alignment:       Qt.AlignHCenter | Qt.AlignVCenter
+            Layout.preferredWidth:  item ? item.implicitWidth : 0
+            Layout.preferredHeight: item ? item.implicitHeight : 0
+            source:                 "qrc:/toolbar/BatteryIndicator.qml"
+        }
+
+        Rectangle {
+            Layout.preferredHeight: parent.height * 0.8
+            Layout.alignment: Qt.AlignVCenter
+            width: ScreenTools.defaultFontPixelWidth * 0.1
+            opacity: 0.5
+        }
+
+        Loader {
+            id:                     gpsIndicatorLoader2
+            Layout.fillHeight:      true
+            Layout.alignment:       Qt.AlignHCenter | Qt.AlignVCenter
+            Layout.preferredWidth:  item ? item.implicitWidth : 0
+            Layout.preferredHeight: item ? item.implicitHeight : 0
+            source:                 "qrc:/toolbar/GPSIndicator.qml"
+        }
+
+        Rectangle {
+            Layout.preferredHeight: parent.height * 0.8
+            Layout.alignment: Qt.AlignVCenter
+            width: ScreenTools.defaultFontPixelWidth * 0.1
+            opacity: 0.5
+        }
+
+        QGCLabel {
+            id:                 modeLabel1
+            //anchors.centerIn:   parent
+            Layout.alignment: Qt.AlignVCenter
+            text:               _activeVehicle ? _activeVehicle.flightMode : qsTr("N/A")
+            color:              "white"
+            font.pointSize:     ScreenTools.isMobile ? 9 : 11
+            font.bold: true
+            ToolTip.visible:    flightMode.containsMouse
+            ToolTip.text:       "Mode"
+
+            MouseArea {
+                id:             flightMode1
+                anchors.fill:   parent
+                hoverEnabled:   true
                 onClicked: {
-                    //console.log("Logout clicked")
-                    //console.log("Current toolbar", currentToolbar)
-                    settingsPopup.close()
-                    logOutRequested()
-                    // if(currentToolbar === planViewToolbar) {
-                    //     logOutRequested()
-                    // } else {
-                    //     console.log("Go to plan view for logout")
-                    // }
+                    if (_activeVehicle) {
+                        mainWindow.showIndicatorPopup(modeLabel, flightModeMenu)
+                    }
                 }
             }
+        }
+
+        Rectangle {
+            Layout.preferredHeight: parent.height * 0.8
+            Layout.alignment: Qt.AlignVCenter
+            width: ScreenTools.defaultFontPixelWidth * 0.1
+            opacity: 0.5
+        }
+
+        Item {
+            Layout.fillWidth: true
+            Layout.preferredWidth: 150
+
+            MainStatusIndicator {
+                anchors.centerIn: parent
+                Layout.fillHeight: true
+            }
+        }
+
+        Rectangle {
+            Layout.preferredHeight: parent.height * 0.8
+            Layout.alignment: Qt.AlignVCenter
+            width: ScreenTools.defaultFontPixelWidth * 0.1
+            opacity: 0.5
+        }
+
+        Loader {
+            id:                     messageIndicatorLoader1
+            Layout.fillHeight:      true
+            Layout.alignment:       Qt.AlignHCenter | Qt.AlignVCenter
+            Layout.preferredWidth:  item ? item.implicitWidth : 0
+            Layout.preferredHeight: item ? item.implicitHeight : 0
+            source:                 "qrc:/toolbar/MessageIndicator.qml"
+        }
+
+        Rectangle {
+            Layout.preferredHeight: parent.height * 0.8
+            Layout.alignment: Qt.AlignVCenter
+            width: ScreenTools.defaultFontPixelWidth * 0.1
+            opacity: 0.5
+        }
+
+        QGCColoredImage {
+            //id: settingsButton
+            height: parent.height * 0.6
+            width: ScreenTools.defaultFontPixelWidth * 4
+            //Layout.leftMargin: -15
+            source: "/res/hb_icon"
+            //logo: true
+
+            QGCMouseArea {
+                anchors.fill: parent
+                onClicked: mainWindow.settingsDrawer.visible = !mainWindow.settingsDrawer.visible
+            }
+        }
+
+        Item {
+            Layout.fillWidth: true
         }
     }
 

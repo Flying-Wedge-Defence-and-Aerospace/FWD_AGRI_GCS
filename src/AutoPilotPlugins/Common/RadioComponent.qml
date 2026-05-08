@@ -119,40 +119,33 @@ SetupPage {
                     Rectangle {
                         id:                     bar
                         anchors.verticalCenter: parent.verticalCenter
-                        width:                  parent.width
+                        width:                  parent.width * 0.98
                         height:                 parent.height / 2
                         color:                  __barColor
-                    }
-
-                    QGCLabel {
-                        anchors.top: indicator.bottom
-                        anchors.horizontalCenter: indicator.horizontalCenter
-                        anchors.topMargin: 4
-                        text: rcValue
-                        visible: mapped
-                        font.bold: true
+                        border.color: "#888"
+                        border.width: 1
+                        radius: 5
                     }
 
                     // Center point
                     Rectangle {
-                        anchors.horizontalCenter:   parent.horizontalCenter
+                        anchors.horizontalCenter:   bar.horizontalCenter
+                        anchors.verticalCenter:    bar.verticalCenter
                         width:                      globals.defaultTextWidth / 2
-                        height:                     parent.height
-                        color:                      qgcPal.window
+                        height:                     bar.height
+                        color:                      QGroundControl.settingsManager.appSettings.indoorPalette.rawValue ? "black" : "white"
                     }
 
                     // Indicator
                     Rectangle {
-                        id: indicator
-                        anchors.verticalCenter: parent.verticalxCenter
-                        // width:                  parent.height * 0.75
-                        // height:                 width
-                        width: parent.height * 0.3
-                        height: width * 3
+                        anchors.verticalCenter: bar.verticalCenter
+                        width:                  parent.height * 0.33
+                        height:                 width * 3
                         //radius:                 width / 2
+                        radius:5
                         color:                  qgcPal.text
                         visible:                mapped
-                        x:                      (((reversed ? _pwmMax - rcValue : rcValue - _pwmMin) / _pwmRange) * parent.width) - (width / 2)
+                        x:                      (((reversed ? _pwmMax - rcValue : rcValue - _pwmMin) / _pwmRange) * bar.width) - (width / 2)
                     }
 
                     QGCLabel {
@@ -174,287 +167,684 @@ SetupPage {
                 }
             } // Component - channelMonitorDisplayComponent
 
-            // Left side column
+            Rectangle {
+                id: leftColumn
+                anchors.left: parent.left
+                anchors.topMargin: ScreenTools.defaultFontPixelWidth * 2
+                anchors.right: columnSpacer.left
+                width: parent.width
+                height: mainColumn.height + (ScreenTools.defaultFontPixelWidth * 3)
+                border.color: "#888"
+                color: qgcPal.window
+                radius: ScreenTools.defaultFontPixelWidth * 0.6
 
-            // Rectangle {
-            //     id: leftColumnBackground
-            //     anchors.left:   parent.left
-            //     anchors.right:  columnSpacer.left
-            //     color:          "#0e1e1e"              // dark background
-            //     radius:         10                     // rounded corners
-            //     border.color:   "white"                // border color
-            //     border.width:   2
-            //     anchors.top:    parent.top
-            //     anchors.bottom: parent.bottom
-            //     z: -1
-
-            Column {
-                id:             leftColumn
-                anchors.left:   parent.left
-                anchors.right:  columnSpacer.left
-                anchors.margins: 12
-                spacing:        20
-
-                // Attitude Controls
                 Column {
-                    id: columnContent
+                    id: mainColumn
                     width:      parent.width
-                    spacing:    10
-                    QGCLabel {
-                        text: qsTr("Attitude Controls")
-                        font.family: "Helvetica"
-                        font.pointSize: 16
-                        font.italic: true
-                        font.underline: true
-                    }
+                    spacing:    ScreenTools.defaultFontPixelWidth * 2
+                    anchors.horizontalCenter: parent.horizontalCenter
 
-                    Item {
-                        width:  parent.width
-                        height: globals.defaultTextHeight * 2
-                        QGCLabel {
-                            id:     rollLabel
-                            width:  globals.defaultTextWidth * 10
-                            text:   qsTr("Roll")
-                            font.weight: Font.Bold
-                            color: "yellow"
-                        }
+                    QGCLabel { text: qsTr(" ") }
+                    QGCLabel { text: qsTr("Attitude Controls"); font.bold: true; font.pointSize: 10; anchors.left: parent.left; anchors.leftMargin: 15 }
 
-                        Loader {
-                            id:                 rollLoader
-                            anchors.left:       rollLabel.right
-                            anchors.right:      parent.right
-                            height:             globals.defaultTextHeight
-                            width:              100
-                            sourceComponent:    channelMonitorDisplayComponent
+                    Rectangle {
+                        width:  parent.width * 0.97
+                        height: rollLayout.implicitHeight + ScreenTools.defaultFontPixelWidth * 4
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        color: "#444444"
+                        border.color: "#888"
+                        radius: ScreenTools.defaultFontPixelWidth / 2
 
-                            property bool mapped:           controller.rollChannelMapped
-                            property bool reversed:         controller.rollChannelReversed
+                        ColumnLayout {
+                            id: rollLayout
+                            anchors.fill: parent
+                            anchors.margins: ScreenTools.defaultFontPixelWidth * 2
+                            spacing: ScreenTools.defaultFontPixelWidth / 2
 
-                            Component.onCompleted: {
-                                console.log(rollLoader.item.rcvalue)
+                            QGCLabel {
+                                id: rollLabel
+                                // anchors.horizontalCenter: parent.horizontalCenterLayout.alignment: Qt.AlignHCenter
+                                text: qsTr("Roll")
+                                font.bold: true
+                                font.pointSize: 13
+                                color: "white"
                             }
 
+                            Loader {
+                                id: rollLoader
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: globals.defaultTextHeight
+
+                                sourceComponent: channelMonitorDisplayComponent
+
+                                property bool mapped: controller.rollChannelMapped
+                                property bool reversed: controller.rollChannelReversed
+                            }
                         }
 
                         Connections {
                             target: controller
-
                             onRollChannelRCValueChanged: rollLoader.item.rcValue = rcValue
                         }
                     }
 
-                    Item {
-                        width:  parent.width
-                        height: globals.defaultTextHeight * 2
+                    // Item {
+                    //     width:  parent.width
+                    //     height: globals.defaultTextHeight * 2
 
-                        QGCLabel {
-                            id:     pitchLabel
-                            width:  globals.defaultTextWidth * 10
-                            text:   qsTr("Pitch")
-                            font.weight: Font.Bold
-                            color: "yellow"
-                        }
+                    //     QGCLabel {
+                    //         id:     rollLabel
+                    //         anchors.left: parent.left
+                    //         anchors.leftMargin: ScreenTools.defaultFontPixelWidth * 2
+                    //         width:  globals.defaultTextWidth * 10
+                    //         text:   qsTr("Roll")
+                    //         font.bold: true
+                    //     }
 
-                        Loader {
-                            id:                 pitchLoader
-                            anchors.left:       pitchLabel.right
-                            anchors.right:      parent.right
-                            height:             globals.defaultTextHeight
-                            width:              100
-                            sourceComponent:    channelMonitorDisplayComponent
+                    //     Loader {
+                    //         id:                 rollLoader
+                    //         anchors.left:       rollLabel.right
+                    //         anchors.right:      parent.right
+                    //         height:             globals.defaultTextHeight
+                    //         width:              100
+                    //         sourceComponent:    channelMonitorDisplayComponent
 
-                            property bool mapped:           controller.pitchChannelMapped
-                            property bool reversed:         controller.pitchChannelReversed
-                        }
+                    //         property bool mapped:           controller.rollChannelMapped
+                    //         property bool reversed:         controller.rollChannelReversed
+                    //     }
 
-                        Connections {
-                            target: controller
+                    //     Connections {
+                    //         target: controller
 
-                            onPitchChannelRCValueChanged: pitchLoader.item.rcValue = rcValue
+                    //         onRollChannelRCValueChanged: rollLoader.item.rcValue = rcValue
+                    //     }
+                    // }
+
+                    Rectangle {
+                        width:  parent.width * 0.97
+                        height: pitchLayout.implicitHeight + ScreenTools.defaultFontPixelWidth * 4
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        color: "#444444"
+                        border.color: "#888"
+                        radius: ScreenTools.defaultFontPixelWidth / 2
+
+                        ColumnLayout {
+                            id: pitchLayout
+                            anchors.fill: parent
+                            anchors.margins: ScreenTools.defaultFontPixelWidth * 2
+                            spacing: ScreenTools.defaultFontPixelWidth / 2
+
+                            QGCLabel {
+                                id: pitchLabel
+                                // anchors.horizontalCenter: parent.horizontalCenterLayout.alignment: Qt.AlignHCenter
+                                text: qsTr("Pitch")
+                                font.bold: true
+                                font.pointSize: 13
+                                color: "white"
+                            }
+
+                            Loader {
+                                id: pitchLoader
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: globals.defaultTextHeight
+
+                                sourceComponent: channelMonitorDisplayComponent
+
+                                property bool mapped: controller.pitchChannelMapped
+                                property bool reversed: controller.pitchChannelReversed
+                            }
+
+                            Connections {
+                                target: controller
+                                onPitchChannelRCValueChanged: pitchLoader.item.rcValue = rcValue
+                            }
                         }
                     }
 
-                    Item {
-                        width:  parent.width
-                        height: globals.defaultTextHeight * 2
+                    // Item {
+                    //     width:  parent.width
+                    //     height: globals.defaultTextHeight * 2
 
-                        QGCLabel {
-                            id:     yawLabel
-                            width:  globals.defaultTextWidth * 10
-                            text:   qsTr("Yaw")
-                            font.weight: Font.Bold
-                            color: "yellow"
-                        }
+                    //     QGCLabel {
+                    //         id:     pitchLabel
+                    //         anchors.left: parent.left
+                    //         anchors.leftMargin: ScreenTools.defaultFontPixelWidth * 2
+                    //         width:  globals.defaultTextWidth * 10
+                    //         text:   qsTr("Pitch")
+                    //         font.bold: true
+                    //     }
 
-                        Loader {
-                            id:                 yawLoader
-                            anchors.left:       yawLabel.right
-                            anchors.right:      parent.right
-                            height:             globals.defaultTextHeight
-                            width:              100
-                            sourceComponent:    channelMonitorDisplayComponent
+                    //     Loader {
+                    //         id:                 pitchLoader
+                    //         anchors.left:       pitchLabel.right
+                    //         anchors.right:      parent.right
+                    //         height:             globals.defaultTextHeight
+                    //         width:              100
+                    //         sourceComponent:    channelMonitorDisplayComponent
 
-                            property bool mapped:           controller.yawChannelMapped
-                            property bool reversed:         controller.yawChannelReversed
+                    //         property bool mapped:           controller.pitchChannelMapped
+                    //         property bool reversed:         controller.pitchChannelReversed
+                    //     }
+
+                    //     Connections {
+                    //         target: controller
+
+                    //         onPitchChannelRCValueChanged: pitchLoader.item.rcValue = rcValue
+                    //     }
+                    // }
+
+                    Rectangle {
+                        width:  parent.width * 0.97
+                        height: yawLayout.implicitHeight + ScreenTools.defaultFontPixelWidth * 4
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        color: "#444444"
+                        border.color: "#888"
+                        radius: ScreenTools.defaultFontPixelWidth / 2
+
+                        ColumnLayout {
+                            id: yawLayout
+                            anchors.fill: parent
+                            anchors.margins: ScreenTools.defaultFontPixelWidth * 2
+                            spacing: ScreenTools.defaultFontPixelWidth / 2
+
+                            QGCLabel {
+                                id: yawLabel
+                                // anchors.horizontalCenter: parent.horizontalCenterLayout.alignment: Qt.AlignHCenter
+                                text: qsTr("Yaw")
+                                font.bold: true
+                                font.pointSize: 13
+                                color: "white"
+                            }
+
+                            Loader {
+                                id: yawLoader
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: globals.defaultTextHeight
+
+                                sourceComponent: channelMonitorDisplayComponent
+
+                                property bool mapped: controller.yawChannelMapped
+                                property bool reversed: controller.yawChannelReversed
+                            }
                         }
 
                         Connections {
                             target: controller
-
                             onYawChannelRCValueChanged: yawLoader.item.rcValue = rcValue
                         }
                     }
 
-                    Item {
-                        width:  parent.width
-                        height: globals.defaultTextHeight * 2
+                    // Item {
+                    //     width:  parent.width
+                    //     height: globals.defaultTextHeight * 2
 
-                        QGCLabel {
-                            id:     throttleLabel
-                            width:  globals.defaultTextWidth * 10
-                            text:   qsTr("Throttle")
-                            font.weight: Font.Bold
-                            color: "yellow"
-                        }
+                    //     QGCLabel {
+                    //         id:     yawLabel
+                    //         anchors.left: parent.left
+                    //         anchors.leftMargin: ScreenTools.defaultFontPixelWidth * 2
+                    //         width:  globals.defaultTextWidth * 10
+                    //         text:   qsTr("Yaw")
+                    //         font.bold: true
+                    //     }
 
-                        Loader {
-                            id:                 throttleLoader
-                            anchors.left:       throttleLabel.right
-                            anchors.right:      parent.right
-                            height:             globals.defaultTextHeight
-                            width:              100
-                            sourceComponent:    channelMonitorDisplayComponent
+                    //     Loader {
+                    //         id:                 yawLoader
+                    //         anchors.left:       yawLabel.right
+                    //         anchors.right:      parent.right
+                    //         height:             globals.defaultTextHeight
+                    //         width:              100
+                    //         sourceComponent:    channelMonitorDisplayComponent
 
-                            property bool mapped:           controller.throttleChannelMapped
-                            property bool reversed:         controller.throttleChannelReversed
+                    //         property bool mapped:           controller.yawChannelMapped
+                    //         property bool reversed:         controller.yawChannelReversed
+                    //     }
+
+                    //     Connections {
+                    //         target: controller
+
+                    //         onYawChannelRCValueChanged: yawLoader.item.rcValue = rcValue
+                    //     }
+                    // }
+
+                    Rectangle {
+                        width:  parent.width * 0.97
+                        height: throttleLayout.implicitHeight + ScreenTools.defaultFontPixelWidth * 4
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        color: "#444444"
+                        border.color: "#888"
+                        radius: ScreenTools.defaultFontPixelWidth / 2
+
+                        ColumnLayout {
+                            id: throttleLayout
+                            anchors.fill: parent
+                            anchors.margins: ScreenTools.defaultFontPixelWidth * 2
+                            spacing: ScreenTools.defaultFontPixelWidth / 2
+
+                            QGCLabel {
+                                id: throttleLabel
+                                // anchors.horizontalCenter: parent.horizontalCenterLayout.alignment: Qt.AlignHCenter
+                                text: qsTr("Throttle")
+                                font.bold: true
+                                font.pointSize: 13
+                                color: "white"
+                            }
+
+                            Loader {
+                                id: throttleLoader
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: globals.defaultTextHeight
+
+                                sourceComponent: channelMonitorDisplayComponent
+
+                                property bool mapped: controller.throttleChannelMapped
+                                property bool reversed: controller.throttleChannelReversed
+                            }
                         }
 
                         Connections {
-                            target:                             controller
-                            onThrottleChannelRCValueChanged:    throttleLoader.item.rcValue = rcValue
+                            target: controller
+                            onThrottleChannelRCValueChanged: throttleLoader.item.rcValue = rcValue
                         }
                     }
-                } // Column - Attitude Control labels
 
-                // Command Buttons
-                Row {
-                    spacing: 10
+                    // Item {
+                    //     width:  parent.width
+                    //     height: globals.defaultTextHeight * 2
 
-                    QGCButton {
-                        id:         skipButton
-                        text:       qsTr("Skip")
-                        backRadius: 7
-                        onClicked:  controller.skipButtonClicked()
-                    }
+                    //     QGCLabel {
+                    //         id:     throttleLabel
+                    //         anchors.left: parent.left
+                    //         anchors.leftMargin: ScreenTools.defaultFontPixelWidth * 2
+                    //         width:  globals.defaultTextWidth * 10
+                    //         text:   qsTr("Throttle")
+                    //         font.bold: true
+                    //     }
 
-                    QGCButton {
-                        id:         cancelButton
-                        text:       qsTr("Cancel")
-                        backRadius: 7
-                        onClicked:  controller.cancelButtonClicked()
-                    }
+                    //     Loader {
+                    //         id:                 throttleLoader
+                    //         anchors.left:       throttleLabel.right
+                    //         anchors.right:      parent.right
+                    //         height:             globals.defaultTextHeight
+                    //         width:              100
+                    //         sourceComponent:    channelMonitorDisplayComponent
 
-                    QGCButton {
-                        id:         nextButton
-                        primary:    true
-                        text:       qsTr("Calibrate")
-                        backRadius: 7
+                    //         property bool mapped:           controller.throttleChannelMapped
+                    //         property bool reversed:         controller.throttleChannelReversed
+                    //     }
 
-                        onClicked: {
-                            if (text === qsTr("Calibrate")) {
-                                if (controller.channelCount < controller.minChannelCount) {
-                                    mainWindow.showMessageDialog(qsTr("Radio Not Ready"),
-                                                                 controller.channelCount == 0 ? qsTr("Please turn on transmitter.") :
-                                                                                                (controller.channelCount < controller.minChannelCount ?
-                                                                                                     qsTr("%1 channels or more are needed to fly.").arg(controller.minChannelCount) :
-                                                                                                     qsTr("Ready to calibrate.")))
+                    //     Connections {
+                    //         target:                             controller
+                    //         onThrottleChannelRCValueChanged:    throttleLoader.item.rcValue = rcValue
+                    //     }
+                    // }
+
+                    Row {
+                        spacing: 10
+                        anchors.left: parent.left
+                        anchors.leftMargin: ScreenTools.defaultFontPixelWidth * 2.1
+
+                        QGCButton {
+                            id:         skipButton
+                            text:       qsTr("Skip")
+                            onClicked:  controller.skipButtonClicked()
+                        }
+
+                        QGCButton {
+                            id:         cancelButton
+                            text:       qsTr("Cancel")
+                            onClicked:  controller.cancelButtonClicked()
+                        }
+
+                        QGCButton {
+                            id:         nextButton
+                            primary:    true
+                            text:       qsTr("Calibrate")
+
+                            onClicked: {
+                                if (text === qsTr("Calibrate")) {
+                                    if (controller.channelCount < controller.minChannelCount) {
+                                        //console.log("Cal Next button Clicked....!")
+                                        mainWindow.showMessageDialog(qsTr("Radio Not Ready"),
+                                                                     controller.channelCount == 0 ? qsTr("Please turn on transmitter.") :
+                                                                                                    (controller.channelCount < controller.minChannelCount ?
+                                                                                                         qsTr("%1 channels or more are needed to fly.").arg(controller.minChannelCount) :
+                                                                                                         qsTr("Ready to calibrate.")))
+                                    } else {
+                                        //console.log("Else Next button Clicked....!")
+                                        mainWindow.showMessageDialog(qsTr("Zero Trims"),
+                                                                     qsTr("Before calibrating you should zero all your trims and subtrims. Click Ok to start Calibration.\n\n%1").arg(
+                                                                         (QGroundControl.multiVehicleManager.activeVehicle.px4Firmware ? "" : qsTr("Please ensure all motor power is disconnected AND all props are removed from the vehicle."))),
+                                                                     StandardButton.Ok,
+                                                                     function() { controller.nextButtonClicked() })
+                                    }
                                 } else {
-                                    mainWindow.showMessageDialog(qsTr("Zero Trims"),
-                                                                 qsTr("Before calibrating you should zero all your trims and subtrims. Click Ok to start Calibration.\n\n%1").arg(
-                                                                     (QGroundControl.multiVehicleManager.activeVehicle.px4Firmware ? "" : qsTr("Please ensure all motor power is disconnected AND all props are removed from the vehicle."))),
-                                                                 StandardButton.Ok,
-                                                                 function() { controller.nextButtonClicked() })
+                                    //console.log("Next button Clicked....!")
+                                    controller.nextButtonClicked()
                                 }
-                            } else {
-                                controller.nextButtonClicked()
                             }
                         }
-                    }
-                } // Row - Buttons
+                    } // Row - Buttons
 
-                // Status Text
-                QGCLabel {
-                    id:         statusText
+
+                    QGCLabel {
+                        id:         statusText
+                        width:      parent.width
+                        wrapMode:   Text.WordWrap
+                    }
+                }
+            }
+
+            Rectangle {
+                id: addSetup
+                anchors.left: parent.left
+                anchors.top: leftColumn.bottom
+                anchors.topMargin: ScreenTools.defaultFontPixelWidth * 2
+                anchors.right: columnSpacer.left
+                width: parent.width
+                height: addColumn.height + (ScreenTools.defaultFontPixelWidth * 3)
+                border.color: "#888"
+                color: qgcPal.window
+                radius: ScreenTools.defaultFontPixelWidth * 0.6
+
+                Column {
+                    id: addColumn
                     width:      parent.width
-                    wrapMode:   Text.WordWrap
-                }
+                    spacing:    ScreenTools.defaultFontPixelWidth * 2
+                    anchors.horizontalCenter: parent.horizontalCenter
 
-                Rectangle {
-                    width:          parent.width
-                    height:         1
-                    border.color:   qgcPal.text
-                    border.width:   1
-                }
+                    QGCLabel { text: qsTr(" ") }
+                    QGCLabel { text: qsTr("Additional Radio Setup"); font.bold: true; font.pointSize: 10; anchors.left: parent.left; anchors.leftMargin: 15 }
 
-                QGCLabel {
-                    text: qsTr("Additional Radio setup")
-                    font.family: "Helvetica"
-                    font.pointSize: 16
-                    font.italic: true
-                    font.underline: true
-                }
+                    GridLayout {
+                        id:                 switchSettingsGrid
+                        anchors.left:       parent.left
+                        anchors.right:      parent.right
+                        columns:            2
+                        columnSpacing:      ScreenTools.defaultFontPixelWidth
 
-                GridLayout {
-                    id:                 switchSettingsGrid
-                    anchors.left:       parent.left
-                    anchors.right:      parent.right
-                    columns:            2
-                    columnSpacing:      ScreenTools.defaultFontPixelWidth
+                        Repeater {
+                            model: QGroundControl.multiVehicleManager.activeVehicle.px4Firmware ?
+                                       (QGroundControl.multiVehicleManager.activeVehicle.multiRotor ?
+                                            [ "RC_MAP_AUX1", "RC_MAP_AUX2", "RC_MAP_PARAM1", "RC_MAP_PARAM2", "RC_MAP_PARAM3"] :
+                                            [ "RC_MAP_FLAPS", "RC_MAP_AUX1", "RC_MAP_AUX2", "RC_MAP_PARAM1", "RC_MAP_PARAM2", "RC_MAP_PARAM3"]) :
+                                       0
 
-                    Repeater {
-                        model: QGroundControl.multiVehicleManager.activeVehicle.px4Firmware ?
-                                   (QGroundControl.multiVehicleManager.activeVehicle.multiRotor ?
-                                        [ "RC_MAP_AUX1", "RC_MAP_AUX2", "RC_MAP_PARAM1", "RC_MAP_PARAM2", "RC_MAP_PARAM3"] :
-                                        [ "RC_MAP_FLAPS", "RC_MAP_AUX1", "RC_MAP_AUX2", "RC_MAP_PARAM1", "RC_MAP_PARAM2", "RC_MAP_PARAM3"]) :
-                                   0
+                            RowLayout {
+                                Layout.fillWidth: true
 
-                        RowLayout {
-                            Layout.fillWidth: true
+                                property Fact fact: controller.getParameterFact(-1, modelData)
 
-                            property Fact fact: controller.getParameterFact(-1, modelData)
-
-                            QGCLabel {
-                                Layout.fillWidth:   true
-                                text:               fact.shortDescription
-                            }
-                            FactComboBox {
-                                width:      ScreenTools.defaultFontPixelWidth * 15
-                                fact:       parent.fact
-                                indexModel: false
+                                QGCLabel {
+                                    Layout.fillWidth:   true
+                                    text:               fact.shortDescription
+                                }
+                                FactComboBox {
+                                    width:      ScreenTools.defaultFontPixelWidth * 15
+                                    fact:       parent.fact
+                                    indexModel: false
+                                }
                             }
                         }
                     }
-                }
 
-                RowLayout {
-                    QGCButton {
-                        id:         bindButton
-                        text:       qsTr("Spektrum Bind")
-                        backRadius: 7
-                        onClicked:  spektrumBindDialogComponent.createObject(mainWindow).open()
-                    }
+                    RowLayout {
+                        anchors.left: parent.left
+                        anchors.leftMargin: ScreenTools.defaultFontPixelWidth * 2
 
-                    QGCButton {
-                        text:       qsTr("Copy Trims")
-                        backRadius: 7
-                        onClicked:  mainWindow.showMessageDialog(qsTr("Copy Trims"),
-                                                                 qsTr("Center your sticks and move throttle all the way down, then press Ok to copy trims. After pressing Ok, reset the trims on your radio back to zero."),
-                                                                 StandardButton.Ok | StandardButton.Cancel,
-                                                                 function() { controller.copyTrims() })
+                        QGCButton {
+                            id:         bindButton
+                            text:       qsTr("Spektrum Bind")
+                            onClicked:  spektrumBindDialogComponent.createObject(mainWindow).open()
+                        }
+
+                        QGCButton {
+                            text:       qsTr("Copy Trims")
+                            onClicked:  mainWindow.showMessageDialog(qsTr("Copy Trims"),
+                                                                     qsTr("Center your sticks and move throttle all the way down, then press Ok to copy trims. After pressing Ok, reset the trims on your radio back to zero."),
+                                                                     StandardButton.Ok | StandardButton.Cancel,
+                                                                     function() { controller.copyTrims() })
+                        }
                     }
                 }
-            } // Column - Left Column
-            //}
+            }
+
+
+            //Left side column
+            // Column {
+            //     id:             leftColumn
+            //     anchors.left:   parent.left
+            //     anchors.right:  columnSpacer.left
+            //     spacing:        10
+
+            //     // Attitude Controls
+            //     Column {
+            //         width:      parent.width
+            //         spacing:    5
+            //         QGCLabel { text: qsTr("Attitude Controls") }
+
+            //         Item {
+            //             width:  parent.width
+            //             height: globals.defaultTextHeight * 2
+            //             QGCLabel {
+            //                 id:     rollLabel
+            //                 width:  globals.defaultTextWidth * 10
+            //                 text:   qsTr("Roll")
+            //             }
+
+            //             Loader {
+            //                 id:                 rollLoader
+            //                 anchors.left:       rollLabel.right
+            //                 anchors.right:      parent.right
+            //                 height:             globals.defaultTextHeight
+            //                 width:              100
+            //                 sourceComponent:    channelMonitorDisplayComponent
+
+            //                 property bool mapped:           controller.rollChannelMapped
+            //                 property bool reversed:         controller.rollChannelReversed
+            //             }
+
+            //             Connections {
+            //                 target: controller
+
+            //                 onRollChannelRCValueChanged: rollLoader.item.rcValue = rcValue
+            //             }
+            //         }
+
+            //         Item {
+            //             width:  parent.width
+            //             height: globals.defaultTextHeight * 2
+
+            //             QGCLabel {
+            //                 id:     pitchLabel
+            //                 width:  globals.defaultTextWidth * 10
+            //                 text:   qsTr("Pitch")
+            //             }
+
+            //             Loader {
+            //                 id:                 pitchLoader
+            //                 anchors.left:       pitchLabel.right
+            //                 anchors.right:      parent.right
+            //                 height:             globals.defaultTextHeight
+            //                 width:              100
+            //                 sourceComponent:    channelMonitorDisplayComponent
+
+            //                 property bool mapped:           controller.pitchChannelMapped
+            //                 property bool reversed:         controller.pitchChannelReversed
+            //             }
+
+            //             Connections {
+            //                 target: controller
+
+            //                 onPitchChannelRCValueChanged: pitchLoader.item.rcValue = rcValue
+            //             }
+            //         }
+
+            //         Item {
+            //             width:  parent.width
+            //             height: globals.defaultTextHeight * 2
+
+            //             QGCLabel {
+            //                 id:     yawLabel
+            //                 width:  globals.defaultTextWidth * 10
+            //                 text:   qsTr("Yaw")
+            //             }
+
+            //             Loader {
+            //                 id:                 yawLoader
+            //                 anchors.left:       yawLabel.right
+            //                 anchors.right:      parent.right
+            //                 height:             globals.defaultTextHeight
+            //                 width:              100
+            //                 sourceComponent:    channelMonitorDisplayComponent
+
+            //                 property bool mapped:           controller.yawChannelMapped
+            //                 property bool reversed:         controller.yawChannelReversed
+            //             }
+
+            //             Connections {
+            //                 target: controller
+
+            //                 onYawChannelRCValueChanged: yawLoader.item.rcValue = rcValue
+            //             }
+            //         }
+
+            //         Item {
+            //             width:  parent.width
+            //             height: globals.defaultTextHeight * 2
+
+            //             QGCLabel {
+            //                 id:     throttleLabel
+            //                 width:  globals.defaultTextWidth * 10
+            //                 text:   qsTr("Throttle")
+            //             }
+
+            //             Loader {
+            //                 id:                 throttleLoader
+            //                 anchors.left:       throttleLabel.right
+            //                 anchors.right:      parent.right
+            //                 height:             globals.defaultTextHeight
+            //                 width:              100
+            //                 sourceComponent:    channelMonitorDisplayComponent
+
+            //                 property bool mapped:           controller.throttleChannelMapped
+            //                 property bool reversed:         controller.throttleChannelReversed
+            //             }
+
+            //             Connections {
+            //                 target:                             controller
+            //                 onThrottleChannelRCValueChanged:    throttleLoader.item.rcValue = rcValue
+            //             }
+            //         }
+            //     } // Column - Attitude Control labels
+
+            //     // Command Buttons
+            //     Row {
+            //         spacing: 10
+
+            //         QGCButton {
+            //             id:         skipButton
+            //             text:       qsTr("Skip")
+            //             onClicked:  controller.skipButtonClicked()
+            //         }
+
+            //         QGCButton {
+            //             id:         cancelButton
+            //             text:       qsTr("Cancel")
+            //             onClicked:  controller.cancelButtonClicked()
+            //         }
+
+            //         QGCButton {
+            //             id:         nextButton
+            //             primary:    true
+            //             text:       qsTr("Calibrate")
+
+            //             onClicked: {
+            //                 if (text === qsTr("Calibrate")) {
+            //                     if (controller.channelCount < controller.minChannelCount) {
+            //                         mainWindow.showMessageDialog(qsTr("Radio Not Ready"),
+            //                                                      controller.channelCount == 0 ? qsTr("Please turn on transmitter.") :
+            //                                                                                     (controller.channelCount < controller.minChannelCount ?
+            //                                                                                          qsTr("%1 channels or more are needed to fly.").arg(controller.minChannelCount) :
+            //                                                                                          qsTr("Ready to calibrate.")))
+            //                     } else {
+            //                         mainWindow.showMessageDialog(qsTr("Zero Trims"),
+            //                                                      qsTr("Before calibrating you should zero all your trims and subtrims. Click Ok to start Calibration.\n\n%1").arg(
+            //                                                          (QGroundControl.multiVehicleManager.activeVehicle.px4Firmware ? "" : qsTr("Please ensure all motor power is disconnected AND all props are removed from the vehicle."))),
+            //                                                      StandardButton.Ok,
+            //                                                      function() { controller.nextButtonClicked() })
+            //                     }
+            //                 } else {
+            //                     controller.nextButtonClicked()
+            //                     console.log("Next button Clicked....!")
+            //                 }
+            //             }
+            //         }
+            //     } // Row - Buttons
+
+            //     // Status Text
+            //     QGCLabel {
+            //         id:         statusText
+            //         width:      parent.width
+            //         wrapMode:   Text.WordWrap
+            //     }
+
+            //     Rectangle {
+            //         width:          parent.width
+            //         height:         1
+            //         border.color:   qgcPal.text
+            //         border.width:   1
+            //     }
+
+            //     QGCLabel { text: qsTr("Additional Radio setup:") }
+
+            //     GridLayout {
+            //         id:                 switchSettingsGrid
+            //         anchors.left:       parent.left
+            //         anchors.right:      parent.right
+            //         columns:            2
+            //         columnSpacing:      ScreenTools.defaultFontPixelWidth
+
+            //         Repeater {
+            //             model: QGroundControl.multiVehicleManager.activeVehicle.px4Firmware ?
+            //                        (QGroundControl.multiVehicleManager.activeVehicle.multiRotor ?
+            //                             [ "RC_MAP_AUX1", "RC_MAP_AUX2", "RC_MAP_PARAM1", "RC_MAP_PARAM2", "RC_MAP_PARAM3"] :
+            //                             [ "RC_MAP_FLAPS", "RC_MAP_AUX1", "RC_MAP_AUX2", "RC_MAP_PARAM1", "RC_MAP_PARAM2", "RC_MAP_PARAM3"]) :
+            //                        0
+
+            //             RowLayout {
+            //                 Layout.fillWidth: true
+
+            //                 property Fact fact: controller.getParameterFact(-1, modelData)
+
+            //                 QGCLabel {
+            //                     Layout.fillWidth:   true
+            //                     text:               fact.shortDescription
+            //                 }
+            //                 FactComboBox {
+            //                     width:      ScreenTools.defaultFontPixelWidth * 15
+            //                     fact:       parent.fact
+            //                     indexModel: false
+            //                 }
+            //             }
+            //         }
+            //     }
+
+            //     RowLayout {
+            //         QGCButton {
+            //             id:         bindButton
+            //             text:       qsTr("Spektrum Bind")
+            //             onClicked:  spektrumBindDialogComponent.createObject(mainWindow).open()
+            //         }
+
+            //         QGCButton {
+            //             text:       qsTr("Copy Trims")
+            //             onClicked:  mainWindow.showMessageDialog(qsTr("Copy Trims"),
+            //                                                      qsTr("Center your sticks and move throttle all the way down, then press Ok to copy trims. After pressing Ok, reset the trims on your radio back to zero."),
+            //                                                      StandardButton.Ok | StandardButton.Cancel,
+            //                                                      function() { controller.copyTrims() })
+            //         }
+            //     }
+            // }/// Column - Left Column
 
             Item {
                 id:             columnSpacer
@@ -462,43 +852,127 @@ SetupPage {
                 width:          20
             }
 
-            // Right side column
-            Column {
-                id:             rightColumn
-                anchors.top:    parent.top
-                anchors.right:  parent.right
-                width:          ScreenTools.defaultFontPixelWidth * 60
-                spacing:        ScreenTools.defaultFontPixelHeight / 2
+            Rectangle {
+                id: rightColumn
+                anchors.top: parent.top
+                anchors.right: parent.right
+                width: ScreenTools.defaultFontPixelWidth * 40
+                height: rightMainColumn.height + (ScreenTools.defaultFontPixelWidth * 3)
+                color: qgcPal.window
+                border.color: "#888"
 
-                Row {
-                    spacing: ScreenTools.defaultFontPixelWidth
+                Column {
+                    id: rightMainColumn
+                    width:      parent.width
 
-                    QGCRadioButton {
-                        text:       qsTr("Mode 1")
-                        checked:    controller.transmitterMode == 1
-                        onClicked:  controller.transmitterMode = 1
-                    }
+                    QGCLabel { text: qsTr(" ") }
 
-                    QGCRadioButton {
-                        text:       qsTr("Mode 2")
-                        checked:    controller.transmitterMode == 2
-                        onClicked:  controller.transmitterMode = 2
+                    Rectangle {
+                        id: modeRect
+                        width: parent.width * 0.9
+                        height: modeRow.height
+                        color: qgcPal.windowShade
+                        // anchors.top: parent.top
+                        // anchors.topMargin: ScreenTools.defaultFontPixelWidth
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        Row {
+                            id: modeRow
+                            spacing: ScreenTools.defaultFontPixelWidth
+                            anchors.horizontalCenter: parent.horizontalCenter
+
+                            QGCRadioButton {
+                                text:       qsTr("Mode 1")
+                                checked:    controller.transmitterMode == 1
+                                onClicked:  controller.transmitterMode = 1
+                            }
+
+                            QGCRadioButton {
+                                text:       qsTr("Mode 2")
+                                checked:    controller.transmitterMode == 2
+                                onClicked:  controller.transmitterMode = 2
+                            }
+                        }
                     }
                 }
+            }
+
+            Rectangle {
+                id: helpImg
+                anchors.right: parent.right
+                anchors.top: rightColumn.bottom
+                anchors.topMargin: ScreenTools.defaultFontPixelWidth * 2
+                //anchors.right: columnSpacer.left
+                width: ScreenTools.defaultFontPixelWidth * 40
+                height: img.height
+                border.color: "#888"
+                color: "transparent"
+                radius: ScreenTools.defaultFontPixelWidth * 0.6
 
                 Image {
+                    id: img
                     width:      parent.width
                     fillMode:   Image.PreserveAspectFit
                     smooth:     true
                     source:     controller.imageHelp
                 }
+            }
+
+            Rectangle {
+                id: rcChannelMon
+                anchors.right: parent.right
+                anchors.top: helpImg.bottom
+                anchors.topMargin: ScreenTools.defaultFontPixelWidth * 2
+                width: ScreenTools.defaultFontPixelWidth * 40
+                height: rcMon.height + (ScreenTools.defaultFontPixelWidth * 2)
+                border.color: "#888"
+                color: "transparent"
+                radius: ScreenTools.defaultFontPixelWidth * 0.6
 
                 RCChannelMonitor {
+                    id: rcMon
+                    anchors.centerIn: parent
                     width:      parent.width
                     twoColumn:  true
                 }
 
-            } // Column - Right Column
+            }
+
+            // Right side column
+            // Column {
+            //     id:             rightColumn
+            //     anchors.top:    parent.top
+            //     anchors.right:  parent.right
+            //     width:          ScreenTools.defaultFontPixelWidth * 40
+            //     spacing:        ScreenTools.defaultFontPixelHeight / 2
+
+                // Row {
+                //     spacing: ScreenTools.defaultFontPixelWidth
+
+                //     QGCRadioButton {
+                //         text:       qsTr("Mode 1")
+                //         checked:    controller.transmitterMode == 1
+                //         onClicked:  controller.transmitterMode = 1
+                //     }
+
+                //     QGCRadioButton {
+                //         text:       qsTr("Mode 2")
+                //         checked:    controller.transmitterMode == 2
+                //         onClicked:  controller.transmitterMode = 2
+                //     }
+                // }
+
+                // Image {
+                //     width:      parent.width
+                //     fillMode:   Image.PreserveAspectFit
+                //     smooth:     true
+                //     source:     controller.imageHelp
+                // }
+
+                // RCChannelMonitor {
+                //     width:      parent.width
+                //     twoColumn:  true
+                // }
+            // } // Column - Right Column
         } // Item
     } // Component - pageComponent
 } // SetupPage

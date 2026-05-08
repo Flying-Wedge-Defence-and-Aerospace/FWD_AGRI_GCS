@@ -24,9 +24,16 @@ import QGroundControl.QGCMapEngineManager   1.0
 import QGroundControl.FactSystem            1.0
 import QGroundControl.FactControls          1.0
 
-Item {
+Rectangle {
     id:             offlineMapView
-    anchors.fill:   parent
+    anchors.fill: parent
+    //anchors.top: parent.top
+    anchors.horizontalCenter: parent.horizontalCenter
+    color: "transparent"
+
+// Item {
+//     //id:             offlineMapView
+//     anchors.fill:   parent
 
     property var    _currentSelection:  null
 
@@ -65,6 +72,8 @@ Item {
     readonly property real sliderTouchArea: ScreenTools.defaultFontPixelWidth * (ScreenTools.isTinyScreen ? 5 : (ScreenTools.isMobile ? 6 : 3))
 
     readonly property int _maxTilesForDownload: _settings ? _settings.maxTilesForDownload.rawValue : 0
+    property string _mapProvider:               QGroundControl.settingsManager.flightMapSettings.mapProvider.value
+    property string _mapType:                   QGroundControl.settingsManager.flightMapSettings.mapType.value
 
     QGCPalette { id: qgcPal }
 
@@ -113,16 +122,20 @@ Item {
         handleChanges()
         _map.visible = true
         _tileSetList.visible = false
+        setLayout.visible = false
         infoView.visible = false
         _exporTiles.visible = false
+        exporTilesRect.visible = false
         addNewSetView.visible = true
     }
 
     function showList() {
         _exporTiles.visible = false
+        exporTilesRect.visible = false
         isMapInteractive = false
         _map.visible = false
         _tileSetList.visible = true
+        setLayout.visible = true
         infoView.visible = false
         addNewSetView.visible = false
         QGroundControl.mapEngineManager.resetAction();
@@ -135,6 +148,8 @@ Item {
         infoView.visible = false
         addNewSetView.visible = false
         _exporTiles.visible = true
+        exporTilesRect.visible = true
+        setLayout.visible = false
     }
 
     function showInfo() {
@@ -188,6 +203,7 @@ Item {
             _map.fitViewportToMapItems()
         }
         _tileSetList.visible = false
+        setLayout.visible = false
         addNewSetView.visible = false
         infoView.visible = true
     }
@@ -627,6 +643,7 @@ Item {
                             onClicked: {
                                 leaveInfoView()
                                 showList()
+                                setLayout.visible = true
                             }
                         }
                     }
@@ -1003,6 +1020,7 @@ Item {
                             width:      (addNewSetColumn.width * 0.5) - (addButtonRow.spacing * 0.5)
                             onClicked: {
                                 showList()
+                                setLayout.visible = true
                             }
                         }
                     }
@@ -1011,56 +1029,284 @@ Item {
             } // QGCFlickable
         } // Rectangle - Add new set dialog
 
-        QGCFlickable {
-            id:                 _tileSetList
-            clip:               true
-            anchors.margins:    ScreenTools.defaultFontPixelWidth
-            anchors.top:        parent.top
-            anchors.bottom:     _listButtonRow.top
-            anchors.left:       parent.left
-            anchors.right:      parent.right
-            contentHeight:      _cacheList.height
-            ButtonGroup {
-                id:             buttonGroup
-                buttons:        _cacheList.children
+        // QGCFlickable {
+        //     anchors.fill: parent
+        //     anchors.horizontalCenter: parent.horizontalCenter
+        //     flickableDirection: Flickable.VerticalFlick
+        //     contentHeight:      setLayout.height
+        //     contentWidth:       setLayout.width
+
+        ColumnLayout {
+            id: setLayout
+            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: ScreenTools.isMobile ? 0 : ScreenTools.defaultFontPixelWidth * 2
+
+            QGCLabel {
+                text: "General Settings"
+                font.bold: true
+                font.pointSize: 11
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
             }
-            Column {
-                id:             _cacheList
-                width:          Math.min(_tileSetList.width, (ScreenTools.defaultFontPixelWidth  * 50).toFixed(0))
-                spacing:        ScreenTools.defaultFontPixelHeight * 0.5
-                anchors.horizontalCenter: parent.horizontalCenter
-                OfflineMapButton {
-                    id:             firstButton
-                    text:           qsTr("Add New Set")
-                    width:          _cacheList.width
-                    height:         ScreenTools.defaultFontPixelHeight * (ScreenTools.isMobile ? 3 : 2)
-                    currentSet:     _currentSelection
-                    onClicked: {
-                        offlineMapView._currentSelection = null
-                        checked = true
-                        addNewSet()
+
+            Rectangle {
+                id: genSet
+                width: ScreenTools.isMobile ? ScreenTools.defaultFontPixelWidth * 50 : ScreenTools.defaultFontPixelWidth * 75  /*ScreenTools.defaultFontPixelWidth * 8 * (Screen.pixelDensity / 160)*/     // small width
+                height: ScreenTools.isMobile ? genSetLayout.height : genSetLayout.height + 20    // height to fit 3 numbers
+                radius: 6
+                color: "transparent"
+                border.color: "#888"
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+
+                ColumnLayout {
+                    id: genSetLayout
+                    anchors.centerIn: parent
+                    //anchors.margins: 8
+                    spacing: ScreenTools.isMobile ? ScreenTools.defaultFontPixelWidth : ScreenTools.defaultFontPixelWidth * 2
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
+                        spacing: 20
+
+                        QGCLabel {
+                            text: "Provider"
+                            font.pointSize: 10
+                            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                            horizontalAlignment: Text.AlignLeft
+                        }
+
+                        Item { Layout.fillWidth: true }
+
+                        QGCComboBox {
+                            id:             uiMapCombo
+                            model:          QGroundControl.mapEngineManager.mapProviderList
+                            //Layout.preferredWidth:  _comboFieldWidth
+                            onActivated: {
+                                _mapProvider = textAt(index)
+                                QGroundControl.settingsManager.flightMapSettings.mapProvider.value=textAt(index)
+                                QGroundControl.settingsManager.flightMapSettings.mapType.value=QGroundControl.mapEngineManager.mapTypeList(textAt(index))[0]
+                            }
+                            Component.onCompleted: {
+                                var index = uiMapCombo.find(_mapProvider)
+                                if(index < 0) index = 0
+                                uiMapCombo.currentIndex = index
+                            }
+                            Layout.preferredWidth: uiMapComboTM.width + 40
+                            TextMetrics {
+                                id: uiMapComboTM
+                                text: uiMapCombo.displayText   // displayText is the visible text in combo
+                                font: uiMapCombo.font
+                            }
+                        }
                     }
-                }
-                Repeater {
-                    model: QGroundControl.mapEngineManager.tileSets
-                    delegate: OfflineMapButton {
-                        text:           object.name
-                        size:           object.downloadStatus
-                        tiles:          object.totalTileCount
-                        complete:       object.complete
-                        width:          firstButton.width
-                        height:         ScreenTools.defaultFontPixelHeight * (ScreenTools.isMobile ? 3 : 2)
-                        currentSet:     _currentSelection
-                        tileSet:        object
-                        onClicked: {
-                            offlineMapView._currentSelection = object
-                            checked = true
-                            showInfo()
+
+                    Rectangle {
+                        height: 1
+                        Layout.fillWidth: true
+                        color: "gray"
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
+                        spacing: 20
+
+                        QGCLabel {
+                            text: "Type"
+                            font.pointSize: 10
+                            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                            horizontalAlignment: Text.AlignLeft
+                        }
+
+                        Item { Layout.fillWidth: true }
+
+                        QGCComboBox {
+                            id:             uiMapTypeCombo
+                            model:          QGroundControl.mapEngineManager.mapTypeList(_mapProvider)
+                            //Layout.preferredWidth:  _comboFieldWidth
+                            onActivated: {
+                                _mapType = textAt(index)
+                                QGroundControl.settingsManager.flightMapSettings.mapType.value=textAt(index)
+                            }
+                            Component.onCompleted: {
+                                var index = uiMapTypeCombo.find(_mapType)
+                                if(index < 0) index = 0
+                                uiMapTypeCombo.currentIndex = index
+                            }
+                            Layout.preferredWidth: uiMapTypeComboTM.width + 40
+                            TextMetrics {
+                                id: uiMapTypeComboTM
+                                text: uiMapTypeCombo.displayText   // displayText is the visible text in combo
+                                font: uiMapTypeCombo.font
+                            }
                         }
                     }
                 }
             }
+
+            QGCLabel {
+                text: "Import / Export"
+                font.bold: true
+                font.pointSize: 11
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+            }
+
+            Rectangle {
+                width: ScreenTools.isMobile ? ScreenTools.defaultFontPixelWidth * 50 : ScreenTools.defaultFontPixelWidth * 75  /*ScreenTools.defaultFontPixelWidth * 8 * (Screen.pixelDensity / 160)*/     // small width
+                height: ScreenTools.isMobile ? impExpLayout.height : impExpLayout.height + 20    // height to fit 3 numbers
+                radius: 6
+                color: "transparent"
+                border.color: "#888"
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+
+                ColumnLayout {
+                    id: impExpLayout
+                    anchors.centerIn: parent
+                    //anchors.margins: 8
+                    spacing: ScreenTools.defaultFontPixelWidth * 2
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
+                        spacing: 20
+
+                        QGCLabel {
+                            text: "Import Map Tiles"
+                            font.pointSize: 10
+                            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                            horizontalAlignment: Text.AlignLeft
+                        }
+
+                        Item { Layout.fillWidth: true }
+
+                        QGCButton {
+                            text:           qsTr("Import")
+                            backRadius: 7
+                            width:          _buttonSize
+                            visible:        QGroundControl.corePlugin.options.showOfflineMapImport
+                            onClicked: {
+                                QGroundControl.mapEngineManager.importAction = QGCMapEngineManager.ActionNone
+                                importDialog.open()
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        height: 1
+                        Layout.fillWidth: true
+                        color: "gray"
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
+                        spacing: 20
+
+                        QGCLabel {
+                            text: "Export Map Tiles"
+                            font.pointSize: 10
+                            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                            horizontalAlignment: Text.AlignLeft
+                        }
+
+                        Item { Layout.fillWidth: true }
+
+                        QGCButton {
+                            text:           qsTr("Export")
+                            backRadius: 7
+                            width:          _buttonSize
+                            visible:        QGroundControl.corePlugin.options.showOfflineMapExport
+                            onClicked:      showExport()
+                        }
+                    }
+                }
+            }
+
+
+
+            QGCLabel {
+                text: "Offline Maps"
+                font.bold: true
+                font.pointSize: 11
+                Layout.topMargin: ScreenTools.defaultFontPixelWidth * 2
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+            }
+
+            QGCLabel {
+                text: "Download map tiles for use when offline"
+                font.italic: true
+                font.pointSize: 9
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+            }
+
+            Rectangle {
+                width: ScreenTools.defaultFontPixelWidth * 75  /*ScreenTools.defaultFontPixelWidth * 8 * (Screen.pixelDensity / 160)*/     // small width
+                implicitHeight: _cacheList.implicitHeight + 20    // height to fit 3 numbers
+                radius: 6
+                color: "transparent"
+                border.color: "#888"
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+
+                QGCFlickable {
+                    id:                 _tileSetList
+                    clip:               true
+                    anchors.fill: parent
+                    anchors.topMargin: ScreenTools.defaultFontPixelWidth * 2
+                    implicitHeight:      _cacheList.height
+                    ButtonGroup {
+                        id:             buttonGroup
+                        buttons:        _cacheList.children
+                    }
+                    Column {
+                        id:             _cacheList
+                        width:          Math.min(_tileSetList.width, (ScreenTools.defaultFontPixelWidth  * 50).toFixed(0))
+                        spacing:        ScreenTools.defaultFontPixelHeight * 0.5
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        OfflineMapButton {
+                            id:             firstButton
+                            text:           qsTr("Add New Set")
+                            width:          _cacheList.width
+                            height:         ScreenTools.defaultFontPixelHeight * (ScreenTools.isMobile ? 3 : 2)
+                            currentSet:     _currentSelection
+                            onClicked: {
+                                offlineMapView._currentSelection = null
+                                checked = true
+                                addNewSet()
+                            }
+                        }
+                        Repeater {
+                            model: QGroundControl.mapEngineManager.tileSets
+                            delegate: OfflineMapButton {
+                                text:           object.name
+                                size:           object.downloadStatus
+                                tiles:          object.totalTileCount
+                                complete:       object.complete
+                                width:          firstButton.width
+                                height:         ScreenTools.defaultFontPixelHeight * (ScreenTools.isMobile ? 3 : 2)
+                                currentSet:     _currentSelection
+                                tileSet:        object
+                                onClicked: {
+                                    offlineMapView._currentSelection = object
+                                    checked = true
+                                    showInfo()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // QGCLabel {
+            //     text: "Other Options"
+            //     font.bold: true
+            //     font.pointSize: 11
+            //     Layout.topMargin: ScreenTools.defaultFontPixelWidth * 2
+            //     Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
+            // }
+        //}
         }
+
         Row {
             id:                 _listButtonRow
             visible:            _tileSetList.visible
@@ -1068,23 +1314,7 @@ Item {
             anchors.bottom:     parent.bottom
             anchors.margins:    ScreenTools.defaultFontPixelWidth
             anchors.horizontalCenter: parent.horizontalCenter
-            QGCButton {
-                text:           qsTr("Import")
-                backRadius: 7
-                width:          _buttonSize
-                visible:        QGroundControl.corePlugin.options.showOfflineMapImport
-                onClicked: {
-                    QGroundControl.mapEngineManager.importAction = QGCMapEngineManager.ActionNone
-                    importDialog.open()
-                }
-            }
-            QGCButton {
-                text:           qsTr("Export")
-                backRadius: 7
-                width:          _buttonSize
-                visible:        QGroundControl.corePlugin.options.showOfflineMapExport
-                onClicked:      showExport()
-            }
+
             QGCButton {
                 text:           qsTr("Options")
                 backRadius: 7
@@ -1094,15 +1324,30 @@ Item {
         }
 
         //-- Export Tile Sets
-        QGCFlickable {
+        Rectangle {
+            id: exporTilesRect
+            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: ScreenTools.defaultFontPixelWidth * 75
+            height: _exportList.height + 30
+            radius: 6
+            color: "transparent"
+            border.color: "#888"
+            visible: false
+
+            QGCFlickable {
             id:                 _exporTiles
             clip:               true
+            anchors.fill: parent
+            anchors.topMargin: ScreenTools.defaultFontPixelWidth * 2
+            width: parent.width
+            height: parent.height
             visible:            false
-            anchors.margins:    ScreenTools.defaultFontPixelWidth
-            anchors.top:        parent.top
-            anchors.bottom:     _exportButtonRow.top
-            anchors.left:       parent.left
-            anchors.right:      parent.right
+            // anchors.margins:    ScreenTools.defaultFontPixelWidth
+            // anchors.top:        parent.top
+            // anchors.bottom:     _exportButtonRow.top
+            // anchors.left:       parent.left
+            // anchors.right:      parent.right
             contentHeight:      _exportList.height
             Column {
                 id:         _exportList
@@ -1131,6 +1376,7 @@ Item {
                     }
                 }
             }
+        }
         }
         Row {
             id:                 _exportButtonRow

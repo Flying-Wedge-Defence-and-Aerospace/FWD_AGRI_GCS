@@ -40,9 +40,8 @@ ObstacleDistanceOverlayVideo    1.0 ObstacleDistanceOverlayVideo.qml
 GripperMenu                     1.0 GripperMenu.qml
 OnScreenGimbalController        1.0 OnScreenGimbalController.qml
 ParameterDetails                1.0 ParameterDetails.qml
-FlyViewTopBar                   1.0 FlyViewTopBar.qml
-MessageToolBar                  1.0 MessageToolBar.qml
-MapTools                        1.0 MapTools.qml
 MapLayers                       1.0 MapLayers.qml
 ProfileDetails                  1.0 ProfileDetails.qml
-
+AndroidTelemetry                1.0 AndroidTelemetry.qml
+ConfigPanel                     1.0 ConfigPanel.qml
+SubSystems                      1.0 SubSystems.qml

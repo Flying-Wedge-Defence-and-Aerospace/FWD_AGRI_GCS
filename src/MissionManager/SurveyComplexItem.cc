@@ -748,6 +748,7 @@ void SurveyComplexItem::_rebuildTransectsPhase1WorkerSinglePolygon(bool refly)
         polygon << polygonPoints[i];
     }
     polygon << polygonPoints[0];
+
     QRectF boundingRect = polygon.boundingRect();
     QPointF boundingCenter = boundingRect.center();
     qCDebug(SurveyComplexItemLog) << "Bounding rect" << boundingRect.topLeft().x() << boundingRect.topLeft().y() << boundingRect.bottomRight().x() << boundingRect.bottomRight().y();

@@ -24,7 +24,7 @@ Rectangle {
     width:      actionColumn.width  + (_margins * 4)
     height:     actionColumn.height + (_margins * 4)
     radius:     _margins / 2
-    color:     /* qgcPal.window*/"#55800000"
+    color:      qgcPal.window
     opacity:    0.9
     visible:    false
 
@@ -104,7 +104,6 @@ Rectangle {
         QGCLabel {
             text:               qsTr("Select Action")
             font.bold: true
-            color: "yellow"
             Layout.alignment:   Qt.AlignHCenter
         }
 

@@ -17,9 +17,9 @@ import QGroundControl.Controls      1.0
 
 Rectangle {
     id:         _root
-    color:      /*qgcPal.toolbarBackground*/ "transparent"
-    width:      _idealWidth < repeater.contentWidth ? repeater.contentWidth + 10 : _idealWidth + 5
-    height:     Math.min(maxHeight, toolStripColumn.height + (flickable.anchors.margins * 2)) + 10
+    color:      qgcPal.toolbarBackground
+    width:      ScreenTools.isMobile ? ScreenTools.defaultFontPixelWidth * 7 : _idealWidth < repeater.contentWidth ? repeater.contentWidth : _idealWidth + 5
+    height:     Math.min(maxHeight, toolStripColumn.height + (flickable.anchors.margins * 2))
     radius:     ScreenTools.defaultFontPixelWidth / 2
 
     property alias  model:              repeater.model
@@ -43,6 +43,8 @@ Rectangle {
 
     signal dropped(int index)
 
+    QGCPalette { id:qgcPal }
+
     DeadMouseArea {
         anchors.fill: parent
     }
@@ -62,7 +64,7 @@ Rectangle {
             id:             toolStripColumn
             anchors.left:   parent.left
             anchors.right:  parent.right
-            spacing:        /*ScreenTools.defaultFontPixelWidth * 0.25*/ 20
+            spacing:        ScreenTools.isMobile ? ScreenTools.defaultFontPixelWidth * 2 : ScreenTools.defaultFontPixelWidth * 3.2
 
             QGCLabel {
                 id:                     titleLabel
@@ -81,7 +83,7 @@ Rectangle {
                     anchors.left:       toolStripColumn.left
                     anchors.right:      toolStripColumn.right
                     height:             width
-                    radius:             /*ScreenTools.defaultFontPixelWidth / 2*/ 10
+                    radius:             ScreenTools.defaultFontPixelWidth / 2
                     fontPointSize:      _root.fontSize
                     toolStripAction:    modelData
                     dropPanel:          _dropPanel

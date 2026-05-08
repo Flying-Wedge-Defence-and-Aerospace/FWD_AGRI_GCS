@@ -25,7 +25,7 @@ SetupPage {
     Component {
         id: safetyPageComponent
 
-        Column {
+        Flow {
             id:         flowLayout
             width:      availableWidth
             spacing:    _margins
@@ -34,30 +34,30 @@ SetupPage {
 
             QGCPalette { id: ggcPal; colorGroupEnabled: true }
 
-            property Fact _batt1Monitor:                    controller.getParameterFact(-1, "BATT_MONITOR")
-            property Fact _batt2Monitor:                    controller.getParameterFact(-1, "BATT2_MONITOR", false /* reportMissing */)
-            property bool _batt2MonitorAvailable:           controller.parameterExists(-1, "BATT2_MONITOR")
-            property bool _batt1MonitorEnabled:             _batt1Monitor.rawValue !== 0
-            property bool _batt2MonitorEnabled:             _batt2MonitorAvailable ? _batt2Monitor.rawValue !== 0 : false
-            property bool _batt1ParamsAvailable:            controller.parameterExists(-1, "BATT_CAPACITY")
-            property bool _batt2ParamsAvailable:            controller.parameterExists(-1, "BATT2_CAPACITY")
+                property Fact _batt1Monitor:                    controller.getParameterFact(-1, "BATT_MONITOR")
+                property Fact _batt2Monitor:                    controller.getParameterFact(-1, "BATT2_MONITOR", false /* reportMissing */)
+                property bool _batt2MonitorAvailable:           controller.parameterExists(-1, "BATT2_MONITOR")
+                property bool _batt1MonitorEnabled:             _batt1Monitor.rawValue !== 0
+                property bool _batt2MonitorEnabled:             _batt2MonitorAvailable ? _batt2Monitor.rawValue !== 0 : false
+                property bool _batt1ParamsAvailable:            controller.parameterExists(-1, "BATT_CAPACITY")
+                property bool _batt2ParamsAvailable:            controller.parameterExists(-1, "BATT2_CAPACITY")
 
-            property Fact _failsafeBatt1LowAct:             controller.getParameterFact(-1, "BATT_FS_LOW_ACT", false /* reportMissing */)
-            property Fact _failsafeBatt2LowAct:             controller.getParameterFact(-1, "BATT2_FS_LOW_ACT", false /* reportMissing */)
-            property Fact _failsafeBatt1CritAct:            controller.getParameterFact(-1, "BATT_FS_CRT_ACT", false /* reportMissing */)
-            property Fact _failsafeBatt2CritAct:            controller.getParameterFact(-1, "BATT2_FS_CRT_ACT", false /* reportMissing */)
-            property Fact _failsafeBatt1LowMah:             controller.getParameterFact(-1, "BATT_LOW_MAH", false /* reportMissing */)
-            property Fact _failsafeBatt2LowMah:             controller.getParameterFact(-1, "BATT2_LOW_MAH", false /* reportMissing */)
-            property Fact _failsafeBatt1CritMah:            controller.getParameterFact(-1, "BATT_CRT_MAH", false /* reportMissing */)
-            property Fact _failsafeBatt2CritMah:            controller.getParameterFact(-1, "BATT2_CRT_MAH", false /* reportMissing */)
-            property Fact _failsafeBatt1LowVoltage:         controller.getParameterFact(-1, "BATT_LOW_VOLT", false /* reportMissing */)
-            property Fact _failsafeBatt2LowVoltage:         controller.getParameterFact(-1, "BATT2_LOW_VOLT", false /* reportMissing */)
-            property Fact _failsafeBatt1CritVoltage:        controller.getParameterFact(-1, "BATT_CRT_VOLT", false /* reportMissing */)
-            property Fact _failsafeBatt2CritVoltage:        controller.getParameterFact(-1, "BATT2_CRT_VOLT", false /* reportMissing */)
+                property Fact _failsafeBatt1LowAct:             controller.getParameterFact(-1, "BATT_FS_LOW_ACT", false /* reportMissing */)
+                property Fact _failsafeBatt2LowAct:             controller.getParameterFact(-1, "BATT2_FS_LOW_ACT", false /* reportMissing */)
+                property Fact _failsafeBatt1CritAct:            controller.getParameterFact(-1, "BATT_FS_CRT_ACT", false /* reportMissing */)
+                property Fact _failsafeBatt2CritAct:            controller.getParameterFact(-1, "BATT2_FS_CRT_ACT", false /* reportMissing */)
+                property Fact _failsafeBatt1LowMah:             controller.getParameterFact(-1, "BATT_LOW_MAH", false /* reportMissing */)
+                property Fact _failsafeBatt2LowMah:             controller.getParameterFact(-1, "BATT2_LOW_MAH", false /* reportMissing */)
+                property Fact _failsafeBatt1CritMah:            controller.getParameterFact(-1, "BATT_CRT_MAH", false /* reportMissing */)
+                property Fact _failsafeBatt2CritMah:            controller.getParameterFact(-1, "BATT2_CRT_MAH", false /* reportMissing */)
+                property Fact _failsafeBatt1LowVoltage:         controller.getParameterFact(-1, "BATT_LOW_VOLT", false /* reportMissing */)
+                property Fact _failsafeBatt2LowVoltage:         controller.getParameterFact(-1, "BATT2_LOW_VOLT", false /* reportMissing */)
+                property Fact _failsafeBatt1CritVoltage:        controller.getParameterFact(-1, "BATT_CRT_VOLT", false /* reportMissing */)
+                property Fact _failsafeBatt2CritVoltage:        controller.getParameterFact(-1, "BATT2_CRT_VOLT", false /* reportMissing */)
 
             property Fact _armingCheck: controller.getParameterFact(-1, "ARMING_CHECK")
 
-            property real _margins:         ScreenTools.defaultFontPixelHeight
+            property real _margins:         ScreenTools.defaultFontPixelHeight * 0.5
             property real _innerMargin:     _margins / 2
             property bool _showIcon:        !ScreenTools.isTinyScreen
             property bool _roverFirmware:   controller.parameterExists(-1, "MODE1") // This catches all usage of ArduRover firmware vehicle types: Rover, Boat...
@@ -83,6 +83,13 @@ SetupPage {
                             Layout.fillWidth:   true
                         }
 
+                        Rectangle {
+                            Layout.fillWidth: true
+                            height: 1
+                            Layout.columnSpan: 2
+                            color: "gray"
+                        }
+
                         QGCLabel { text: qsTr("Critical action:") }
                         FactComboBox {
                             fact:               failsafeBattCritAct
@@ -90,11 +97,25 @@ SetupPage {
                             Layout.fillWidth:   true
                         }
 
+                        Rectangle {
+                            Layout.fillWidth: true
+                            height: 1
+                            Layout.columnSpan: 2
+                            color: "gray"
+                        }
+
                         QGCLabel { text: qsTr("Low voltage threshold:") }
                         FactTextField {
                             fact:               failsafeBattLowVoltage
                             showUnits:          true
                             Layout.fillWidth:   true
+                        }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            height: 1
+                            Layout.columnSpan: 2
+                            color: "gray"
                         }
 
 
@@ -105,11 +126,25 @@ SetupPage {
                             Layout.fillWidth:   true
                         }
 
+                        Rectangle {
+                            Layout.fillWidth: true
+                            height: 1
+                            Layout.columnSpan: 2
+                            color: "gray"
+                        }
+
                         QGCLabel { text: qsTr("Low mAh threshold:") }
                         FactTextField {
                             fact:               failsafeBattLowMah
                             showUnits:          true
                             Layout.fillWidth:   true
+                        }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            height: 1
+                            Layout.columnSpan: 2
+                            color: "gray"
                         }
 
                         QGCLabel { text: qsTr("Critical mAh threshold:") }
@@ -140,22 +175,22 @@ SetupPage {
             }
 
             Column {
-                spacing: _margins / 2
+                spacing: ScreenTools.defaultFontPixelWidth * 2
                 visible: _batt1MonitorEnabled
 
                 QGCLabel {
                     text:       qsTr("Battery1 Failsafe Triggers")
-                    //font.family: ScreenTools.demiboldFontFamily
-                    font.family: "Helvetica"
-                    font.pointSize: 16
-                    font.italic: true
-                    font.underline: true
+                    font.family: ScreenTools.demiboldFontFamily
+                    font.bold: true
+                    font.pointSize: 12
                 }
 
                 Rectangle {
-                    width:  battery1FailsafeLoader.x + battery1FailsafeLoader.width + _margins + 50
+                    width:  battery1FailsafeLoader.x + battery1FailsafeLoader.width + _margins
                     height: battery1FailsafeLoader.y + battery1FailsafeLoader.height + _margins
-                    color:  /*ggcPal.windowShade*/ "#2c3e50"
+                    color: "transparent"
+                    border.color: "#888"
+                    radius: ScreenTools.defaultFontPixelWidth * 0.6
 
                     Loader {
                         id:                 battery1FailsafeLoader
@@ -178,22 +213,22 @@ SetupPage {
 
 
             Column {
-                spacing: _margins / 2
+                spacing: ScreenTools.defaultFontPixelWidth * 2
                 visible: _batt2MonitorEnabled
 
                 QGCLabel {
                     text:       qsTr("Battery2 Failsafe Triggers")
-                    font.family: "Helvetica"
-                    font.pointSize: 16
-                    font.italic: true
-                    font.underline: true
-                    // font.family: ScreenTools.demiboldFontFamily
+                    font.family: ScreenTools.demiboldFontFamily
+                    font.bold: true
+                    font.pointSize: 12
                 }
 
                 Rectangle {
-                    width:  battery2FailsafeLoader.x + battery2FailsafeLoader.width + _margins + 50
+                    width:  battery2FailsafeLoader.x + battery2FailsafeLoader.width + _margins
                     height: battery2FailsafeLoader.y + battery2FailsafeLoader.height + _margins
-                    color:  /*ggcPal.windowShade*/"#2c3e50"
+                    color: "transparent"
+                    border.color: "#888"
+                    radius: ScreenTools.defaultFontPixelWidth * 0.6
 
                     Loader {
                         id:                 battery2FailsafeLoader
@@ -218,7 +253,7 @@ SetupPage {
                 id: planeGeneralFS
 
                 Column {
-                    spacing: _margins / 2
+                    spacing: ScreenTools.defaultFontPixelWidth * 2
 
                     property Fact _failsafeThrEnable:   controller.getParameterFact(-1, "THR_FAILSAFE")
                     property Fact _failsafeThrValue:    controller.getParameterFact(-1, "THR_FS_VALUE")
@@ -227,12 +262,16 @@ SetupPage {
                     QGCLabel {
                         text:       qsTr("Failsafe Triggers")
                         font.family: ScreenTools.demiboldFontFamily
+                        font.bold: true
+                        font.pointSize: 12
                     }
 
                     Rectangle {
                         width:  fsColumn.x + fsColumn.width + _margins
                         height: fsColumn.y + fsColumn.height + _margins
-                        color:  /*qgcPal.windowShade*/ "#2c3e50"
+                        color: "transparent"
+                        border.color: "#888"
+                        radius: ScreenTools.defaultFontPixelWidth * 0.6
 
                         ColumnLayout {
                             id:                 fsColumn
@@ -258,7 +297,7 @@ SetupPage {
 
                             QGCCheckBox {
                                 text:       qsTr("GCS failsafe")
-                                checked:    _failsafeGCSEnable.value != 0
+                                checked:    _failsafeGCSEnable.value !== 0
                                 onClicked:  _failsafeGCSEnable.value = checked ? 1 : 0
                             }
                         }
@@ -274,7 +313,7 @@ SetupPage {
                 id: roverGeneralFS
 
                 Column {
-                    spacing: _margins / 2
+                    spacing: ScreenTools.defaultFontPixelWidth * 2
 
                     property Fact _failsafeGCSEnable:   controller.getParameterFact(-1, "FS_GCS_ENABLE")
                     property Fact _failsafeThrEnable:   controller.getParameterFact(-1, "FS_THR_ENABLE")
@@ -286,13 +325,17 @@ SetupPage {
                         id:         failsafeLabel
                         text:       qsTr("Failsafe Triggers")
                         font.family: ScreenTools.demiboldFontFamily
+                        font.bold: true
+                        font.pointSize: 12
                     }
 
                     Rectangle {
                         id:     failsafeSettings
-                        width:  fsGrid.x + fsGrid.width + _margins + 50
+                        width:  fsGrid.x + fsGrid.width + _margins
                         height: fsGrid.y + fsGrid.height + _margins
-                        color:  /*ggcPal.windowShade*/  "#2c3e50"
+                        color: "transparent"
+                        border.color: "#888"
+                        radius: ScreenTools.defaultFontPixelWidth * 0.6
 
                         GridLayout {
                             id:                 fsGrid
@@ -308,6 +351,13 @@ SetupPage {
                                 indexModel:         false
                             }
 
+                            Rectangle {
+                                Layout.fillWidth: true
+                                height: 1
+                                Layout.columnSpan: 2
+                                color: "gray"
+                            }
+
                             QGCLabel { text: qsTr("Throttle failsafe:") }
                             FactComboBox {
                                 Layout.fillWidth:   true
@@ -319,6 +369,13 @@ SetupPage {
                             FactTextField {
                                 Layout.fillWidth:   true
                                 fact:               _failsafeThrValue
+                            }
+
+                            Rectangle {
+                                Layout.fillWidth: true
+                                height: 1
+                                Layout.columnSpan: 2
+                                color: "gray"
                             }
 
                             QGCLabel { text: qsTr("Failsafe Crash Check:") }
@@ -340,7 +397,7 @@ SetupPage {
                 id: copterGeneralFS
 
                 Column {
-                    spacing: _margins / 2
+                    spacing: ScreenTools.defaultFontPixelWidth * 2
 
                     property Fact _failsafeGCSEnable:               controller.getParameterFact(-1, "FS_GCS_ENABLE")
                     property Fact _failsafeBattLowAct:              controller.getParameterFact(-1, "r.BATT_FS_LOW_ACT", false /* reportMissing */)
@@ -351,17 +408,17 @@ SetupPage {
 
                     QGCLabel {
                         text:       qsTr("General Failsafe Triggers")
-                        font.family: "Helvetica"
-                        font.pointSize: 16
-                        font.italic: true
-                        font.underline: true
-                        // font.family: ScreenTools.demiboldFontFamily
+                        font.family: ScreenTools.demiboldFontFamily
+                        font.bold: true
+                        font.pointSize: 12
                     }
 
                     Rectangle {
-                        width:  generalFailsafeColumn.x + generalFailsafeColumn.width + _margins + 50
+                        width:  generalFailsafeColumn.x + generalFailsafeColumn.width + _margins
                         height: generalFailsafeColumn.y + generalFailsafeColumn.height + _margins
-                        color:  /*ggcPal.windowShade*/ "#2c3e50"
+                        color: "transparent"
+                        border.color: "#888"
+                        radius: ScreenTools.defaultFontPixelWidth * 0.6
 
                         Column {
                             id:                 generalFailsafeColumn
@@ -382,6 +439,13 @@ SetupPage {
                                     Layout.fillWidth:   true
                                 }
 
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    height: 1
+                                    Layout.columnSpan: 2
+                                    color: "gray"
+                                }
+
                                 QGCLabel { text: qsTr("Throttle failsafe:") }
                                 QGCComboBox {
                                     model:              [qsTr("Disabled"), qsTr("Always RTL"),
@@ -390,6 +454,13 @@ SetupPage {
                                     Layout.fillWidth:   true
 
                                     onActivated: _failsafeThrEnable.value = index
+                                }
+
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    height: 1
+                                    Layout.columnSpan: 2
+                                    color: "gray"
                                 }
 
                                 QGCLabel { text: qsTr("PWM threshold:") }
@@ -412,7 +483,7 @@ SetupPage {
                 id: copterGeoFence
 
                 Column {
-                    spacing: _margins / 2
+                    spacing: ScreenTools.defaultFontPixelWidth * 2
 
                     property Fact _fenceAction: controller.getParameterFact(-1, "FENCE_ACTION")
                     property Fact _fenceAltMax: controller.getParameterFact(-1, "FENCE_ALT_MAX")
@@ -427,17 +498,17 @@ SetupPage {
 
                     QGCLabel {
                         text:           qsTr("GeoFence")
-                        font.family: "Helvetica"
-                        font.pointSize: 16
-                        font.italic: true
-                        font.underline: true
-                        // font.family:    ScreenTools.demiboldFontFamily
+                        font.family:    ScreenTools.demiboldFontFamily
+                        font.bold: true
+                        font.pointSize: 12
                     }
 
                     Rectangle {
                         width:  mainLayout.width + (_margins * 2)
                         height: mainLayout.height + (_margins * 2)
-                        color:  /*ggcPal.windowShade*/ "#2c3e50"
+                        color: "transparent"
+                        border.color: "#888"
+                        radius: ScreenTools.defaultFontPixelWidth * 0.6
 
                         ColumnLayout {
                             id:         mainLayout
@@ -445,11 +516,38 @@ SetupPage {
                             y:          _margins
                             spacing:    ScreenTools.defaultFontPixellHeight / 2
 
-                            FactCheckBox {
-                                id:     enabledCheckBox
-                                text:   qsTr("Enabled")
-                                fact:   _fenceEnable
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignVCenter
+                                spacing: ScreenTools.defaultFontPixelWidth * 5
+
+                                QGCLabel {
+                                    text: "Enabled                           "
+                                    font.pointSize: 10
+                                    Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                                    horizontalAlignment: Text.AlignLeft
+                                }
+
+                                Item { Layout.fillWidth: true }
+
+                                FactToggleSwitch {
+                                    id: enabledCheckBox
+                                    fact:   _fenceEnable
+                                }
                             }
+
+
+                            // QGCToggleSwitch {
+                            //     Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                            //     checked: QGroundControl.multiVehicleManager.gcsHeartBeatEnabled
+                            //     onCheckedChanged: QGroundControl.multiVehicleManager.gcsHeartBeatEnabled = checked
+                            // }
+
+                            // FactCheckBox {
+                            //     id:     enabledCheckBox
+                            //     text:   qsTr("Enabled")
+                            //     fact:   _fenceEnable
+                            // }
 
                             GridLayout {
                                 columns:    2
@@ -548,7 +646,7 @@ SetupPage {
                 id: copterRTL
 
                 Column {
-                    spacing: _margins / 2
+                    spacing: ScreenTools.defaultFontPixelWidth * 2
 
                     property Fact _landSpeedFact:   controller.getParameterFact(-1, "LAND_SPEED")
                     property Fact _rtlAltFact:      controller.getParameterFact(-1, "RTL_ALT")
@@ -557,27 +655,27 @@ SetupPage {
 
                     QGCLabel {
                         id:             rtlLabel
-                        text:           qsTr("Return To Launch")
-                        font.family: "Helvetica"
-                        font.pointSize: 16
-                        font.italic: true
-                        font.underline: true
-                        // font.family:    ScreenTools.demiboldFontFamily
+                        text:           qsTr("Return to Launch")
+                        font.family:    ScreenTools.demiboldFontFamily
+                        font.bold: true
+                        font.pointSize: 12
                     }
 
                     Rectangle {
                         id:     rtlSettings
                         width:  landSpeedField.x + landSpeedField.width + _margins
                         height: landSpeedField.y + landSpeedField.height + _margins
-                        color:  /*ggcPal.windowShade*/ "#2c3e50"
+                        color: "transparent"
+                        border.color: "#888"
+                        radius: ScreenTools.defaultFontPixelWidth * 0.6
 
                         Image {
                             id:                 icon
                             anchors.margins:    _margins
                             anchors.left:       parent.left
                             anchors.top:        parent.top
-                            height:             ScreenTools.defaultFontPixelWidth * 20
-                            width:              ScreenTools.defaultFontPixelWidth * 20
+                            height:             ScreenTools.isMobile ? ScreenTools.defaultFontPixelWidth * 10 : ScreenTools.defaultFontPixelWidth * 20
+                            width:              ScreenTools.isMobile ? ScreenTools.defaultFontPixelWidth * 10 : ScreenTools.defaultFontPixelWidth * 20
                             sourceSize.width:   width
                             mipmap:             true
                             fillMode:           Image.PreserveAspectFit
@@ -598,7 +696,8 @@ SetupPage {
                             anchors.left:       _showIcon ? icon.right : parent.left
                             anchors.top:        parent.top
                             text:               qsTr("Return at current altitude")
-                            checked:            _rtlAltFact.value == 0
+                            checked:            _rtlAltFact.value === 0
+                            font.pointSize: ScreenTools.isMobile ? 8 : 10
 
                             onClicked: _rtlAltFact.value = 0
                         }
@@ -609,7 +708,8 @@ SetupPage {
                             anchors.top:        returnAtCurrentRadio.bottom
                             anchors.left:       returnAtCurrentRadio.left
                             text:               qsTr("Return at specified altitude:")
-                            checked:            _rtlAltFact.value != 0
+                            checked:            _rtlAltFact.value !== 0
+                            font.pointSize: ScreenTools.isMobile ? 8 : 10
 
                             onClicked: _rtlAltFact.value = 1500
                         }
@@ -629,7 +729,7 @@ SetupPage {
                             anchors.left:       returnAtCurrentRadio.left
                             anchors.baseline:   landDelayField.baseline
                             checked:            _rtlLoitTimeFact.value > 0
-                            text:               qsTr("Loiter above Home for:")
+                            text:               qsTr("loiter above home")
 
                             onClicked: _rtlLoitTimeFact.value = (checked ? 60 : 0)
                         }
@@ -648,6 +748,7 @@ SetupPage {
                             anchors.left:       returnAtCurrentRadio.left
                             anchors.baseline:   rltAltFinalField.baseline
                             text:               qsTr("Final land stage altitude:")
+                            font.pointSize: ScreenTools.isMobile ? 8 : 10
                         }
 
                         FactTextField {
@@ -663,6 +764,7 @@ SetupPage {
                             anchors.left:       returnAtCurrentRadio.left
                             anchors.baseline:   landSpeedField.baseline
                             text:               qsTr("Final land stage descent speed:")
+                            font.pointSize: ScreenTools.isMobile ? 8 : 10
                         }
 
                         FactTextField {
@@ -685,23 +787,23 @@ SetupPage {
                 id: planeRTL
 
                 Column {
-                    spacing: _margins / 2
+                    spacing: ScreenTools.defaultFontPixelWidth * 2
 
                     property Fact _rtlAltFact: controller.getParameterFact(-1, "ALT_HOLD_RTL")
 
                     QGCLabel {
-                        text:           qsTr("Return To Launch")
-                        font.family: "Helvetica"
-                        font.pointSize: 16
-                        font.italic: true
-                        font.underline: true
-                        // font.family:    ScreenTools.demiboldFontFamily
+                        text:           qsTr("Return to Launch")
+                        font.family:    ScreenTools.demiboldFontFamily
+                        font.bold: true
+                        font.pointSize: 12
                     }
 
                     Rectangle {
                         width:  rltAltField.x + rltAltField.width + _margins
                         height: rltAltField.y + rltAltField.height + _margins
-                        color:  /*qgcPal.windowShade*/ "#2c3e50"
+                        color: "transparent"
+                        border.color: "#888"
+                        radius: ScreenTools.defaultFontPixelWidth * 0.6
 
                         QGCRadioButton {
                             id:                 returnAtCurrentRadio
@@ -743,21 +845,21 @@ SetupPage {
             }
 
             Column {
-                spacing: _margins / 2
+                spacing: ScreenTools.defaultFontPixelWidth * 2
 
                 QGCLabel {
                     text:           qsTr("Arming Checks")
-                    font.family: "Helvetica"
-                    font.pointSize: 16
-                    font.italic: true
-                    font.underline: true
-                    // font.family:    ScreenTools.demiboldFontFamily
+                    font.family:    ScreenTools.demiboldFontFamily
+                    font.bold: true
+                    font.pointSize: 12
                 }
 
                 Rectangle {
                     width:  flowLayout.width
                     height: armingCheckInnerColumn.height + (_margins * 2)
-                    color:  /*ggcPal.windowShade*/ "#2c3e50"
+                    color: "transparent"
+                    border.color: "#888"
+                    radius: ScreenTools.defaultFontPixelWidth * 0.6
 
                     Column {
                         id:                 armingCheckInnerColumn
@@ -782,7 +884,7 @@ SetupPage {
                             wrapMode:       Text.WordWrap
                             color:          qgcPal.warningText
                             text:            qsTr("Warning: Turning off arming checks can lead to loss of Vehicle control.")
-                            visible:        _armingCheck.value != 1
+                            visible:        _armingCheck.value !== 1
                         }
                     }
                 } // Rectangle - Arming checks

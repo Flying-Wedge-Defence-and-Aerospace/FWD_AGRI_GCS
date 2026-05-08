@@ -155,7 +155,7 @@ Item {
             fillMode:           Image.PreserveAspectFit
             anchors.fill:       parent
             sourceSize.height:  parent.height
-            color:              /*qgcPal.text*/ "white"
+            color:              qgcPal.text
             transform: Rotation {
                 origin.x:       compassDial.width  / 2
                 origin.y:       compassDial.height / 2

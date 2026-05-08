@@ -19,46 +19,51 @@ Rectangle {
     color:         qgcPal.window
     anchors.fill:   parent
 
-    readonly property real _margins: ScreenTools.defaultFontPixelHeight
-
-    QGCPalette { id: qgcPal; colorGroupEnabled: true }
-
-    QGCFlickable {
-        anchors.margins:    _margins
-        anchors.fill:       parent
-        contentWidth:       grid.width
-        contentHeight:      grid.height
-        clip:               true
-
-        GridLayout {
-            id:         grid
-            columns:    2
-            rowSpacing: 20
-            columnSpacing: 40
-
-            QGCLabel { text: qsTr("QGroundControl User Guide"); font.bold: true; font.pointSize: 14; color: "yellow" }
-            QGCLabel {
-                linkColor:          qgcPal.text
-                text:               "<a href=\"https://docs.qgroundcontrol.com\">https://docs.qgroundcontrol.com</a>"
-                onLinkActivated:    Qt.openUrlExternally(link)
-                font.pointSize: 14
-            }
-
-            QGCLabel { text: qsTr("PX4 Users Discussion Forum"); font.bold: true; font.pointSize: 14; color: "yellow" }
-            QGCLabel {
-                linkColor:          qgcPal.text
-                text:               "<a href=\"http://discuss.px4.io/c/qgroundcontrol\">http://discuss.px4.io/c/qgroundcontrol</a>"
-                onLinkActivated:    Qt.openUrlExternally(link)
-                font.pointSize: 14
-            }
-
-            QGCLabel { text: qsTr("ArduPilot Users Discussion Forum"); font.bold: true; font.pointSize: 14; color: "yellow" }
-            QGCLabel {
-                linkColor:          qgcPal.text
-                text:               "<a href=\"https://discuss.ardupilot.org/c/ground-control-software/qgroundcontrol\">https://discuss.ardupilot.org/c/ground-control-software/qgroundcontrol</a>"
-                onLinkActivated:    Qt.openUrlExternally(link)
-                font.pointSize: 14
-            }
-        }
+    QGCLabel {
+        anchors.centerIn: parent
+        text: "Help Settings"
     }
+
+    // readonly property real _margins: ScreenTools.defaultFontPixelHeight
+
+    // QGCPalette { id: qgcPal; colorGroupEnabled: true }
+
+    // QGCFlickable {
+    //     anchors.margins:    _margins
+    //     anchors.fill:       parent
+    //     contentWidth:       grid.width
+    //     contentHeight:      grid.height
+    //     clip:               true
+
+    //     GridLayout {
+    //         id:         grid
+    //         columns:    2
+    //         rowSpacing: 20
+    //         columnSpacing: 40
+
+    //         QGCLabel { text: qsTr("QGroundControl User Guide"); font.bold: true; font.pointSize: 14; color: "yellow" }
+    //         QGCLabel {
+    //             linkColor:          qgcPal.text
+    //             text:               "<a href=\"https://docs.qgroundcontrol.com\">https://docs.qgroundcontrol.com</a>"
+    //             onLinkActivated:    Qt.openUrlExternally(link)
+    //             font.pointSize: 14
+    //         }
+
+    //         QGCLabel { text: qsTr("PX4 Users Discussion Forum"); font.bold: true; font.pointSize: 14; color: "yellow" }
+    //         QGCLabel {
+    //             linkColor:          qgcPal.text
+    //             text:               "<a href=\"http://discuss.px4.io/c/qgroundcontrol\">http://discuss.px4.io/c/qgroundcontrol</a>"
+    //             onLinkActivated:    Qt.openUrlExternally(link)
+    //             font.pointSize: 14
+    //         }
+
+    //         QGCLabel { text: qsTr("ArduPilot Users Discussion Forum"); font.bold: true; font.pointSize: 14; color: "yellow" }
+    //         QGCLabel {
+    //             linkColor:          qgcPal.text
+    //             text:               "<a href=\"https://discuss.ardupilot.org/c/ground-control-software/qgroundcontrol\">https://discuss.ardupilot.org/c/ground-control-software/qgroundcontrol</a>"
+    //             onLinkActivated:    Qt.openUrlExternally(link)
+    //             font.pointSize: 14
+    //         }
+    //     }
+    // }
 }

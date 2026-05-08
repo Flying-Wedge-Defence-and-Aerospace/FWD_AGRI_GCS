@@ -55,7 +55,7 @@ Rectangle {
         Column {
             id:         buttonColumn
             width:      _maxButtonWidth
-            spacing:    _defaultTextHeight / 2
+            spacing:    /*_defaultTextHeight / 2*/ 0
 
             property real _maxButtonWidth: 0
 

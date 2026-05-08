@@ -893,7 +893,7 @@ SetupPage {
                                 imageSource:        "qrc:///qmlimages/VehicleRight.png"
                             }
                             VehicleRotationCal {
-                                width:              parent.indicatorWidth
+                                width:              parent.indicatorWidths
                                 height:             parent.indicatorHeight
                                 visible:            controller.orientationCalNoseDownSideVisible
                                 calValid:           controller.orientationCalNoseDownSideDone

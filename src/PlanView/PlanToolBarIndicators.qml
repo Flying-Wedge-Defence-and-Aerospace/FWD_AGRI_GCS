@@ -38,8 +38,8 @@ Item {
     property real   _largeValueWidth:           ScreenTools.defaultFontPixelWidth * 8
     property real   _mediumValueWidth:          ScreenTools.defaultFontPixelWidth * 4
     property real   _smallValueWidth:           ScreenTools.defaultFontPixelWidth * 3
-    property real   _labelToValueSpacing:       ScreenTools.defaultFontPixelWidth
-    property real   _rowSpacing:                ScreenTools.isMobile ? 1 : 0
+    property real   _labelToValueSpacing:       ScreenTools.defaultFontPixelWidth / 2
+    property real   _rowSpacing:                /*ScreenTools.isMobile ? 1 : 0*/ 0
     property real   _distance:                  _currentMissionItemValid ? _currentMissionItem.distance : NaN
     property real   _altDifference:             _currentMissionItemValid ? _currentMissionItem.altDifference : NaN
     property real   _azimuth:                   _currentMissionItemValid ? _currentMissionItem.azimuth : NaN
@@ -143,48 +143,53 @@ Item {
                 Layout.columnSpan:  8
                 font.pointSize:     ScreenTools.smallFontPointSize
                 font.bold: true
-                color: "yellow"
+                color: "white"
             }
 
-            QGCLabel { text: qsTr("Alt diff:"); font.pointSize: _dataFontSize; }
+            QGCLabel { text: qsTr("Alt diff:"); font.pointSize: _dataFontSize; color: "white"}
             QGCLabel {
                 text:                   _altDifferenceText
                 font.pointSize:         _dataFontSize
                 Layout.minimumWidth:    _mediumValueWidth
+                color: "white"
             }
 
             Item { width: 1; height: 1 }
 
-            QGCLabel { text: qsTr("Azimuth:"); font.pointSize: _dataFontSize; }
+            QGCLabel { text: qsTr("Azimuth:"); font.pointSize: _dataFontSize; color: "white"}
             QGCLabel {
                 text:                   _azimuthText
                 font.pointSize:         _dataFontSize
                 Layout.minimumWidth:    _smallValueWidth
+                color: "white"
             }
 
             Item { width: 1; height: 1 }
 
-            QGCLabel { text: qsTr("Dist prev WP:"); font.pointSize: _dataFontSize; }
+            QGCLabel { text: qsTr("Dist prev WP:"); font.pointSize: _dataFontSize; color: "white"}
             QGCLabel {
                 text:                   _distanceText
                 font.pointSize:         _dataFontSize
                 Layout.minimumWidth:    _largeValueWidth
+                color: "white"
             }
 
-            QGCLabel { text: qsTr("Gradient:"); font.pointSize: _dataFontSize; }
+            QGCLabel { text: qsTr("Gradient:"); font.pointSize: _dataFontSize; color: "white"}
             QGCLabel {
                 text:                   _gradientText
                 font.pointSize:         _dataFontSize
                 Layout.minimumWidth:    _mediumValueWidth
+                color: "white"
             }
 
             Item { width: 1; height: 1 }
 
-            QGCLabel { text: qsTr("Heading:"); font.pointSize: _dataFontSize; }
+            QGCLabel { text: qsTr("Heading:"); font.pointSize: _dataFontSize; color: "white"}
             QGCLabel {
                 text:                   _headingText
                 font.pointSize:         _dataFontSize
                 Layout.minimumWidth:    _smallValueWidth
+                color: "white"
             }
         }
 
@@ -199,30 +204,33 @@ Item {
                 Layout.columnSpan:  5
                 font.pointSize:     ScreenTools.smallFontPointSize
                 font.bold: true
-                color: "yellow"
+                color: "white"
             }
 
-            QGCLabel { text: qsTr("Distance:"); font.pointSize: _dataFontSize; }
+            QGCLabel { text: qsTr("Distance:"); font.pointSize: _dataFontSize; color: "white"}
             QGCLabel {
                 text:                   _missionDistanceText
                 font.pointSize:         _dataFontSize
                 Layout.minimumWidth:    _largeValueWidth
+                color: "white"
             }
 
             Item { width: 1; height: 1 }
 
-            QGCLabel { text: qsTr("Max telem dist:"); font.pointSize: _dataFontSize; }
+            QGCLabel { text: qsTr("Max telem dist:"); font.pointSize: _dataFontSize; color: "white"}
             QGCLabel {
                 text:                   _missionMaxTelemetryText
                 font.pointSize:         _dataFontSize
                 Layout.minimumWidth:    _largeValueWidth
+                color: "white"
             }
 
-            QGCLabel { text: qsTr("Time:"); font.pointSize: _dataFontSize; }
+            QGCLabel { text: qsTr("Time:"); font.pointSize: _dataFontSize; color: "white"}
             QGCLabel {
                 text:                   getMissionTime()
                 font.pointSize:         _dataFontSize
                 Layout.minimumWidth:    _largeValueWidth
+                color: "white"
             }
         }
 
@@ -237,13 +245,15 @@ Item {
                 text:               qsTr("Battery")
                 Layout.columnSpan:  3
                 font.pointSize:     ScreenTools.smallFontPointSize
+                color: "white"
             }
 
-            QGCLabel { text: qsTr("Batteries required:"); font.pointSize: _dataFontSize; }
+            QGCLabel { text: qsTr("Batteries required:"); font.pointSize: _dataFontSize; color: "white"}
             QGCLabel {
                 text:                   _batteriesRequiredText
                 font.pointSize:         _dataFontSize
                 Layout.minimumWidth:    _mediumValueWidth
+                color: "white"
             }
 
             Item { width: 1; height: 1 }

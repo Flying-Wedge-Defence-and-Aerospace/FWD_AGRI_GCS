@@ -144,12 +144,12 @@ Item {
                 ctx.lineTo(arrowBase2.x, arrowBase2.y)
                 ctx.lineTo(panelX, panelY + r)
 
-                context.strokeStyle = /*"#00E676"*/ "#90a010"
+                context.strokeStyle = "#00E676" /*"#90a010"*/
                 context.lineWidth = 10
                 context.stroke()
 
                 ctx.closePath()
-                ctx.fillStyle = /*qgcPal.windowShade*/ "#66800000"
+                ctx.fillStyle = qgcPal.windowShade /*"#66800000"*/
                 ctx.fill()
             }
 

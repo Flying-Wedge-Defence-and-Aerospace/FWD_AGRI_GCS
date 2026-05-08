@@ -12,6 +12,7 @@ import QtQuick          2.3
 import QtQuick.Controls 1.2
 import QtQuick.Layouts  1.2
 
+import QGroundControl               1.0
 import QGroundControl.FactSystem    1.0
 import QGroundControl.FactControls  1.0
 import QGroundControl.Palette       1.0
@@ -45,68 +46,132 @@ SetupPage {
     Component {
         id: flightModePageComponent
 
-        Row {
+        Flow {
             id:         flowLayout
             width:      availableWidth
-            spacing:     _margins + 50
+            spacing:     ScreenTools.defaultFontPixelWidth * 3
 
+            Rectangle {
+                id: fltModeSet
+                width: flightModeSettings.width + ScreenTools.defaultFontPixelWidth * 2
+                height: mainColumn.height + ScreenTools.defaultFontPixelWidth * 2
+                //color: "#333"
+                color: QGroundControl.settingsManager.appSettings.indoorPalette.rawValue ? "#333" : "#ccc"
+                radius: ScreenTools.defaultFontPixelWidth * 0.8
+                border.color: "#888"
+                //anchors.centerIn: parent
 
             Column {
-                spacing: _margins
+                id: mainColumn
+                spacing: _margins / 2
+                anchors.centerIn: parent
 
                 QGCLabel {
                     id:             flightModeLabel
-                    text:           qsTr("FLIGHT MODE SETTINGS") + (_fltmodeChExists ? "" : qsTr(" (Channel 5)"))
-                    font.family: "Helvetica"     // or ScreenTools.demiboldFontFamily if you want QGC's default
-                    font.pointSize: 16
-                    font.italic: true
-                    font.underline: true
-                    //font.family:    ScreenTools.demiboldFontFamily
+                    text:           qsTr("Flight Mode Settings") + (_fltmodeChExists ? "" : qsTr(" (Channel 5)"))
+                    font.family:    ScreenTools.demiboldFontFamily
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    font.pointSize: 11
+                    color: QGroundControl.settingsManager.appSettings.indoorPalette.rawValue ? "white" : "black"
+                }
+
+                Rectangle {
+                    id: lineRect
+                    width: fltModeSet.width
+                    height: 1
+                    color: "gray"
                 }
 
                 Rectangle {
                     id:     flightModeSettings
-                    width:  flightModeColumn.width + (_margins * 2) + 30
+                    width:  flightModeColumn.width + (_margins * 3)
                     height: flightModeColumn.height + ScreenTools.defaultFontPixelHeight
-                    color:  /*qgcPal.windowShade*/ "#2c3e50"
-                    radius: 10
+                    // color:  qgcPal.windowShade
+                    color: "transparent"
+                    // border.width: 1
+                    // border.color: "#888"
+                    //radius: 8
+                    anchors.topMargin: ScreenTools.defaultFontPixelWidth * 2
+                    anchors.horizontalCenter: parent.horizontalCenter
 
                     Column {
                         id:                 flightModeColumn
-                        anchors.margins:    ScreenTools.defaultFontPixelWidth
+                        //anchors.margins:    ScreenTools.defaultFontPixelWidth
+                        anchors.centerIn: parent
                         anchors.left:       parent.left
                         anchors.top:        parent.top
                         spacing:            ScreenTools.defaultFontPixelHeight
-                        anchors.leftMargin: 20
 
-                        Row {
-                            spacing:    _margins
-                            visible:    _fltmodeChExists
+                        Rectangle {
+                            id: rowRect
+                            color: QGroundControl.settingsManager.appSettings.indoorPalette.rawValue ? "black" : "white"                // dark gray background
+                            radius: 6
+                            border.color: "#888"
+                            border.width: 1
+                            anchors.horizontalCenter: parent.horizontalCenter
 
-                            QGCLabel {
-                                id:                 modeChannelLabel
-                                anchors.baseline:   modeChannelCombo.baseline
-                                text:               qsTr("Flight mode channel:")
-                                font.bold: true
-                            }
 
-                            QGCComboBox {
-                                id:             modeChannelCombo
-                                width:          ScreenTools.defaultFontPixelWidth * 15
-                                model:          [ qsTr("Not assigned"), qsTr("Channel 1"), qsTr("Channel 2"),
-                                    qsTr("Channel 3"),    qsTr("Channel 4"), qsTr("Channel 5"),
-                                    qsTr("Channel 6"),    qsTr("Channel 7"), qsTr("Channel 8") ]
+                            implicitWidth:  rowContent.implicitWidth  + ScreenTools.defaultFontPixelWidth * 5
+                            implicitHeight: rowContent.implicitHeight + (ScreenTools.defaultFontPixelHeight / 1)
+                            visible: _fltmodeChExists
 
-                                currentIndex:   _fltmodeCh.value
-                                onActivated:    _fltmodeCh.value = index
+                            Row {
+                                id: rowContent
+                                spacing: ScreenTools.defaultFontPixelWidth
+                                anchors.margins: ScreenTools.defaultFontPixelWidth * 2
+                                anchors.centerIn: parent
+
+                                QGCLabel {
+                                    id:                 modeChannelLabel
+                                    anchors.baseline:   modeChannelCombo.baseline
+                                    text:               qsTr("FLIGHT MODE CHANNEL")
+                                    font.bold: true
+                                    color: QGroundControl.settingsManager.appSettings.indoorPalette.rawValue ? "white" : "black"
+                                    font.pointSize: ScreenTools.isMobile ? 8 : 8
+                                }
+
+                                QGCComboBox {
+                                    id:             modeChannelCombo
+                                    width:          ScreenTools.defaultFontPixelWidth * 15
+                                    model:          [
+                                                        qsTr("Not assigned"), qsTr("Channel 1"), qsTr("Channel 2"),
+                                                        qsTr("Channel 3"), qsTr("Channel 4"), qsTr("Channel 5"),
+                                                        qsTr("Channel 6"), qsTr("Channel 7"), qsTr("Channel 8")
+                                                    ]
+                                    currentIndex:   _fltmodeCh.value
+                                    onActivated:    _fltmodeCh.value = index
+                                }
                             }
                         }
+
+                        // Row {
+                        //     spacing:    _margins
+                        //     visible:    _fltmodeChExists
+
+                        //     QGCLabel {
+                        //         id:                 modeChannelLabel
+                        //         anchors.baseline:   modeChannelCombo.baseline
+                        //         text:               qsTr("FLIGHT MODE CHANNEL:")
+                        //         font.bold: true
+                        //     }
+
+                        //     QGCComboBox {
+                        //         id:             modeChannelCombo
+                        //         width:          ScreenTools.defaultFontPixelWidth * 15
+                        //         model:          [ qsTr("Not assigned"), qsTr("Channel 1"), qsTr("Channel 2"),
+                        //             qsTr("Channel 3"),    qsTr("Channel 4"), qsTr("Channel 5"),
+                        //             qsTr("Channel 6"),    qsTr("Channel 7"), qsTr("Channel 8") ]
+
+                        //         currentIndex:   _fltmodeCh.value
+                        //         onActivated:    _fltmodeCh.value = index
+                        //     }
+                        // }
 
                         GridLayout {
                             rows:   _customSimpleMode ? 7 : 6
                             flow:   GridLayout.TopToBottom
-                            rowSpacing: 20
-                            columnSpacing: 30
+                            columnSpacing: ScreenTools.defaultFontPixelWidth * 2
+                            rowSpacing: ScreenTools.defaultFontPixelWidth * 2
 
                             QGCLabel { text: ""; visible: _customSimpleMode }
                             Repeater {
@@ -114,12 +179,11 @@ SetupPage {
 
                                 QGCLabel {
                                     text:   qsTr("Flight Mode ") + index
-                                    color:  controller.activeFlightMode == index ? "yellow" : qgcPal.text
-
+                                    color:  controller.activeFlightMode == index ? "yellow" : qgcPal.buttonText
+                                    font.bold: /*controller.activeFlightMode == index ? */true /*: false*/
+                                    font.italic: controller.activeFlightMode == index ? false : true
                                     property int index: modelData + 1
-
-                                    font.bold: true         // makes text bold
-                                    font.capitalization: Font.AllUppercase
+                                    font.pointSize: 10
                                 }
                             }
 
@@ -138,8 +202,10 @@ SetupPage {
 
                             QGCLabel {
                                 text:           qsTr("Simple")
-                                font.pointSize: ScreenTools.smallFontPointSize
+                                font.pointSize: ScreenTools.mediumFontPointSize
                                 visible:        _customSimpleMode
+                                font.bold: true
+
                             }
                             Repeater {
                                 model:  controller.simpleModeEnabled
@@ -153,8 +219,9 @@ SetupPage {
 
                             QGCLabel {
                                 text:           qsTr("Super-Simple")
-                                font.pointSize: ScreenTools.smallFontPointSize
+                                font.pointSize: ScreenTools.mediumFontPointSize
                                 visible:        _customSimpleMode
+                                font.bold: true
                             }
                             Repeater {
                                 model:  controller.superSimpleModeEnabled
@@ -170,84 +237,123 @@ SetupPage {
                             Repeater {
                                 model:  6
 
-                                QGCLabel {
-                                    text: _pwmStrings[modelData]
-                                    font.bold: true
-                                }
+                                QGCLabel { text: _pwmStrings[modelData]; font.bold: true; }
                             }
                         }
 
-                        RowLayout {
-                            spacing: _margins
+                        Rectangle {
+                            id: lastRect
+                            color: QGroundControl.settingsManager.appSettings.indoorPalette.rawValue ? "black" : "white"               // dark gray background
+                            radius: 6
+                            border.color: "#888"
+                            border.width: 1
+                            anchors.horizontalCenter: parent.horizontalCenter
+
+
+                            implicitWidth:  simpleRow.implicitWidth  + ScreenTools.defaultFontPixelWidth * 5
+                            implicitHeight: simpleRow.implicitHeight + (ScreenTools.defaultFontPixelHeight / 1)
                             visible: controller.simpleModesSupported
 
-                            QGCLabel { text: qsTr("Simple Mode") }
+                            RowLayout {
+                                id: simpleRow
+                                spacing: _margins
+                                visible: controller.simpleModesSupported
+                                anchors.centerIn: parent
 
-                            QGCComboBox {
-                                model:          controller.simpleModeNames
-                                currentIndex:   controller.simpleMode
-                                onActivated:    controller.simpleMode = index
+                                QGCLabel {
+                                    text: qsTr("SIMPLE MODE"); font.bold: true
+                                    color: QGroundControl.settingsManager.appSettings.indoorPalette.rawValue ? "white" : "black"
+                                    font.pointSize: ScreenTools.isMobile ? 8 : 8
+                                }
+
+                                QGCComboBox {
+                                    model:          controller.simpleModeNames
+                                    currentIndex:   controller.simpleMode
+                                    onActivated:    controller.simpleMode = index
+                                }
                             }
                         }
                     } // Column - Flight Modes
                 } // Rectangle - Flight Modes
             } // Column - Flight Modes
+            }
 
-            Column {
-                spacing: _margins
+            Rectangle {
+                id: chanOptSet
+                width: channelOptionsSettings.width + ScreenTools.defaultFontPixelWidth * 3
+                height: optionsColumn.height + ScreenTools.defaultFontPixelWidth * 2
+                color: QGroundControl.settingsManager.appSettings.indoorPalette.rawValue ? "#333" : "#ccc"
+                anchors.leftMargin: ScreenTools.defaultFontPixelWidth * 2
+                radius: ScreenTools.defaultFontPixelWidth * 0.8
+                //anchors.centerIn: parent
+                border.color: "#888"
 
-                QGCLabel {
-                    id:                 channelOptionsLabel
-                    text:               qsTr("SWITCH OPTIONS")
-                    font.family: "Helvetica"
-                    font.pointSize: 16
-                    font.italic: true
-                    font.underline: true
-                    //font.family:        ScreenTools.demiboldFontFamily
-                }
+                Column {
+                    id: optionsColumn
+                    spacing: _margins / 2
+                    anchors.centerIn: parent
 
-                Rectangle {
-                    id:     channelOptionsSettings
-                    width:  channelOptColumn.width + (_margins * 2)
-                    height: channelOptColumn.height + ScreenTools.defaultFontPixelHeight
-                    color:  /*qgcPal.windowShade*/ "#2c3e50"
+                    QGCLabel {
+                        id:                 channelOptionsLabel
+                        text:               qsTr("Switch Options")
+                        font.family:        ScreenTools.demiboldFontFamily
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        font.pointSize: 11
+                    }
 
-                    Column {
-                        id:                 channelOptColumn
-                        anchors.margins:    ScreenTools.defaultFontPixelWidth
-                        anchors.left:       parent.left
-                        anchors.top:        parent.top
-                        anchors.leftMargin: 15
-                        spacing:            ScreenTools.defaultFontPixelHeight
+                    Rectangle {
+                        width: chanOptSet.width
+                        height: 1
+                        color: "gray"
+                    }
 
-                        Repeater {
-                            model: _rcOptionStop - _rcOptionStart + 1
+                    Rectangle {
+                        id:     channelOptionsSettings
+                        width:  channelOptColumn.width + (_margins * 2)
+                        height: channelOptColumn.height + (ScreenTools.defaultFontPixelHeight * 2)
+                        color:  "transparent"
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        // radius: 8
+                        // border.width: 1
+                        // border.color: "#888"
 
-                            Row {
-                                spacing: ScreenTools.defaultFontPixelWidth + 30
+                        Column {
+                            id:                 channelOptColumn
+                            anchors.margins:    ScreenTools.defaultFontPixelWidth
+                            anchors.left:       parent.left
+                            anchors.top:        parent.top
+                            spacing:            ScreenTools.defaultFontPixelHeight
+                            anchors.topMargin: ScreenTools.DefaultFontPixelWidth
 
-                                property int index: modelData + _rcOptionStart
-                                property Fact nullFact: Fact { }
+                            Repeater {
+                                model: _rcOptionStop - _rcOptionStart + 1
 
-                                QGCLabel {
-                                    anchors.baseline:   optCombo.baseline
-                                    text:               qsTr("Channel option %1").arg(index)
-                                    color:              controller.channelOptionEnabled[modelData + (_ch7OptAvailable ? 1 : 0)] ? "yellow" : qgcPal.text
-                                    font.bold: true
-                                    font.capitalization: Font.AllUppercase
+                                Row {
+                                    spacing: ScreenTools.defaultFontPixelWidth * 2
+
+                                    property int index: modelData + _rcOptionStart
+                                    property Fact nullFact: Fact { }
+
+                                    QGCLabel {
+                                        anchors.baseline:   optCombo.baseline
+                                        text:               qsTr("Channel option %1 :").arg(index)
+                                        color:              controller.channelOptionEnabled[modelData + (_ch7OptAvailable ? 1 : 0)] ? "yellow" : qgcPal.text
+                                        font.italic: true
+                                        font.bold: true
+                                    }
+
+                                    FactComboBox {
+                                        id:         optCombo
+                                        width:      ScreenTools.defaultFontPixelWidth * 15
+                                        fact:       controller.getParameterFact(-1, "r.RC" + index + "_OPTION")
+                                        indexModel: false
+                                    }
                                 }
-
-                                FactComboBox {
-                                    id:         optCombo
-                                    width:      ScreenTools.defaultFontPixelWidth * 15
-                                    fact:       controller.getParameterFact(-1, "r.RC" + index + "_OPTION")
-                                    indexModel: false
-                                }
-                            }
-                        } // Repeater -- Channel options
-                    } // Column - Channel options
-                } // Rectangle - Channel options
-            } // Column - Channel options
+                            } // Repeater -- Channel options
+                        } // Column - Channel options
+                    } // Rectangle - Channel options
+                } // Column - Channel options
+            }
         } // Flow
     } // Component - flightModePageComponent
 } // SetupPage

@@ -30,14 +30,12 @@ Item {
     property bool   show:                   true
 
     readonly property string _pipExpandedSettingsKey: "IsPIPVisible"
-    signal videoClose
-    signal videoOpen
 
     property var    _fullItem
     property var    _pipOrWindowItem
     property alias  _windowContentItem: window.contentItem
     property bool   _isExpanded:        true
-    property real   _pipSize:           parent.width * 0.16
+    property real   _pipSize:           parent.width * 0.2
     property real   _maxSize:           0.75                // Percentage of parent control size
     property real   _minSize:           0.10
     property bool   _componentComplete: false
@@ -127,7 +125,7 @@ Item {
     MouseArea {
         id:             pipResize
         anchors.top:    parent.top
-        anchors.left:  parent.left
+        anchors.right:  parent.right
         height:         ScreenTools.minTouchPixels
         width:          height
 
@@ -137,7 +135,7 @@ Item {
         // When we push the mouse button down, we un-anchor the mouse area to prevent a resizing loop
         onPressed: {
             pipResize.anchors.top = undefined // Top doesn't seem to 'detach'
-            pipResize.anchors.left = undefined // This one works right, which is what we really need
+            pipResize.anchors.right = undefined // This one works right, which is what we really need
             pipResize.initialX = mouse.x
             pipResize.initialWidth = _root.width
         }
@@ -145,7 +143,7 @@ Item {
         // When we let go of the mouse button, we re-anchor the mouse area in the correct position
         onReleased: {
             pipResize.anchors.top = _root.top
-            pipResize.anchors.left = _root.left
+            pipResize.anchors.right = _root.right
         }
 
         // Drag
@@ -162,10 +160,10 @@ Item {
 
     // Resize icon
     Image {
-        source:         /*"/qmlimages/pipResize.svg"*/ "/res/pipResize"
+        source:         "/qmlimages/pipResize.svg"
         fillMode:       Image.PreserveAspectFit
         mipmap: true
-        anchors.left:  parent.left
+        anchors.right:  parent.right
         anchors.top:    parent.top
         visible:        _isExpanded && (ScreenTools.isMobile || pipMouseArea.containsMouse)
         height:         ScreenTools.defaultFontPixelHeight * 2.5
@@ -194,10 +192,10 @@ Item {
     // Pip to Window
     Image {
         id:             popupPIP
-        source:         /*"/qmlimages/PiP.svg"*/ "/res/pip"
+        source:         "/qmlimages/PiP.svg"
         mipmap:         true
         fillMode:       Image.PreserveAspectFit
-        anchors.right:   parent.right
+        anchors.left:   parent.left
         anchors.top:    parent.top
         visible:        _isExpanded && !ScreenTools.isMobile && pipMouseArea.containsMouse
         height:         ScreenTools.defaultFontPixelHeight * 2.5
@@ -215,7 +213,7 @@ Item {
         source:         "/qmlimages/pipHide.svg"
         mipmap:         true
         fillMode:       Image.PreserveAspectFit
-        anchors.right:   parent.right
+        anchors.left:   parent.left
         anchors.bottom: parent.bottom
         visible:        _isExpanded && (ScreenTools.isMobile || pipMouseArea.containsMouse)
         height:         ScreenTools.defaultFontPixelHeight * 2.5
@@ -223,16 +221,13 @@ Item {
         sourceSize.height:  height
         MouseArea {
             anchors.fill:   parent
-            onClicked:{
-                _root._setPipIsExpanded(false)
-                videoClose()
-            }
+            onClicked:      _root._setPipIsExpanded(false)
         }
     }
 
     Rectangle {
         id:                     showPip
-        anchors.right :          parent.right
+        anchors.left :          parent.left
         anchors.bottom:         parent.bottom
         height:                 ScreenTools.defaultFontPixelHeight * 2
         width:                  ScreenTools.defaultFontPixelHeight * 2
@@ -251,10 +246,7 @@ Item {
         }
         MouseArea {
             anchors.fill:   parent
-            onClicked: {
-                _root._setPipIsExpanded(true)
-                videoOpen()
-            }
+            onClicked:      _root._setPipIsExpanded(true)
         }
     }
 }

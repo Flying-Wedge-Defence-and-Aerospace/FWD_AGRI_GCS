@@ -11,7 +11,7 @@
 
 MotorComponent::MotorComponent(Vehicle* vehicle, AutoPilotPlugin* autopilot, QObject* parent) :
     VehicleComponent(vehicle, autopilot, parent),
-    _name(tr("Motor Setup"))
+    _name(tr("Motors"))
 {
 
 }

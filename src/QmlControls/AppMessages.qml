@@ -52,7 +52,7 @@ Item {
             Component {
                 id: delegateItem
                 Rectangle {
-                    color:  /*index % 2 == 0 ? qgcPal.window : qgcPal.windowShade*/ "#2c3e50"
+                    color:  index % 2 == 0 ? qgcPal.window : qgcPal.windowShade
                     height: Math.round(ScreenTools.defaultFontPixelHeight * 0.5 + field.height)
                     width:  listview.width
 

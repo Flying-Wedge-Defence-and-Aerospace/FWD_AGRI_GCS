@@ -17,7 +17,7 @@
 
 APMCameraComponent::APMCameraComponent(Vehicle* vehicle, AutoPilotPlugin* autopilot, QObject* parent)
     : VehicleComponent(vehicle, autopilot, parent)
-    , _name(tr("Camera Controls"))
+    , _name(tr("Camera"))
 {
 }
 

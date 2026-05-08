@@ -73,18 +73,42 @@
     "type":                 "bool",
     "default":              false
 },
-{
-    "name":      "enableCustomActions",
-    "shortDesc": "Enable Custom Actions",
-    "type":      "bool",
-    "default":   false
-},
-{
-    "name":      "customActionDefinitions",
-    "shortDesc": "Custom Action Definitions",
-    "longDesc":  "File that defines custom actions to send connected vehicle",
-    "type":      "string",
-    "default":   ""
-}
-]
+        {
+            "name":             "enableCustomActions",
+            "shortDesc": "Enable Custom Actions",
+            "type":      "bool",
+            "default":   false
+        },
+        {
+            "name":      "customActionDefinitions",
+            "shortDesc": "Custom Action Definitions",
+            "longDesc":  "File that defines custom actions to send connected vehicle",
+            "type":      "string",
+            "default":   ""
+        },
+        {
+            "name":             "telemetryVisible",
+            "shortDesc": "Show/Hide Telemetry panel",
+            "type":             "bool",
+            "default":     true
+        },
+        {
+            "name":             "hudVisible",
+            "shortDesc": "Show/Hide HUD (Instrument Panel)",
+            "type":             "bool",
+            "default":     true
+        },
+        {
+            "name":             "toolStripVisible",
+            "shortDesc": "Show/Hide ToolStrip",
+            "type":             "bool",
+            "default":     true
+        },
+        {
+            "name":             "videoVisible",
+            "shortDesc": "Show/Hide Video",
+            "type":             "bool",
+            "default":     true
+        }
+    ]
 }

@@ -44,7 +44,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             height: 1
-            color: "white"
+            color: "gray"
             opacity: 0.3
         }
 
@@ -61,7 +61,7 @@ Item {
             visible: multiRotorFailSafe.visible
             Layout.fillWidth: true
             height: 1
-            color: "white"
+            color: "gray"
             opacity: 0.3
         }
 
@@ -78,7 +78,7 @@ Item {
             visible:  fixedWingFailSafe.visible ? true : false
             Layout.fillWidth: true
             height: 1
-            color: "white"
+            color: "gray"
             opacity: 0.3
         }
 
@@ -95,7 +95,7 @@ Item {
             visible:  roverFailSafe.visible ? true : false
             Layout.fillWidth: true
             height: 1
-            color: "white"
+            color: "gray"
             opacity: 0.3
         }
 
@@ -112,7 +112,7 @@ Item {
             visible:  roverFailSafeAction.visible ? true : false
             Layout.fillWidth: true
             height: 1
-            color: "white"
+            color: "gray"
             opacity: 0.3
         }
 
@@ -129,7 +129,7 @@ Item {
             visible:  roverFailSafeCrashCheck.visible ? true : false
             Layout.fillWidth: true
             height: 1
-            color: "white"
+            color: "gray"
             opacity: 0.3
         }
 
@@ -144,7 +144,7 @@ Item {
             visible:  batt1LowFailSafe.visible ? true : false
             Layout.fillWidth: true
             height: 1
-            color: "white"
+            color: "gray"
             opacity: 0.3
         }
 
@@ -159,7 +159,7 @@ Item {
             visible:  batt1CriticalFailSafe.visible ? true : false
             Layout.fillWidth: true
             height: 1
-            color: "white"
+            color: "gray"
             opacity: 0.3
         }
 
@@ -174,7 +174,7 @@ Item {
             visible:  batt2LowFailSafe.visible ? true : false
             Layout.fillWidth: true
             height: 1
-            color: "white"
+            color: "gray"
             opacity: 0.3
         }
 
@@ -189,7 +189,7 @@ Item {
             visible:  batt2CriticalFailSafe.visible ? true : false
             Layout.fillWidth: true
             height: 1
-            color: "white"
+            color: "gray"
             opacity: 0.3
         }
 
@@ -219,7 +219,7 @@ Item {
             visible:  geoFenceEnable.visible ? true : false
             Layout.fillWidth: true
             height: 1
-            color: "white"
+            color: "gray"
             opacity: 0.3
         }
 
@@ -236,7 +236,7 @@ Item {
             visible:  geoFenceAction.visible ? true : false
             Layout.fillWidth: true
             height: 1
-            color: "white"
+            color: "gray"
             opacity: 0.3
         }
 
@@ -253,7 +253,7 @@ Item {
             visible:  rtlMinAltMR.visible ? true : false
             Layout.fillWidth: true
             height: 1
-            color: "white"
+            color: "gray"
             opacity: 0.3
         }
 

@@ -11,7 +11,6 @@
 import QtQuick                  2.3
 import QtQuick.Controls         1.2
 import QtQuick.Controls.Styles  1.4
-import QtGraphicalEffects 1.15
 
 import QGroundControl                       1.0
 import QGroundControl.FactSystem            1.0
@@ -25,9 +24,9 @@ Rectangle {
     anchors.fill:   parent
     anchors.rightMargin: ScreenTools.defaultFontPixelWidth
     anchors.leftMargin:  ScreenTools.defaultFontPixelWidth
-    color:          /*qgcPal.window*/ "black"
+    color:          qgcPal.window
 
-    property real _minSummaryW:     ScreenTools.isTinyScreen ? ScreenTools.defaultFontPixelWidth * 28 : ScreenTools.defaultFontPixelWidth * 36
+    property real _minSummaryW:     ScreenTools.isTinyScreen ? ScreenTools.defaultFontPixelWidth * 28 : ScreenTools.defaultFontPixelWidth * 45
     property real _summaryBoxWidth: _minSummaryW
     property real _summaryBoxSpace: ScreenTools.defaultFontPixelWidth * 2
 
@@ -91,10 +90,9 @@ Rectangle {
                 property bool setupComplete: QGroundControl.multiVehicleManager.activeVehicle ? QGroundControl.multiVehicleManager.activeVehicle.autopilot.setupComplete : false
             }
 
-            Grid {
+            Flow {
                 id:         _flowCtl
                 width:      _summaryRoot.width
-                columns: 4
                 spacing:    _summaryBoxSpace
 
                 Repeater {
@@ -102,16 +100,15 @@ Rectangle {
 
                     // Outer summary item rectangle
                     Rectangle {
-                        id: rectBox
-                        width:      320
-                        height:     ScreenTools.defaultFontPixelHeight * 13 + 60
-                        color:      /*qgcPal.windowShade*/"black"
+                        width:      _summaryBoxWidth
+                        height:     ScreenTools.defaultFontPixelHeight * 16
+                        color:      qgcPal.windowShade
                         visible:    modelData.summaryQmlSource.toString() !== ""
                         border.width: 1
                         border.color: qgcPal.text
-                        radius: 10
+                        radius: 7
                         Component.onCompleted: {
-                            border.color = /*Qt.rgba(border.color.r, border.color.g, border.color.b, 0.1)*/ "white"
+                            border.color = Qt.rgba(border.color.r, border.color.g, border.color.b, 0.1)
                         }
 
                         readonly property real titleHeight: ScreenTools.defaultFontPixelHeight * 2
@@ -121,15 +118,11 @@ Rectangle {
                             id:     titleBar
                             width:  parent.width
                             height: titleHeight
-                            //radius: 5
-                            backRadius: 5
                             text:   capitalizeWords(modelData.name)
-                            font.bold: true
-
+                            backRadius: 0
 
                             // Setup indicator
                             Rectangle {
-                                id: setupRect
                                 anchors.rightMargin:    ScreenTools.defaultFontPixelWidth
                                 anchors.right:          parent.right
                                 anchors.verticalCenter: parent.verticalCenter
@@ -141,16 +134,27 @@ Rectangle {
                             }
 
                             onClicked : {
-                                console.log(modelData.setupSource)
+                                //console.log(modelData.setupSource)
                                 if (modelData.setupSource !== "") {
                                     setupView.showVehicleComponentPanel(modelData)
                                 }
                             }
                         }
+
+                        Rectangle {
+                            id:line
+                            anchors.top: titleBar.bottom
+                            width: parent.width
+                            height: 1
+                        }
+
                         // Summary Qml
                         Rectangle {
-                            anchors.top:    titleBar.bottom
+                            id: sumRect
+                            anchors.top:    line.bottom
                             width:          parent.width
+                            border.color: "white"
+                            border.width: 1
                             Loader {
                                 anchors.fill:       parent
                                 anchors.margins:    ScreenTools.defaultFontPixelWidth

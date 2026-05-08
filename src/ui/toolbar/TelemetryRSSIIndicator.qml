@@ -24,6 +24,8 @@ Item {
     anchors.bottom: parent.bottom
     width:          telemIcon.width * 1.1
 
+    QGCPalette { id: qgcPal }
+
     property bool showIndicator: _hasTelemetry
 
     property var  _activeVehicle:   QGroundControl.multiVehicleManager.activeVehicle
@@ -35,8 +37,8 @@ Item {
             width:  telemCol.width   + ScreenTools.defaultFontPixelWidth  * 3
             height: telemCol.height  + ScreenTools.defaultFontPixelHeight * 2
             radius: ScreenTools.defaultFontPixelHeight * 0.5
-            color:  /*qgcPal.window*/ "#2c3e50"
-            border.color:   /*qgcPal.text*/ "yellow"
+            color:  qgcPal.window
+            border.color:   qgcPal.text
             Column {
                 id:                 telemCol
                 spacing:            ScreenTools.defaultFontPixelHeight * 0.5
@@ -87,7 +89,7 @@ Item {
     MouseArea {
         anchors.fill: parent
         onClicked: {
-            mainWindow.showIndicatorPopup(_root, telemRSSIInfo)
+            mainWindow.showIndicatorPopup(_root, telemRSSIInfo, "bottom")
         }
     }
 }

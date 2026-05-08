@@ -18,7 +18,7 @@ Button {
     property real   pointSize:      ScreenTools.defaultFontPointSize    ///< Point size for button text
     property bool   showBorder:     qgcPal.globalTheme === QGCPalette.Light
     property bool   iconLeft:       false
-    property real   backRadius:     0
+    property real   backRadius:     7
     property real   heightFactor:   0.5
     property real   fontWeight:     Font.Normal // default for qml Text
     property string iconSource
@@ -38,30 +38,11 @@ Button {
         implicitWidth:  ScreenTools.implicitButtonWidth
         implicitHeight: ScreenTools.implicitButtonHeight
         radius:         backRadius
-        border.width:   /*showBorder ? 1 : 0*/ 1
-        border.color:   /*qgcPal.buttonText*/ "white"
-        // color:          _showHighlight ?
-        //                     qgcPal.buttonHighlight :
-        //                     (primary ? qgcPal.primaryButton : qgcPal.button)
-
-        // color: _showHighlight ?
-        //        Qt.rgba(0.2, 0.6, 0.9, 1) :   // bright blue
-        //        (primary ? Qt.rgba(0.15, 0.45, 0.75, 1) : Qt.rgba(0.3, 0.3, 0.3, 1))
-
-        color: _showHighlight ? "#90a010" : (primary ? "gray" : "#3a3a3a")
-
-
-        // color: !_rootButton.enabled
-        //        ? "gray"                          // disabled
-        //        : _rootButton.hovered
-        //          ? "#1aa1a1"                     // hover effect (slightly lighter black)
-        //          : "#2c3e50"                       // no
-
-
-        // color: _showHighlight ?
-        //        "#1abc9c" :        // teal (highlight)
-        //        (primary ? "#3498db" : "#34495e")
-
+        border.width:   showBorder ? 1 : 0
+        border.color:   qgcPal.buttonText
+        color:          _showHighlight ?
+                            qgcPal.buttonHighlight :
+                            (primary ? qgcPal.primaryButton : "#5A7D9A"/*qgcPal.button*/)
     }
 
     contentItem: Item {

@@ -206,7 +206,7 @@ Rectangle {
 
         ColumnLayout {
             id:         buttonColumn
-            spacing:    _defaultTextHeight / 2
+            spacing:    0
 
             // Repeater {
             //     model:                  _corePlugin ? _corePlugin.settingsPages : []
@@ -225,11 +225,11 @@ Rectangle {
 
             SubMenuButton {
                 id:                 summaryButton
-                imageResource:      "/res/summary"
+                imageResource:      "/qmlimages/VehicleSummaryIcon.png"
                 setupIndicator:     false
                 checked:            true
                 exclusiveGroup:     setupButtonGroup
-                text:               qsTr("Setup Summary")
+                text:               qsTr("Summary")
                 Layout.fillWidth:   true
                 onClicked: showSummaryPanel()
             }
@@ -268,7 +268,7 @@ Rectangle {
                 onClicked:          showPanel(this, "JoystickConfig.qml")
 
                 property var    _activeJoystick:        joystickManager.activeJoystick
-                property bool   _buttonsOnly:           _activeJoystick ? _activeJoystick.axisCount == 0 : false
+                property bool   _buttonsOnly:           _activeJoystick ? _activeJoystick.axisCount === 0 : false
                 property bool   _forcedToButtonsOnly:   !QGroundControl.corePlugin.options.allowJoystickSelection && _buttonsOnly
             }
 

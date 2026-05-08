@@ -41,7 +41,7 @@ ToolStripActionList {
     model: [
         ToolStripAction {
             text:           qsTr("Plan")
-            iconSource:     "/res/strategy"
+            iconSource:     "/res/planView"
             onTriggered:    mainWindow.showPlanView()
         },
         PreFlightCheckListShowAction { onTriggered: displayPreFlightChecklist() },

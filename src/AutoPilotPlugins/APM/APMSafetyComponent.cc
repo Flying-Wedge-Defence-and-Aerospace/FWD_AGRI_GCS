@@ -17,7 +17,7 @@
 
 APMSafetyComponent::APMSafetyComponent(Vehicle* vehicle, AutoPilotPlugin* autopilot, QObject* parent)
     : VehicleComponent(vehicle, autopilot, parent)
-    , _name(tr("Safety Systems"))
+    , _name(tr("Safety"))
 {
 }
 

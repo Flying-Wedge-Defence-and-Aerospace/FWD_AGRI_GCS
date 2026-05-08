@@ -250,7 +250,7 @@ SetupPage {
 
                         RowLayout {
                             spacing: ScreenTools.defaultFontPixelWidth
-                            visible: battSource.rawValue == -1
+                            visible: battSource.rawValue === -1
 
                             QGCLabel { text:  qsTr("Source") }
                             FactComboBox {
@@ -265,7 +265,7 @@ SetupPage {
                             id:             batteryGrid
                             columns:        5
                             columnSpacing:  ScreenTools.defaultFontPixelWidth
-                            visible:        battSource.rawValue != -1
+                            visible:        battSource.rawValue !== -1
 
                             QGCLabel { text:  qsTr("Source") }
                             FactComboBox {

@@ -33,6 +33,7 @@ Rectangle {
     property bool _first: true
 
     property bool _commingFromRIDSettings:  false
+    property bool _commingFromCommLinks:    false
 
     QGCPalette { id: qgcPal }
 
@@ -41,6 +42,9 @@ Rectangle {
         if (globals.commingFromRIDIndicator) {
             __rightPanel.source = "qrc:/qml/RemoteIDSettings.qml"
             globals.commingFromRIDIndicator = false
+        } else if (globals.commingFromCommLinks) {
+            __rightPanel.source = "qrc:/qml/LinkSettings.qml"
+            globals.commingFromCommLinks = false
         } else {
             __rightPanel.source = QGroundControl.corePlugin.settingsPages[QGroundControl.corePlugin.defaultSettings].url
         }
@@ -60,7 +64,7 @@ Rectangle {
 
         ColumnLayout {
             id:         buttonColumn
-            spacing:    _verticalMargin
+            spacing:    0
 
             property real _maxButtonWidth: 0
 
@@ -92,7 +96,16 @@ Rectangle {
                         }
                         if(_first) {
                             _first = false
-                            checked = true
+                            if (!globals.commingFromCommLinks) {
+                                checked = true
+                            }
+                        }
+                        if (globals.commingFromCommLinks) {
+                            _commingFromCommLinks = true
+                            checked = false
+                            if (modelData.url === "qrc:/qml/LinkSettings.qml") {
+                                checked = true
+                            }
                         }
                         if (_commingFromRIDSettings) {
                             checked = false

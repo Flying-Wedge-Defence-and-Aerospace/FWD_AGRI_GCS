@@ -28,7 +28,11 @@ Canvas {
     property bool   showSequenceNumbers:    true
 
     property real   _width:             showGimbalYaw ? Math.max(_gimbalYawWidth, labelControl.visible ? labelControl.width : indicator.width) : (labelControl.visible ? labelControl.width : indicator.width)
-    property real   _height:            showGimbalYaw ? _gimbalYawWidth : (labelControl.visible ? labelControl.height : indicator.height)
+    property real _height: showGimbalYaw
+            ? _gimbalYawWidth
+            : (small ? indicator.height : ScreenTools.defaultFontPixelHeight * 2)
+
+    //property real   _height:            showGimbalYaw ? _gimbalYawWidth : (labelControl.visible ? labelControl.height : indicator.height)
     property real   _gimbalYawRadius:   ScreenTools.defaultFontPixelHeight
     property real   _gimbalYawWidth:    _gimbalYawRadius * 2
     property real   _smallRadiusRaw:    Math.ceil((ScreenTools.defaultFontPixelHeight * ScreenTools.smallFontPointRatio) / 2)
@@ -83,7 +87,7 @@ Canvas {
         color:                  "white"
         opacity:                0.5
         radius:                 _labelRadius
-        visible:                /*_label.length !== 0 && !small*/ false
+        visible:                _label.length !== 0 && !small
     }
 
     QGCLabel {
@@ -100,101 +104,36 @@ Canvas {
         visible:                labelControl.visible
     }
 
-
-    // Rectangle {
-    //     id:                             indicator
-    //     anchors.horizontalCenter:       parent.left
-    //     anchors.verticalCenter:         parent.top
-    //     anchors.horizontalCenterOffset: anchorPointX
-    //     anchors.verticalCenterOffset:   anchorPointY
-    //     width:                          _indicatorRadius * 2
-    //     height:                         width
-    //     color:                          root.color
-    //     radius:                         _indicatorRadius
-
-    //     QGCLabel {
-    //         id: idLabel
-    //         anchors.fill:           parent
-    //         horizontalAlignment:    Text.AlignHCenter
-    //         verticalAlignment:      Text.AlignVCenter
-    //         color:                  /*"white"*/ "yellow"
-    //         font.pointSize:         ScreenTools.defaultFontPointSize
-    //         fontSizeMode:           Text.Fit
-    //         text:                   _index
-    //         font.bold: true
-    //     }
-    // }
-
-    // Item {
-    //     id: indicator
-    //     anchors.horizontalCenter: parent.left
-    //     anchors.verticalCenter: parent.top
-    //     anchors.horizontalCenterOffset: anchorPointX
-    //     anchors.verticalCenterOffset: anchorPointY
-    //     width: _indicatorRadius * 6
-    //     height: width + 80
-
-    //     // Icon
-    //     Image {
-    //         id: placeIcon
-    //         anchors.fill: parent
-    //         /*source: "qrc:/qmlimages/MapCenter.svg"*/   // replace with your icon
-    //         source: "/res/place_icon/"
-    //         fillMode: Image.PreserveAspectFit
-    //     }
-
-    //     // Index number on top
-    //     QGCLabel {
-    //         anchors.centerIn: parent
-    //         anchors.verticalCenterOffset: -5
-    //         text: _index
-    //         color: "yellow"
-    //         font.bold: true
-    //         font.pointSize: ScreenTools.defaultFontPointSize
-    //     }
-    // }
-
     Rectangle {
-        id: indicator
-        anchors.horizontalCenter: parent.left
-        anchors.verticalCenter: parent.top
+        id:                             indicator
+        anchors.horizontalCenter:       parent.left
+        anchors.verticalCenter:         parent.top
         anchors.horizontalCenterOffset: anchorPointX
-        anchors.verticalCenterOffset: anchorPointY
-        width: _indicatorRadius * 6
-        height: width + 40
-
-        color: "transparent"
-        border.width: 0
-
-        Image {
-            id: placeIcon
-            anchors.bottomMargin: 25
-            anchors.fill: parent
-            source: "/res/place_icon/"
-            fillMode: Image.PreserveAspectFit
-            opacity: 0.5
-        }
+        anchors.verticalCenterOffset:   anchorPointY
+        width:                          _indicatorRadius * 2
+        height:                         width
+        color:                          root.color
+        radius:                         _indicatorRadius
 
         QGCLabel {
-            anchors.centerIn: parent
-            anchors.verticalCenterOffset: -17
-            text: _index
-            color: "yellow"
-            font.bold: true
-            font.pointSize: ScreenTools.defaultFontPointSize
+            anchors.fill:           parent
+            horizontalAlignment:    Text.AlignHCenter
+            verticalAlignment:      Text.AlignVCenter
+            color:                  "white"
+            font.pointSize:         ScreenTools.defaultFontPointSize
+            fontSizeMode:           Text.Fit
+            text:                   _index
         }
     }
 
-
-
     // Extra circle to indicate selection
     Rectangle {
-        width:          indicator.width * 1
+        width:          indicator.width * 2
         height:         width
         radius:         width * 0.5
         color:          Qt.rgba(0,0,0,0)
         border.color:   Qt.rgba(1,1,1,0.5)
-        border.width:   3
+        border.width:   1
         visible:        checked && highlightSelected
         anchors.centerIn: indicator
     }
@@ -213,4 +152,4 @@ Canvas {
             parent.clicked(Qt.point(mouse.x, mouse.y))
         }
     }
-    }
+}

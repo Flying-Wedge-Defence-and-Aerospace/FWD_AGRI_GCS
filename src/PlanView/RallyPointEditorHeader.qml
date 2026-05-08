@@ -20,7 +20,7 @@ QGCFlickable {
         width:  parent.width
         height: innerEditorRect.y + innerEditorRect.height + (_margin * 2)
         radius: _radius
-        color:  /*qgcPal.missionItemEditor*/ "#77800000"
+        color:  qgcPal.missionItemEditor /*"#77800000"*/
 
         QGCLabel {
             id:                 editorLabel
@@ -30,7 +30,6 @@ QGCFlickable {
             text:               qsTr("RALLY POINTS")
             font.bold: true
             font.pointSize: ScreenTools.isMobile ? 10 : 13
-            color: "white"
         }
 
         Rectangle {
@@ -40,7 +39,7 @@ QGCFlickable {
             anchors.right:      parent.right
             anchors.top:        editorLabel.bottom
             height:             infoLabel.height + (_margin * 2)
-            color:              /*qgcPal.windowShadeDark*/ "#77800000"
+            color:              qgcPal.windowShadeDark /*"#77800000"*/
             radius:             _radius
 
             QGCLabel {
@@ -53,7 +52,6 @@ QGCFlickable {
                 font.pointSize:     /*ScreenTools.smallFontPointSize*/ 8
                 font.italic: true
                 text:               qsTr("Rally Points provide alternate landing points when performing a Return to Launch (RTL).")
-                color: "yellow"
             }
 
             /*

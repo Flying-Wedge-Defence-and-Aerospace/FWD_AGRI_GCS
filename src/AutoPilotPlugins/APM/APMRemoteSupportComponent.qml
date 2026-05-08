@@ -28,18 +28,18 @@ SetupPage {
             id:                 backgroundRectangle
             width:              availableWidth
             height:             elementsRow.height * 1.5
-            color:              /*qgcPal.windowShade*/ "#2c3e50"
+            color:              qgcPal.windowShade
 
             GridLayout {
                 id:               elementsRow
                 columns:          2
-                
+
                 anchors.left:           parent.left
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.margins:        ScreenTools.defaultFontPixelWidth
 
-                columnSpacing:          ScreenTools.defaultFontPixelWidth + 10
-                rowSpacing:             ScreenTools.defaultFontPixelWidth + 10
+                columnSpacing:          ScreenTools.defaultFontPixelWidth
+                rowSpacing:             ScreenTools.defaultFontPixelWidth
 
                 QGCLabel {
                     visible:            QGroundControl.settingsManager.appSettings.forwardMavlinkAPMSupportHostName.visible
@@ -53,7 +53,6 @@ SetupPage {
                 QGCButton {
                     text:    qsTr("Connect")
                     enabled: !QGroundControl.linkManager.mavlinkSupportForwardingEnabled
-                    backRadius: 7
 
                     onPressed: {
                         QGroundControl.linkManager.createMavlinkForwardingSupportLink()

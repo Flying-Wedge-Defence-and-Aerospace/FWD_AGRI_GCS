@@ -41,7 +41,7 @@ ColumnLayout {
         fillMode:                   Image.PreserveAspectFit
         mipmap:                     true
         smooth:                     true
-        color:                     /* _color*/ "white"
+        color:                      _color
         opacity:                    instrumentValueData.currentOpacity
         visible:                    _iconVisible
 
@@ -78,7 +78,7 @@ ColumnLayout {
         height:             _tightHeight
         font.pointSize:     /*ScreenTools.smallFontPointSize*/ 15
         text:               instrumentValueData.text
-        color:              /*_color*/ "white"
+        color:              _color
         opacity:            instrumentValueData.currentOpacity
         visible:            !_iconVisible
     }

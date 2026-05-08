@@ -25,10 +25,8 @@ Rectangle {
     id: root
     width: ScreenTools.isMobile ? ScreenTools.defaultFontPixelWidth * 21 : ScreenTools.defaultFontPixelWidth * 48
     height: mainLayout.height + 20
-    color:  /*Qt.rgba(0.2, 0.4, 0.8, 0.65)*/ "#66800000"
-    radius: 10
-    border.color: "orange"
-    border.width: 2
+    color:  qgcPal.globalTheme === QGCPalette.Light ? Qt.rgba(1, 1, 1, 0.5) : Qt.rgba(0, 0, 0, 0.5)
+    radius: ScreenTools.defaultFontPixelHeight / 2
 
     property var    activeVehicle:         QGroundControl.multiVehicleManager.activeVehicle
 
@@ -49,7 +47,6 @@ Rectangle {
             RowLayout {
                 QGCLabel {
                     text: qsTr("Roll  ")
-                    color: "white"
                     font.bold: true
                     font.pointSize: ScreenTools.isMobile ? 6.5 : 9
                 }
@@ -60,14 +57,12 @@ Rectangle {
                           ? _activeVehicle.roll.valueString
                           : "N/A"
                     font.bold: true
-                    color: "white"
                     horizontalAlignment: Text.AlignHCenter
                     font.pointSize: ScreenTools.isMobile ? 6.5 : 9
                 }
 
                 QGCLabel {
                     text: "deg"
-                    color: "white"
                     font.bold: true
                     font.pointSize: ScreenTools.isMobile ? 6.5 : 9
                 }
@@ -76,13 +71,12 @@ Rectangle {
             Rectangle {
                 width: 1
                 Layout.fillHeight: true
-                color: "white"
+                color: "gray"
             }
 
             RowLayout {
                 QGCLabel {
                     text: qsTr("Pitch  ")
-                    color: "white"
                     font.bold: true
                     font.pointSize: ScreenTools.isMobile ? 6.5 : 9
                 }
@@ -93,14 +87,12 @@ Rectangle {
                           ? _activeVehicle.pitch.valueString
                           : "N/A"
                     font.bold: true
-                    color: "white"
                     horizontalAlignment: Text.AlignHCenter
                     font.pointSize: ScreenTools.isMobile ? 6.5 : 9
                 }
 
                 QGCLabel {
                     text: " deg"
-                    color: "white"
                     font.bold: true
                     font.pointSize: ScreenTools.isMobile ? 6.5 : 9
                 }
@@ -109,13 +101,12 @@ Rectangle {
             Rectangle {
                 width: 1
                 Layout.fillHeight: true
-                color: "white"
+                color: "gray"
             }
 
             RowLayout {
                 QGCLabel {
                     text: qsTr("Yaw")
-                    color: "white"
                     font.bold: true
                     font.pointSize: ScreenTools.isMobile ? 6.5 : 9
                 }
@@ -126,14 +117,12 @@ Rectangle {
                           ? _activeVehicle.yawRate.valueString
                           : "N/A"
                     font.bold: true
-                    color: "white"
                     horizontalAlignment: Text.AlignHCenter
                     font.pointSize: ScreenTools.isMobile ? 6.5 : 9
                 }
 
                 QGCLabel {
                     text: "deg"
-                    color: "white"
                     font.bold: true
                     font.pointSize: ScreenTools.isMobile ? 6.5 : 9
                 }
@@ -149,7 +138,6 @@ Rectangle {
 
                 QGCLabel {
                     text: qsTr("Air Speed")
-                    color: /*qgcPal.text*/ "white"
                     font.bold: true
                     font.pointSize: ScreenTools.isMobile ? 6.5 : 9
                 }
@@ -159,7 +147,6 @@ Rectangle {
                     text: (_activeVehicle && _activeVehicle.airSpeed)
                           ? _activeVehicle.airSpeed.valueString
                           : "N/A"
-                    color: "white"
                     font.bold: true
                     horizontalAlignment: Text.AlignHCenter
                     font.pointSize: ScreenTools.isMobile ? 6.5 : 9
@@ -167,7 +154,6 @@ Rectangle {
 
                 QGCLabel {
                     text: "m/s"
-                    color: "white"
                     font.bold: true
                     font.pointSize: ScreenTools.isMobile ? 6.5 : 9
                 }
@@ -176,13 +162,12 @@ Rectangle {
             Rectangle {
                 width: 1
                 Layout.fillHeight: true
-                color: "white"
+                color: "gray"
             }
 
             RowLayout {
                 QGCLabel {
                     text: qsTr("Ground Speed")
-                    color: "white"
                     font.bold: true
                     font.pointSize: ScreenTools.isMobile ? 6.5 : 9
                 }
@@ -191,7 +176,6 @@ Rectangle {
                     Layout.preferredWidth: 20
                     text: (_activeVehicle && _activeVehicle.groundSpeed)
                             ? _activeVehicle.groundSpeed.valueString : "N/A"
-                    color: "white"
                     font.bold: true
                     horizontalAlignment: Text.AlignHCenter
                     font.pointSize: ScreenTools.isMobile ? 6.5 : 9
@@ -199,7 +183,6 @@ Rectangle {
 
                 QGCLabel {
                     text: "m/s"
-                    color: "white"
                     font.bold: true
                     font.pointSize: ScreenTools.isMobile ? 6.5 : 9
                 }
@@ -211,7 +194,7 @@ Rectangle {
             Layout.alignment: Qt.AlignHCenter
             Layout.fillWidth: true
             Layout.preferredHeight: 2
-            color: "white"
+            color: "gray"
             opacity: 0.5
         }
 
@@ -227,7 +210,7 @@ Rectangle {
             Rectangle {
                 width: infoTable.width / 2
                 height: 50
-                border.color: Qt.rgba(1, 1, 1, 0.3)
+                border.color: "gray"
                 border.width: 0.5
                 color: "transparent"
 
@@ -237,7 +220,6 @@ Rectangle {
                     QGCLabel {
                         text: qsTr("Alt Rel (m)")
                         font.bold: true
-                        color: "white"
                         Layout.alignment: Qt.AlignHCenter
                         font.pointSize: ScreenTools.isMobile ? 5.5 : 9
                     }
@@ -246,7 +228,6 @@ Rectangle {
                                 ? _activeVehicle.altitudeRelative.valueString : "N/A"
                         //font.pointSize: 12
                         font.bold: true
-                        color: "white"
                         Layout.alignment: Qt.AlignHCenter
                         font.pointSize: ScreenTools.isMobile ? 5.8 : 11
                     }
@@ -256,7 +237,7 @@ Rectangle {
             Rectangle {
                 width: infoTable.width / 2
                 height: 50
-                border.color: Qt.rgba(1, 1, 1, 0.3)
+                border.color: "gray"
                 border.width: 0.5
                 color: "transparent"
 
@@ -266,7 +247,6 @@ Rectangle {
                     QGCLabel {
                         text: qsTr("Climb Rate (m)")
                         font.bold: true
-                        color: "white"
                         Layout.alignment: Qt.AlignHCenter
                         font.pointSize: ScreenTools.isMobile ? 5.5 : 9
                     }
@@ -274,7 +254,6 @@ Rectangle {
                         text: (_activeVehicle && _activeVehicle.climbRate)
                                 ? _activeVehicle.climbRate.valueString : "N/A"
                         font.bold: true
-                        color: "white"
                         Layout.alignment: Qt.AlignHCenter
                         font.pointSize: ScreenTools.isMobile ? 5.8 : 11
                     }
@@ -285,7 +264,7 @@ Rectangle {
             Rectangle {
                 width: infoTable.width / 2
                 height: 50
-                border.color: Qt.rgba(1, 1, 1, 0.3)
+                border.color: "gray"
                 border.width: 0.5
                 color: "transparent"
 
@@ -295,7 +274,6 @@ Rectangle {
                     QGCLabel {
                         text: qsTr("Flight Distance (m)")
                         font.bold: true
-                        color: "white"
                         Layout.alignment: Qt.AlignHCenter
                         font.pointSize: ScreenTools.isMobile ? 5.5 : 9
                     }
@@ -304,7 +282,6 @@ Rectangle {
                                 ? _activeVehicle.flightDistance.valueString : "N/A"
                         //font.pointSize: 12
                         font.bold: true
-                        color: "white"
                         Layout.alignment: Qt.AlignHCenter
                         font.pointSize: ScreenTools.isMobile ? 6.5 : 11
                     }
@@ -314,7 +291,7 @@ Rectangle {
             Rectangle {
                 width: infoTable.width / 2
                 height: 50
-                border.color: Qt.rgba(1, 1, 1, 0.3)
+                border.color: "gray"
                 border.width: 0.5
                 color: "transparent"
 
@@ -324,13 +301,11 @@ Rectangle {
                     QGCLabel {
                         text: qsTr("Flight Time (sec)")
                         font.bold: true
-                        color: "white"
                         Layout.alignment: Qt.AlignHCenter
                         font.pointSize: ScreenTools.isMobile ? 5.5 : 9
                     }
                     QGCLabel {
                         Layout.alignment: Qt.AlignHCenter
-                        color: "white"
                         text: QGroundControl.multiVehicleManager.activeVehicle ?
                               QGroundControl.multiVehicleManager.activeVehicle.flightTime.valueString : "N/A"
                         //font.pointSize: 12
@@ -346,7 +321,6 @@ Rectangle {
             Layout.alignment: Qt.AlignHCenter
             text: qsTr("BATTERY PROFILE")
             font.bold: true
-            color: "yellow"
             font.pointSize: ScreenTools.isMobile ? 5.8 : 9
         }
 
@@ -361,7 +335,7 @@ Rectangle {
             Rectangle {
                 width: batteryLayout.width / 2
                 height: 50
-                border.color: Qt.rgba(1, 1, 1, 0.3)
+                border.color: "gray"
                 border.width: 0.5
                 color: "transparent"
 
@@ -371,14 +345,12 @@ Rectangle {
                     QGCLabel {
                         text: qsTr("Battery Current (Amp)")
                         font.bold: true
-                        color: "white"
                         Layout.alignment: Qt.AlignHCenter
                         font.pointSize: ScreenTools.isMobile ? 5.5 : 9
                     }
 
                     QGCLabel {
                         Layout.alignment: Qt.AlignHCenter
-                        color: "white"
                         text: (_activeVehicle && _activeVehicle.batteries && _activeVehicle.batteries.count > 0
                                 && _activeVehicle.batteries.get(0))
                               ? _activeVehicle.batteries.get(0).current.valueString
@@ -392,7 +364,7 @@ Rectangle {
             Rectangle {
                 width: batteryLayout.width / 2
                 height: 50
-                border.color: Qt.rgba(1, 1, 1, 0.3)
+                border.color: "gray"
                 border.width: 0.5
                 color: "transparent"
 
@@ -402,14 +374,12 @@ Rectangle {
                     QGCLabel {
                         text: qsTr("Battery Voltage (Vol)")
                         font.bold: true
-                        color: "white"
                         Layout.alignment: Qt.AlignHCenter
                         font.pointSize: ScreenTools.isMobile ? 5.5 : 9
                     }
 
                     QGCLabel {
                         Layout.alignment: Qt.AlignHCenter
-                        color: "white"
                         text: (_activeVehicle && _activeVehicle.batteries && _activeVehicle.batteries.count > 0
                                 && _activeVehicle.batteries.get(0))
                               ? _activeVehicle.batteries.get(0).voltage.valueString
@@ -424,139 +394,68 @@ Rectangle {
         QGCLabel {
             Layout.alignment: Qt.AlignHCenter
             text: qsTr("OTHER PROFILES")
-            color: "yellow"
             font.bold: true
             font.pointSize: ScreenTools.isMobile ? 5.8 : 9
-            visible: (
-                // (activeVehicle && activeVehicle.rcRSSI !== undefined && activeVehicle.rcRSSI > 0) ||
-                (activeVehicle && activeVehicle.rcRSSI !== undefined && activeVehicle.rcRSSI > 0 && activeVehicle.rcRSSI < 100) ||
-                (activeVehicle && activeVehicle.gimbalAvailable) ||
-                (activeVehicle && activeVehicle.remoteIDAvailable) ||
-                (activeVehicle && activeVehicle.telemetryLRSSI !== undefined && activeVehicle.telemetryLRSSI > 0))
+            // visible: (
+            //     // (activeVehicle && activeVehicle.rcRSSI !== undefined && activeVehicle.rcRSSI > 0) ||
+            //     (activeVehicle && activeVehicle .rcRSSI !== undefined && activeVehicle.rcRSSI > 0 && activeVehicle.rcRSSI < 100) ||
+            //     (activeVehicle && activeVehicle.gimbalAvailable) ||
+            //     (activeVehicle && activeVehicle.remoteIDAvailable) ||
+            //     (activeVehicle && activeVehicle.telemetryLRSSI !== undefined && activeVehicle.telemetryLRSSI > 0))
         }
 
-        Rectangle {
-            Layout.alignment: Qt.AlignHCenter
-            width: parent.width * 0.95
-            height: 50
-            border.color: Qt.rgba(1, 1, 1, 0.3)
-            border.width: 0.5
-            color: "transparent"
-            visible: (
-                // (activeVehicle && activeVehicle.rcRSSI !== undefined && activeVehicle.rcRSSI > 0) ||
-                (activeVehicle && activeVehicle.rcRSSI !== undefined && activeVehicle.rcRSSI > 0 && activeVehicle.rcRSSI < 100) ||
-                (activeVehicle && activeVehicle.gimbalAvailable) ||
-                (activeVehicle && activeVehicle.remoteIDAvailable) ||
-                (activeVehicle && activeVehicle.telemetryLRSSI !== undefined && activeVehicle.telemetryLRSSI > 0))
+        RowLayout {
+            spacing: ScreenTools.defaultFontPixelWidth
+            Rectangle {
+                id: rcRssiRect
+                implicitWidth: rcRssiLoader.status === Loader.Ready ? rcRssiLoader.width + ScreenTools.defaultFontPixelWidth : 60
+                height: 30
+                color: "transparent"
+                //visible: activeVehicle && activeVehicle.rcRSSI && activeVehicle.rcRSSI > 0
 
-
-            Row {
-                anchors.fill: parent
-                spacing: 0
-
-                Rectangle {
-                    width: parent.width / 5
-                    height: parent.height
-                    color: "transparent"
-                    //visible: activeVehicle && activeVehicle.rcRSSI && activeVehicle.rcRSSI > 0
-
-                    Item {
-                        anchors.centerIn: parent
-                        width: parent.width
-                        height: parent.height
-
-                        Loader {
-                            id: rcRssiLoader
-                            //source: "qrc:/toolbar/RCRSSIIndicator.qml"
-                            //active: true
-                            anchors.centerIn: parent
-                            width: parent.width * 0.6
-                            height: parent.height * 0.6
-                            source: "qrc:/toolbar/RCRSSIIndicator.qml"
-                        }
-                    }
+                Loader {
+                    id: rcRssiLoader
+                    anchors.fill: parent
+                    source: "qrc:/toolbar/RCRSSIIndicator.qml"
                 }
+            }
 
-                Rectangle {
-                    width: 1
-                    color: "gray"
-                    Layout.fillHeight: true
+            Rectangle {
+                id: gimbalRect
+                implicitWidth: gimbalLoader.status === Loader.Ready ? gimbalLoader.width + ScreenTools.defaultFontPixelWidth : 60
+                height: 30
+                color: "transparent"
+
+                Loader {
+                    id: gimbalLoader
+                    anchors.fill: parent
+                    source: /*(activeVehicle && activeVehicle.gimbalAvailable) ?*/ "qrc:/toolbar/GimbalIndicator.qml" /*: ""*/
                 }
+            }
 
-                Rectangle {
-                    width: parent.width / 2.3
-                    height: parent.height
-                    color: "transparent"
+            Rectangle {
+                id: remoteIdRect
+                implicitWidth: remoteIdLoader.status === Loader.Ready ? remoteIdLoader.width + ScreenTools.defaultFontPixelWidth : 60
+                height: 30
+                color: "transparent"
 
-                    Item {
-                        anchors.centerIn: parent
-                        width: parent.width
-                        height: parent.height
-
-                        Loader {
-                            id: gimbalLoader
-                            source: (activeVehicle && activeVehicle.gimbalAvailable) ? "qrc:/toolbar/GimbalIndicator.qml" : ""
-                            //source: "qrc:/toolbar/GimbalIndicator.qml"
-                            //active: true
-                            anchors.centerIn: parent
-                            width: parent.width * 0.6
-                            height: parent.height * 0.6
-                        }
-                    }
+                Loader {
+                    id: remoteIdLoader
+                    anchors.fill: parent
+                    source: /*(activeVehicle && activeVehicle.remoteIDAvailable) ?*/ "qrc:/toolbar/RemoteIDIndicator.qml" /*: ""*/
                 }
+            }
 
-                Rectangle {
-                    width: 1
-                    color: "gray"
-                    Layout.fillHeight: true
-                }
+            Rectangle {
+                id: telemRssiRect
+                implicitWidth: telemRssiLoader.status === Loader.Ready ? telemRssiLoader.width + ScreenTools.defaultFontPixelWidth : 20
+                height: 30
+                color: "transparent"
 
-                Rectangle {
-                    width: parent.width / 6
-                    height: parent.height
-                    color: "transparent"
-
-                    Item {
-                        anchors.centerIn: parent
-                        width: parent.width
-                        height: parent.height
-
-                        Loader {
-                            id: remoteIdLoader
-                            source: (activeVehicle && activeVehicle.remoteIDAvailable) ? "qrc:/toolbar/RemoteIDIndicator.qml" : ""
-                            //source: "qrc:/toolbar/RemoteIDIndicator.qml"
-                            //active: true
-                            anchors.centerIn: parent
-                            width: parent.width * 0.6
-                            height: parent.height * 0.6
-                        }
-                    }
-                }
-
-                Rectangle {
-                    width: 1
-                    color: "blue"
-                    Layout.fillHeight: true
-                }
-
-                Rectangle {
-                    width: parent.width / 6
-                    height: parent.height
-                    color: "transparent"
-
-                    Item {
-                        anchors.centerIn: parent
-                        width: parent.width
-                        height: parent.height
-
-                        Loader {
-                            id: telemLoader
-                            anchors.centerIn: parent
-                            width: parent.width * 0.6
-                            height: parent.height * 0.6
-                            source: (activeVehicle && activeVehicle.telemetryLRSSI > 0) ? "qrc:/toolbar/TelemetryRSSIIndicator.qml" : ""
-                        }
-                    }
+                Loader {
+                    id: telemRssiLoader
+                    anchors.fill: parent
+                    source: /*(activeVehicle && activeVehicle.telemetryLRSSI > 0) ?*/ "qrc:/toolbar/TelemetryRSSIIndicator.qml" /*: ""*/
                 }
             }
         }

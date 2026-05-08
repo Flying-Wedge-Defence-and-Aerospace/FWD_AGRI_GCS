@@ -74,6 +74,9 @@ public:
     }
 
     QmlComponentInfo* pGeneral                  = nullptr;
+    QmlComponentInfo* pFlyView                  = nullptr;
+    QmlComponentInfo* pPlanView                 = nullptr;
+    QmlComponentInfo* pVideo                    = nullptr;
     QmlComponentInfo* pCommLinks                = nullptr;
     QmlComponentInfo* pOfflineMaps              = nullptr;
 #if defined(QGC_GST_TAISYNC_ENABLED)
@@ -83,6 +86,7 @@ public:
     QmlComponentInfo* pMicrohard                = nullptr;
 #endif
     QmlComponentInfo* pMAVLink                  = nullptr;
+    QmlComponentInfo* pADSBServer               = nullptr;
     QmlComponentInfo* pConsole                  = nullptr;
     QmlComponentInfo* pHelp                     = nullptr;
 #if defined(QT_DEBUG)
@@ -154,6 +158,22 @@ QVariantList &QGCCorePlugin::settingsPages()
                                             QUrl::fromUserInput("qrc:/qml/GeneralSettings.qml"),
                                             QUrl::fromUserInput("qrc:/res/gear-white.svg"));
         _p->settingsList.append(QVariant::fromValue(reinterpret_cast<QmlComponentInfo*>(_p->pGeneral)));
+
+        _p->pFlyView = new QmlComponentInfo(tr("Fly View"),
+                                            QUrl::fromUserInput("qrc:/qml/FlyViewSettings.qml"),
+                                            QUrl::fromUserInput("qrc:/res/fv_icon"));
+        _p->settingsList.append(QVariant::fromValue(reinterpret_cast<QmlComponentInfo*>(_p->pFlyView)));
+
+        _p->pPlanView = new QmlComponentInfo(tr("Plan View"),
+                                            QUrl::fromUserInput("qrc:/qml/PlanViewSettings.qml"),
+                                            QUrl::fromUserInput("qrc:/res/pv_icon"));
+        _p->settingsList.append(QVariant::fromValue(reinterpret_cast<QmlComponentInfo*>(_p->pPlanView)));
+
+        _p->pVideo = new QmlComponentInfo(tr("Video"),
+                                             QUrl::fromUserInput("qrc:/qml/VideoSettings.qml"),
+                                             QUrl::fromUserInput("qrc:/res/vs_icon"));
+        _p->settingsList.append(QVariant::fromValue(reinterpret_cast<QmlComponentInfo*>(_p->pVideo)));
+
         _p->pCommLinks = new QmlComponentInfo(tr("Comm Links"),
                                               QUrl::fromUserInput("qrc:/qml/LinkSettings.qml"),
                                               QUrl::fromUserInput("qrc:/res/commLink_icon"));
@@ -174,10 +194,16 @@ QVariantList &QGCCorePlugin::settingsPages()
                                               QUrl::fromUserInput(""));
         _p->settingsList.append(QVariant::fromValue(reinterpret_cast<QmlComponentInfo*>(_p->pMicrohard)));
 #endif
-        _p->pMAVLink = new QmlComponentInfo(tr("MAVLink"),
+        _p->pMAVLink = new QmlComponentInfo(tr("Telemetry"),
                                             QUrl::fromUserInput("qrc:/qml/MavlinkSettings.qml"),
                                             QUrl::fromUserInput("qrc:/res/mavLink_icon"));
         _p->settingsList.append(QVariant::fromValue(reinterpret_cast<QmlComponentInfo*>(_p->pMAVLink)));
+
+        _p->pADSBServer = new QmlComponentInfo(tr("ADSB Server"),
+                                               QUrl::fromUserInput("qrc:/qml/ADSBServerSettings.qml"),
+                                               QUrl::fromUserInput("qrc:/res/waves.svg"));
+        _p->settingsList.append(QVariant::fromValue(reinterpret_cast<QmlComponentInfo*>(_p->pADSBServer)));
+
         _p->pRemoteID = new QmlComponentInfo(tr("Remote ID"),
                                             QUrl::fromUserInput("qrc:/qml/RemoteIDSettings.qml"),
                                              QUrl::fromUserInput("qrc:/res/remoteId_icon"));

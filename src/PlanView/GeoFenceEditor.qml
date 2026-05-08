@@ -27,7 +27,7 @@ QGCFlickable {
         anchors.right:  parent.right
         height: geoFenceItems.y + geoFenceItems.height + (_margin * 2)
         radius: _radius
-        color:  /*qgcPal.missionItemEditor*/ "#77800000"
+        color:  qgcPal.missionItemEditor /*"#77800000"*/
 
         QGCLabel {
             id:                 geoFenceLabel
@@ -38,7 +38,6 @@ QGCFlickable {
             font.bold: true
             font.pointSize: ScreenTools.isMobile ? 10 : 13
             anchors.leftMargin: ScreenTools.defaultFontPixelWidth
-            color: "white"
         }
 
         Rectangle {
@@ -48,7 +47,7 @@ QGCFlickable {
             anchors.right:      parent.right
             anchors.top:        geoFenceLabel.bottom
             height:             fenceColumn.y + fenceColumn.height + (_margin * 2)
-            color:              /*qgcPal.windowShadeDark*/ /*"#2c3e50"*/ "#77800000"
+            color:              qgcPal.windowShadeDark /*"#2c3e50"*/ /*"#77800000"*/
             radius:             _radius
 
             Column {
@@ -68,7 +67,6 @@ QGCFlickable {
                                         qsTr("GeoFencing allows you to set a virtual fence around the area you want to fly in.") :
                                         qsTr("This vehicle does not support GeoFence.")
                     font.italic: true
-                    color: "yellow"
                 }
 
                 Column {

@@ -1,0 +1,157 @@
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.6.0'
+    }
+}
+
+repositories {
+    google()
+    jcenter()
+}
+
+apply plugin: 'com.android.application'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+    compileOnly fileTree(dir: '/home/fwd/Qt/5.15.2/android/jar', include: ['QtAndroid.jar'])
+}
+android {
+    /*******************************************************
+     * The following variables:
+     * - androidBuildToolsVersion,
+     * - androidCompileSdkVersion
+     * - qt5AndroidDir - holds the path to qt android files
+     *                   needed to build any Qt application
+     *                   on Android.
+     *
+     * are defined in gradle.properties file. This file is
+     * updated by QtCreator and androiddeployqt tools.
+     * Changing them manually might break the compilation!
+     *******************************************************/
+
+    compileSdkVersion androidCompileSdkVersion.toInteger()
+
+    buildToolsVersion '28.0.3'
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['/home/fwd/Qt/5.15.2/android/src', 'src', 'java']
+            java.excludes = ['android/java/src/org/qtproject/qt5/android/QtActivityDelegate.java',
+                 'android/java/src/org/qtproject/qt5/android/QtNative.java',
+                 'android/java/src/org/qtproject/qt5/android/QtLayout.java',
+                 'android/java/src/org/qtproject/qt5/android/QtInputConnection.java',
+                 'android/java/src/org/qtproject/qt5/android/QtSurface.java']
+            aidl.srcDirs = [qt5AndroidDir + '/src', 'src', 'aidl']
+            res.srcDirs = [qt5AndroidDir + '/res', 'res']
+            resources.srcDirs = ['resources']
+            renderscript.srcDirs = ['src']
+            assets.srcDirs = ['assets']
+            jniLibs.srcDirs = ['libs']
+       }
+    }
+
+    tasks.withType(JavaCompile) {
+        options.incremental = true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    // Do not compress Qt binary resources file
+    aaptOptions {
+        noCompress 'rcc'
+    }
+
+    defaultConfig {
+        resConfig "en"
+        minSdkVersion = qtMinSdkVersion
+        targetSdkVersion = qtTargetSdkVersion
+    }
+}
+
+
+/**buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        // Gradle plugin that works with Qt 5.15.2 (compatible with Gradle 5.6.4)
+        classpath 'com.android.tools.build:gradle:4.0.2'
+    }
+}
+
+repositories {
+    google()
+    mavenCentral()
+
+    // Allow loading AARs from project/libs
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+apply plugin: 'com.android.application'
+
+dependencies {
+    // Load all AAR + JAR from android/libs
+    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+
+    // Explicit SIYI AAR
+    implementation(name: 'fpvlib-debug', ext: 'aar')
+    implementation(name: 'fpvlib-release', ext: 'aar')
+
+    implementation 'androidx.annotation:annotation:1.6.0'
+    implementation 'androidx.core:core:1.12.0'
+}
+
+android {
+    compileSdkVersion 33
+    buildToolsVersion '28.0.3'
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['/home/fwd/Qt/5.15.2/android/src', 'src', 'java']
+            aidl.srcDirs = [qt5AndroidDir + '/src', 'src', 'aidl']
+            res.srcDirs = [qt5AndroidDir + '/res', 'res']
+            resources.srcDirs = ['resources']
+            renderscript.srcDirs = ['src']
+            assets.srcDirs = ['assets']
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    aaptOptions {
+        noCompress 'rcc'
+    }
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 33
+        resConfig "en"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}*/
+

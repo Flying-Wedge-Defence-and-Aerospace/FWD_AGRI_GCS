@@ -16,7 +16,7 @@ Rectangle {
     id:                 valuesRect
     width:              availableWidth
     height:             valuesColumn.height + (_margin * 2)
-    color:              /*qgcPal.windowShadeDark*/ /*"#2c3e50"*/ "#77800000"
+    color:              qgcPal.windowShadeDark /*"#2c3e50"*/ /*"#77800000"*/
     visible:            missionItem.isCurrentItem
     radius:             _radius
 
@@ -92,7 +92,6 @@ Rectangle {
                 QGCLabel {
                     id:     altModeLabel
                     text:   QGroundControl.altitudeModeShortDescription(_missionController.globalAltitudeMode)
-                    color: "white"
                 }
                 QGCColoredImage {
                     height:     ScreenTools.defaultFontPixelHeight / 2
@@ -215,7 +214,6 @@ Rectangle {
                     font.pointSize:         /*ScreenTools.smallFontPointSize*/ 8
                     text:                   qsTr("The following speed values are used to calculate total mission time. They do not affect the flight speed for the mission.")
                     font.italic: true
-                    color: "yellow"
                     visible:                _showCruiseSpeed || _showHoverSpeed
                 }
 
@@ -286,7 +284,6 @@ Rectangle {
                     text:                   qsTr("Actual position set by vehicle at flight time.")
                     font.italic: true
                     horizontalAlignment:    Text.AlignHCenter
-                    color: "yellow"
                 }
 
                 QGCButton {

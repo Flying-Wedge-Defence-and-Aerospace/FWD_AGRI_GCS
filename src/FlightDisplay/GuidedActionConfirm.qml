@@ -21,10 +21,8 @@ Rectangle {
     width:      ScreenTools.defaultFontPixelWidth * 50
     height:     mainLayout.height + (_margins * 6)
     radius:     /*ScreenTools.defaultFontPixelWidth / 4*/ 10
-    color:      /*qgcPal.window*/ "#77800000"
+    color:      qgcPal.window /*"#77800000"*/
     visible:    false
-    border.color: "orange"
-    border.width: 2
 
     property var    guidedController
     property var    guidedValueSlider
@@ -100,7 +98,6 @@ Rectangle {
             font.pointSize:         ScreenTools.mediumFontPointSize
             font.bold: true
             font.italic: true
-            color: "yellow"
         }
 
         QGCCheckBox {
@@ -148,37 +145,136 @@ Rectangle {
 
         Rectangle {
             Layout.fillWidth: true
-            color: "white"
             height: 2
+            color: "gray"
         }
 
         RowLayout {
             Layout.fillWidth:   true
             spacing:            ScreenTools.defaultFontPixelWidth
 
-            SliderSwitch {
-                id:                 slider
-                confirmText:        ScreenTools.isMobile ? qsTr("Slide to confirm") : qsTr("Slide or hold spacebar")
-                Layout.fillWidth:   true
 
-                onAccept: {
-                    _root.visible = false
-                    var sliderOutputValue = 0
-                    if (guidedValueSlider.visible) {
-                        sliderOutputValue = guidedValueSlider.getOutputValue()
-                        guidedValueSlider.visible = false
-                    }
-                    hideTrigger = false
-                    guidedController.executeAction(_root.action, _root.actionData, sliderOutputValue, _root.optionChecked)
-                    if (mapIndicator) {
-                        mapIndicator.actionConfirmed()
-                        mapIndicator = undefined
+            // SliderSwitch {
+            //     id:                 slider
+            //     confirmText:        ScreenTools.isMobile ? qsTr("Slide to confirm") : qsTr("Slide or hold spacebar")
+            //     Layout.fillWidth:   true
+
+            //     onAccept: {
+            //         _root.visible = false
+            //         var sliderOutputValue = 0
+            //         if (guidedValueSlider.visible) {
+            //             sliderOutputValue = guidedValueSlider.getOutputValue()
+            //             guidedValueSlider.visible = false
+            //         }
+            //         hideTrigger = false
+            //         guidedController.executeAction(_root.action, _root.actionData, sliderOutputValue, _root.optionChecked)
+            //         if (mapIndicator) {
+            //             mapIndicator.actionConfirmed()
+            //             mapIndicator = undefined
+            //         }
+            //     }
+            // }
+
+            Rectangle {
+                height: slider.height + 16
+                width:  height
+                radius: height / 2
+                color:  qgcPal.primaryButton
+
+                QGCColoredImage {
+                    anchors.margins:    parent.height / 4
+                    anchors.fill:       parent
+                    source:             "/res/tick"
+                    fillMode:           Image.PreserveAspectFit
+                    color:              qgcPal.text
+                }
+
+                QGCMouseArea {
+                    fillItem:   parent
+                    onClicked: {
+                        _root.visible = false
+                        var sliderOutputValue = 0
+                        if (guidedValueSlider.visible) {
+                            sliderOutputValue = guidedValueSlider.getOutputValue()
+                            guidedValueSlider.visible = false
+                        }
+                        hideTrigger = false
+                        guidedController.executeAction(_root.action, _root.actionData, sliderOutputValue, _root.optionChecked)
+                        if (mapIndicator) {
+                            mapIndicator.actionConfirmed()
+                            mapIndicator = undefined
+                        }
                     }
                 }
             }
 
+            Item {
+                Layout.fillWidth: true
+            }
+
+            QGCLabel {
+                id:                 slider
+                //confirmText:        ScreenTools.isMobile ? qsTr("Slide to confirm") : qsTr("Slide or hold spacebar")
+                text: qsTr("Click for above action")
+                font.pointSize: 10
+                font.bold: true
+                //Layout.fillWidth:   true
+
+                // onClicked: {
+                //     _root.visible = false
+                //     var sliderOutputValue = 0
+                //     if (guidedValueSlider.visible) {
+                //         sliderOutputValue = guidedValueSlider.getOutputValue()
+                //         guidedValueSlider.visible = false
+                //     }
+                //     hideTrigger = false
+                //     guidedController.executeAction(_root.action, _root.actionData, sliderOutputValue, _root.optionChecked)
+                //     if (mapIndicator) {
+                //         mapIndicator.actionConfirmed()
+                //         mapIndicator = undefined
+                //     }
+                // }
+            }
+
+            Item {
+                Layout.fillWidth: true
+            }
+
+            // Rectangle {
+            //     height: slider.height + 16
+            //     width:  height
+            //     radius: height / 2
+            //     color:  qgcPal.primaryButton
+
+            //     QGCColoredImage {
+            //         anchors.margins:    parent.height / 4
+            //         anchors.fill:       parent
+            //         source:             "/res/tick"
+            //         fillMode:           Image.PreserveAspectFit
+            //         color:              qgcPal.text
+            //     }
+
+            //     QGCMouseArea {
+            //         fillItem:   parent
+            //         onClicked: {
+            //             _root.visible = false
+            //             var sliderOutputValue = 0
+            //             if (guidedValueSlider.visible) {
+            //                 sliderOutputValue = guidedValueSlider.getOutputValue()
+            //                 guidedValueSlider.visible = false
+            //             }
+            //             hideTrigger = false
+            //             guidedController.executeAction(_root.action, _root.actionData, sliderOutputValue, _root.optionChecked)
+            //             if (mapIndicator) {
+            //                 mapIndicator.actionConfirmed()
+            //                 mapIndicator = undefined
+            //             }
+            //         }
+            //     }
+            // }
+
             Rectangle {
-                height: slider.height * 0.75
+                height: slider.height + 16
                 width:  height
                 radius: height / 2
                 color:  qgcPal.primaryButton

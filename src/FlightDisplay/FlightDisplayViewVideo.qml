@@ -53,7 +53,7 @@ Item {
         anchors.fill:   parent
         source:         "/res/videoBackground"
         fillMode:       Image.PreserveAspectCrop
-        visible:        !(QGroundControl.videoManager.decoding)
+        visible:        mainWindow.videoPanelVisible && !(QGroundControl.videoManager.decoding)
 
         Rectangle {
             anchors.centerIn:   parent
@@ -220,13 +220,13 @@ Item {
             property int zoom: 0
         }
 
-        PhotoVideoControl {
-            id: photoVideoControl
-            anchors.right: videoControl.left
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 5
-            anchors.rightMargin: 5
-            width: _rightPanelWidth
-        }
+        // PhotoVideoControl {
+        //     id: photoVideoControl
+        //     anchors.right: videoControl.left
+        //     anchors.bottom: parent.bottom
+        //     anchors.bottomMargin: 5
+        //     anchors.rightMargin: 5
+        //     width: _rightPanelWidth
+        // }
     }
 }

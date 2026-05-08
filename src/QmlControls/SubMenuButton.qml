@@ -1,4 +1,3 @@
-
 import QtQuick                  2.3
 import QtQuick.Controls         1.2
 import QtQuick.Controls.Styles  1.4
@@ -21,10 +20,12 @@ Button {
     text:               "Button"  ///< Pass in your own button text
     activeFocusOnPress: true
 
-    implicitHeight: ScreenTools.isTinyScreen ? ScreenTools.defaultFontPixelHeight * 3.5 : ScreenTools.defaultFontPixelHeight * 2.5
+    implicitHeight: ScreenTools.isTinyScreen ? ScreenTools.defaultFontPixelHeight * 3.5 : ScreenTools.defaultFontPixelHeight * 2
     implicitWidth:  __panel.implicitWidth
 
     onCheckedChanged: checkable = false
+
+    //property var imageColor: undefined
 
     style: ButtonStyle {
         id: buttonStyle
@@ -34,29 +35,12 @@ Button {
             colorGroupEnabled:  control.enabled
         }
 
-        property bool showHighlight: control.pressed | control.checked
+        property bool showHighlight: control.pressed | control.checked | control.hovered
 
         background: Rectangle {
             id:     innerRect
-            //color:  showHighlight ? "#2c3e50" /*qgcPal.buttonHighlight*/ : qgcPal.windowShade
-
-            // color: !_rootButton.enabled
-            //        ? "gray"                          // disabled
-            //        : _rootButton.hovered
-            //          ? "#1aa1a1"                     // hover effect (slightly lighter black)
-            //          : "#2c3e50"                       // normal enabled
-
-            color: !_rootButton.enabled
-                       ? "gray"                          // disabled
-                       : control.checked
-                         ? "#90a010"                     // ✅ active (clicked / summary panel open)
-                         : _rootButton.hovered
-                           ? "#90a010"                   // hover (slightly different teal if you want)
-                           : "#2c3e50"                   // normal enabled
-
-            Behavior on color { ColorAnimation { duration: 150 } }
-
-            radius: 10
+            color:  showHighlight ? qgcPal.buttonHighlight : qgcPal.windowShade
+            radius: ScreenTools.defaultFontPixelWidth / 2
 
             implicitWidth: titleBar.x + titleBar.contentWidth + ScreenTools.defaultFontPixelWidth
 
@@ -65,23 +49,23 @@ Button {
                 anchors.leftMargin:     ScreenTools.defaultFontPixelWidth
                 anchors.left:           parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                width:                  ScreenTools.defaultFontPixelHeight * 2
-                height:                 ScreenTools.defaultFontPixelHeight * 2
+                width:                  ScreenTools.defaultFontPixelHeight * 1.5
+                height:                 ScreenTools.defaultFontPixelHeight * 1.5
                 fillMode:               Image.PreserveAspectFit
                 mipmap:                 true
-                color:                  imageColor ? imageColor : (control.setupComplete ? qgcPal.button : "red")
+                //color: control.checked ? "black" : "white"
+                color:               imageColor ? imageColor : (control.setupComplete ? qgcPal.button : "red")
                 source:                 control.imageResource
                 sourceSize:             _rootButton.sourceSize
             }
 
             QGCLabel {
                 id:                     titleBar
-                anchors.leftMargin:     ScreenTools.defaultFontPixelWidth
+                anchors.leftMargin:     ScreenTools.defaultFontPixelWidth * 2
                 anchors.left:           image.right
                 anchors.verticalCenter: parent.verticalCenter
                 verticalAlignment:      TextEdit.AlignVCenter
-                font.family: "Courier New"
-                color:                  /*showHighlight ? qgcPal.buttonHighlightText : qgcPal.buttonText*/ "white"
+                color:                  showHighlight ? qgcPal.buttonHighlightText : qgcPal.buttonText
                 text:                   control.text
             }
         }

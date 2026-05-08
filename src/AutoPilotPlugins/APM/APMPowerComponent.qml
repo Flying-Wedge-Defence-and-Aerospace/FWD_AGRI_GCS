@@ -27,13 +27,17 @@ SetupPage {
         id:         controller
     }
 
+    QGCPalette {
+        id: qgcPal
+    }
+
     Component {
         id: powerPageComponent
 
-        Column {
+        Flow {
             id:         flowLayout
             width:      availableWidth
-            spacing:    _margins + 20
+            spacing:    ScreenTools.defaultFontPixelWidth * 2
 
             property Fact _batt1Monitor:            controller.getParameterFact(-1, "BATT_MONITOR")
             property Fact _batt2Monitor:            controller.getParameterFact(-1, "BATT2_MONITOR", false /* reportMissing */)
@@ -58,16 +62,14 @@ SetupPage {
 
                 QGCLabel {
                     text:       qsTr("Battery 1")
-                    font.family: "Helvetica"
-                    font.pointSize: 16
-                    font.italic: true
-                    font.underline: true
+                    font.family: ScreenTools.demiboldFontFamily
+                    color: "yellow"
                 }
 
                 Rectangle {
                     width:  batt1Column.x + batt1Column.width + _margins
                     height: batt1Column.y + batt1Column.height + _margins
-                    color:  /*ggcPal.windowShade*/ "#2c3e50"
+                    color:  ggcPal.windowShade
 
                     ColumnLayout {
                         id:                 batt1Column
@@ -96,7 +98,6 @@ SetupPage {
 
                         QGCButton {
                             text:       qsTr("Reboot vehicle")
-                            backRadius: 7
                             visible:    _showBatt1Reboot
                             onClicked:  controller.vehicle.rebootVehicle()
                         }
@@ -107,21 +108,21 @@ SetupPage {
             // Battery 1 settings
             Column {
                 id:         _batt1FullSettings
-                spacing:    (_margins / 2)
+                spacing:    _margins / 2
                 visible:    _batt1MonitorEnabled && _batt1ParamsAvailable
 
                 QGCLabel {
                     text:       qsTr("Battery 1")
-                    font.family: "Helvetica"
-                    font.pointSize: 16
-                    font.italic: true
-                    font.underline: true
+                    font.family: ScreenTools.demiboldFontFamily
+                    font.pointSize: 12
                 }
 
                 Rectangle {
-                    width:  battery1Loader.x + battery1Loader.width + _margins + 50
-                    height: battery1Loader.y + battery1Loader.height + _margins + 30
-                    color:  /*ggcPal.windowShade*/"#2c3e50"
+                    width:  battery1Loader.x + battery1Loader.width + _margins
+                    height: battery1Loader.y + battery1Loader.height + _margins
+                    color:  "transparent"
+                    radius: ScreenTools.defaultFontPixelWidth * 0.6
+                    border.color: "#888"
 
                     Loader {
                         id:                 battery1Loader
@@ -147,21 +148,21 @@ SetupPage {
 
             // Battery2 Monitor settings only - used when only monitor param is available
             Column {
-                spacing: (_margins / 2)
+                spacing: _margins / 2
                 visible: !_batt2MonitorEnabled || !_batt2ParamsAvailable
 
                 QGCLabel {
                     text:       qsTr("Battery 2")
-                    font.family: "Helvetica"
-                    font.pointSize: 16
-                    font.italic: true
-                    font.underline: true
+                    font.family: ScreenTools.demiboldFontFamily
+                    font.pointSize: 12
                 }
 
                 Rectangle {
                     width:  batt2Column.x + batt2Column.width + _margins
                     height: batt2Column.y + batt2Column.height + _margins
-                    color:  /*ggcPal.windowShade*/"#2c3e50"
+                    color:  "transparent"
+                    radius: ScreenTools.defaultFontPixelWidth * 0.6
+                    border.color: "#888"
 
                     ColumnLayout {
                         id:                 batt2Column
@@ -205,16 +206,16 @@ SetupPage {
 
                 QGCLabel {
                     text:       qsTr("Battery 2")
-                    font.family: "Helvetica"
-                    font.pointSize: 16
-                    font.italic: true
-                    font.underline: true
+                    font.family: ScreenTools.demiboldFontFamily
+                    font.pointSize: 12
                 }
 
                 Rectangle {
                     width:  battery2Loader.x + battery2Loader.width + _margins
                     height: battery2Loader.y + battery2Loader.height + _margins
-                    color:  /*ggcPal.windowShade*/ "#2c3e50"
+                    color:  "transparent"
+                    radius: ScreenTools.defaultFontPixelWidth * 0.6
+                    border.color: "#888"
 
                     Loader {
                         id:                 battery2Loader
@@ -244,17 +245,16 @@ SetupPage {
 
                 QGCLabel {
                     text:       qsTr("ESC Calibration")
-                    font.family: "Helvetica"
-                    font.pointSize: 16
-                    font.italic: true
-                    font.underline: true
-
+                    font.family: ScreenTools.demiboldFontFamily
+                    font.pointSize: 12
                 }
 
                 Rectangle {
                     width:  escCalibrationHolder.x + escCalibrationHolder.width + _margins
                     height: escCalibrationHolder.y + escCalibrationHolder.height + _margins
-                    color:  /*ggcPal.windowShade*/ "#2c3e50"
+                    color:  "transparent"
+                    radius: ScreenTools.defaultFontPixelWidth * 0.6
+                    border.color: "#888"
 
                     Column {
                         id:         escCalibrationHolder
@@ -273,25 +273,32 @@ SetupPage {
                             Column {
                                 spacing: _margins
 
-                                QGCButton {
-                                    text: qsTr("Calibrate")
-                                    backRadius: 7
-                                    enabled:    _escCalibration && _escCalibration.rawValue === 0
-                                    onClicked:  if(_escCalibration) _escCalibration.rawValue = 3
-                                }
+                                // QGCButton {
+                                //     text: qsTr("Calibrate")
+                                //     enabled:    _escCalibration && _escCalibration.rawValue === 0
+                                //     onClicked:  if(_escCalibration) _escCalibration.rawValue = 3
+                                // }
 
                                 Column {
                                     enabled: _escCalibration && _escCalibration.rawValue === 3
-                                    QGCLabel { text:   _escCalibration ? (_escCalibration.rawValue === 3 ? qsTr("Now perform these steps:") : qsTr("Click Calibrate to start, then:")) : "" ; color: "white"}
-                                    QGCLabel { text:   qsTr("- Disconnect USB and battery so flight controller powers down") ; color: "white"}
-                                    QGCLabel { text:   qsTr("- Connect the battery") ; color: "white"}
-                                    QGCLabel { text:   qsTr("- The arming tone will be played (if the vehicle has a buzzer attached)") ; color: "white"}
-                                    QGCLabel { text:   qsTr("- If using a flight controller with a safety button press it until it displays solid red") ; color: "white"}
-                                    QGCLabel { text:   qsTr("- You will hear a musical tone then two beeps") ; color: "white"}
-                                    QGCLabel { text:   qsTr("- A few seconds later you should hear a number of beeps (one for each battery cell you're using)") ; color: "white"}
-                                    QGCLabel { text:   qsTr("- And finally a single long beep indicating the end points have been set and the ESC is calibrated") ; color: "white"}
-                                    QGCLabel { text:   qsTr("- Disconnect the battery and power up again normally") ; color: "white"}
+                                    QGCLabel { text:   _escCalibration ? (_escCalibration.rawValue === 3 ? qsTr("Now perform these steps:") : qsTr("Click Calibrate to start, then:")) : "" ; font.pointSize: ScreenTools.isMobile ? 8 : 10}
+                                    QGCLabel { text:   qsTr("- Disconnect USB and battery so flight controller powers down") ; font.pointSize: ScreenTools.isMobile ? 8 : 12}
+                                    QGCLabel { text:   qsTr("- Connect the battery") ; font.pointSize: ScreenTools.isMobile ? 8 : 12}
+                                    QGCLabel { text:   qsTr("- The arming tone will be played (if the vehicle has a buzzer attached)") ; font.pointSize: ScreenTools.isMobile ? 8 : 12}
+                                    QGCLabel { text:   qsTr("- If using a flight controller with a safety button press it until it displays solid red") ; font.pointSize: ScreenTools.isMobile ? 8 : 12}
+                                    QGCLabel { text:   qsTr("- You will hear a musical tone then two beeps"); font.pointSize: ScreenTools.isMobile ? 8 : 12 }
+                                    QGCLabel { text:   qsTr("- A few seconds later you should hear a number of beeps (one for each battery cell you're using)") ; font.pointSize: ScreenTools.isMobile ? 8 : 12}
+                                    QGCLabel { text:   qsTr("- And finally a single long beep indicating the end points have been set and the ESC is calibrated"); font.pointSize: ScreenTools.isMobile ? 8 : 12 }
+                                    QGCLabel { text:   qsTr("- Disconnect the battery and power up again normally") ; font.pointSize: ScreenTools.isMobile ? 8 : 12}
                                 }
+
+                                QGCButton {
+                                    text: qsTr("Calibrate")
+                                    enabled:    _escCalibration && _escCalibration.rawValue === 0
+                                    onClicked:  if(_escCalibration) _escCalibration.rawValue = 3
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                }
+
                             }
                         }
                     }
@@ -385,7 +392,7 @@ SetupPage {
             GridLayout {
                 columns:        3
                 rowSpacing:     _margins
-                columnSpacing:  _margins
+                columnSpacing:  0
 
                 QGCLabel { text: qsTr("Battery monitor:") }
 
@@ -478,64 +485,98 @@ SetupPage {
                 QGCLabel {
                     Layout.row:     6
                     Layout.column:  0
-                    text:           qsTr("Voltage multiplier:")
+                    text:           qsTr("Vol multiplier")
                     visible:        _showAdvanced
                 }
 
                 FactTextField {
-                    width:      _fieldWidth
+                    width:      ScreenTools.defaultFontPixelWidth * 10
                     fact:       battVoltMult
                     visible:    _showAdvanced
                 }
 
                 QGCButton {
-                    text:       qsTr("Calculate")
-                    backRadius: 7
+                    Layout.row: 7
+                    Layout.columnSpan: 3
+                    text:       qsTr("Calculate Vol multiplier")
                     visible:    _showAdvanced
                     onClicked:  calcVoltageMultiplierDlgComponent.createObject(mainWindow, { vehicleVoltageFact: vehicleVoltage, battVoltMultFact: battVoltMult }).open()
                 }
 
-                QGCLabel {
-                    Layout.columnSpan:  3
-                    Layout.fillWidth:   true
-                    //font.pointSize:     ScreenTools.smallFontPointSize
-                    wrapMode:           Text.WordWrap
-                    text:               qsTr("If the battery voltage reported by the vehicle is largely different than the voltage read externally using a voltmeter you can adjust the voltage multiplier value to correct this. Click the Calculate button for help with calculating a new value.")
-                    color: "yellow"
-                    font.pointSize: 8
-                    visible:            _showAdvanced
+                Rectangle {
+                    Layout.columnSpan: 3
+                    Layout.preferredWidth: parent.width * 0.7
+                    color: qgcPal.window
+                    border.color: "#888"
+                    radius: ScreenTools.defaultFontPixelWidth * 0.6
+
+                    // Give Rectangle height based on wrapped text
+                    implicitHeight: battVM.contentHeight + (ScreenTools.defaultFontPixelWidth)
+
+                    QGCLabel {
+                        id: battVM
+                        width: parent.width    // ensure wrapping width equals Rectangle’s width
+                        wrapMode: Text.WordWrap
+                        font.italic: true
+                        font.bold: true
+                        font.pointSize: 8
+                        text: qsTr("If the battery voltage reported by the vehicle is largely different than the voltage read externally using a voltmeter you can adjust the voltage multiplier value to correct this. Click the Calculate button for help with calculating a new value.")
+                        visible: _showAdvanced
+                    }
                 }
 
                 QGCLabel {
-                    text:       qsTr("Amps per volt:")
+                    text:       qsTr("Amps per volt")
                     visible:    _showAdvanced
                 }
 
                 FactTextField {
-                    width:      _fieldWidth
+                    width:      ScreenTools.defaultFontPixelWidth * 10
                     fact:       battAmpPerVolt
                     visible:    _showAdvanced
                 }
 
                 QGCButton {
-                    text:       qsTr("Calculate")
-                    backRadius: 7
+                    Layout.row: 10
+                    Layout.columnSpan: 3
+                    text:       qsTr("Calculate amps per volt")
                     visible:    _showAdvanced
                     onClicked:  calcAmpsPerVoltDlgComponent.createObject(mainWindow, { vehicleCurrentFact: vehicleCurrent, battAmpPerVoltFact: battAmpPerVolt }).open()
                 }
 
-                QGCLabel {
-                    Layout.columnSpan:  3
-                    Layout.fillWidth:   true
-                    font.pointSize:     /*ScreenTools.smallFontPointSize*/ 8
-                    wrapMode:           Text.WordWrap
-                    text:               qsTr("If the current draw reported by the vehicle is largely different than the current read externally using a current meter you can adjust the amps per volt value to correct this. Click the Calculate button for help with calculating a new value.")
-                    color: "yellow"
-                    visible:            _showAdvanced
+                Rectangle {
+                    Layout.columnSpan: 3
+                    Layout.preferredWidth: parent.width * 0.7
+                    color: qgcPal.window
+                    border.color: "#888"
+                    radius: ScreenTools.defaultFontPixelWidth * 0.6
+
+                    // Give Rectangle height based on wrapped text
+                    implicitHeight: battAPV.contentHeight + (ScreenTools.defaultFontPixelWidth)
+
+                    QGCLabel {
+                        id: battAPV
+                        width: parent.width    // ensure wrapping width equals Rectangle’s width
+                        wrapMode: Text.WordWrap
+                        font.italic: true
+                        font.bold: true
+                        font.pointSize: 8
+                        text: qsTr("If the current draw reported by the vehicle is largely different than the current read externally using a current meter you can adjust the amps per volt value to correct this. Click the Calculate button for help with calculating a new value.")
+                        visible: _showAdvanced
+                    }
                 }
 
+                // QGCLabel {
+                //     Layout.columnSpan:  3
+                //     Layout.fillWidth:   true
+                //     font.pointSize:     ScreenTools.smallFontPointSize
+                //     wrapMode:           Text.WordWrap
+                //     text:               qsTr("If the current draw reported by the vehicle is largely different than the current read externally using a current meter you can adjust the amps per volt value to correct this. Click the Calculate button for help with calculating a new value.")
+                //     visible:            _showAdvanced
+                // }
+
                 QGCLabel {
-                    text:       qsTr("Amps Offset:")
+                    text:       qsTr("Amps Offset")
                     visible:    _showAdvanced
                 }
 
@@ -545,15 +586,37 @@ SetupPage {
                     visible:    _showAdvanced
                 }
 
-                QGCLabel {
-                    Layout.columnSpan:  3
-                    Layout.fillWidth:   true
-                    font.pointSize:     /*ScreenTools.smallFontPointSize*/ 8
-                    wrapMode:           Text.WordWrap
-                    text:               qsTr("If the vehicle reports a high current read when there is little or no current going through it, adjust the Amps Offset. It should be equal to the voltage reported by the sensor when the current is zero.")
-                    color: "yellow"
-                    visible:            _showAdvanced
+                Rectangle {
+                    Layout.columnSpan: 3
+                    Layout.preferredWidth: parent.width * 0.7
+                    color: qgcPal.window
+                    border.color: "#888"
+                    radius: ScreenTools.defaultFontPixelWidth * 0.6
+
+                    // Give Rectangle height based on wrapped text
+                    implicitHeight: battAO.contentHeight + (ScreenTools.defaultFontPixelWidth)
+
+                    QGCLabel {
+                        id: battAO
+                        anchors.fill: parent
+                        width: parent.width    // ensure wrapping width equals Rectangle’s width
+                        wrapMode: Text.WordWrap
+                        font.italic: true
+                        font.bold: true
+                        font.pointSize: 8
+                        text: qsTr("If the vehicle reports a high current read when there is little or no current going through it, adjust the Amps Offset. It should be equal to the voltage reported by the sensor when the current is zero.")
+                        visible: _showAdvanced
+                    }
                 }
+
+                // QGCLabel {
+                //     Layout.columnSpan:  3
+                //     Layout.fillWidth:   true
+                //     font.pointSize:     ScreenTools.smallFontPointSize
+                //     wrapMode:           Text.WordWrap
+                //     text:               qsTr("If the vehicle reports a high current read when there is little or no current going through it, adjust the Amps Offset. It should be equal to the voltage reported by the sensor when the current is zero.")
+                //     visible:            _showAdvanced
+                // }
 
             } // GridLayout
         } // Column

@@ -30,4 +30,8 @@ DECLARE_SETTINGSFACT(FlyViewSettings, showObstacleDistanceOverlay)
 DECLARE_SETTINGSFACT(FlyViewSettings, updateHomePosition)
 DECLARE_SETTINGSFACT(FlyViewSettings, enableCustomActions)
 DECLARE_SETTINGSFACT(FlyViewSettings, customActionDefinitions)
+DECLARE_SETTINGSFACT(FlyViewSettings, telemetryVisible)
+DECLARE_SETTINGSFACT(FlyViewSettings, hudVisible)
+DECLARE_SETTINGSFACT(FlyViewSettings, toolStripVisible)
+DECLARE_SETTINGSFACT(FlyViewSettings, videoVisible)
 

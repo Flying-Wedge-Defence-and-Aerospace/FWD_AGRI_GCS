@@ -164,8 +164,8 @@ StableBuild {
 }
 
 # Set the QGC version from git
-APP_VERSION_STR = "V1.0.0"
-VERSION         = 1.0.0   # Marker to indicate out-of-tree build
+APP_VERSION_STR = "V1.0.1"
+VERSION         = 1.0.1   # Marker to indicate out-of-tree build
 MAC_VERSION     = 1.0
 MAC_BUILD       = 0
 
@@ -200,7 +200,7 @@ MAC_BUILD       = 0
 DEFINES += APP_VERSION_STR=\"\\\"$$APP_VERSION_STR\\\"\"
 
 AndroidBuild {
-    QGC_ANDROID_PACKAGE = org.mavlink.qgroundcontrol
+    QGC_ANDROID_PACKAGE = com.fwd.agri.gcs
     
     message(VERSION $${VERSION})
     MAJOR_VERSION   = $$section(VERSION, ".", 0, 0)
@@ -257,7 +257,7 @@ AndroidBuild {
 
     message(Android version info: $${ANDROID_VERSION_CODE} bitness:$${ANDROID_VERSION_BITNESS} major:$${MAJOR_VERSION} minor:$${MINOR_VERSION} patch:$${PATCH_VERSION} dev:$${DEV_VERSION})
 
-    ANDROID_VERSION_NAME    = APP_VERSION_STR
+    ANDROID_VERSION_NAME    = $${APP_VERSION_STR}
 }
 
 DEFINES += EIGEN_MPL2_ONLY

@@ -23,7 +23,9 @@ import QGroundControl.Palette               1.0
 //-- Message Indicator
 Item {
     id:             _root
-    width:          height
+    implicitHeight: ScreenTools.defaultFontPixelHeight * 2
+    implicitWidth: implicitHeight
+    //width:          height
     anchors.top:    parent.top
     anchors.bottom: parent.bottom
 
@@ -40,7 +42,7 @@ Item {
     property bool   _isMessageImportant:    _activeVehicle ? !_activeVehicle.messageTypeNormal && !_activeVehicle.messageTypeNone : false
 
     function dropMessageIndicator() {
-        mainWindow.showIndicatorPopup(_root, vehicleMessagesPopup);
+        mainWindow.showIndicatorPopup(_root, vehicleMessagesPopup, "top");
     }
 
     function getMessageColor() {
@@ -73,7 +75,7 @@ Item {
 
     QGCColoredImage {
         anchors.fill:       parent
-        source:             "/qmlimages/Megaphone.svg"
+        source:             "/res/message"
         sourceSize.height:  height
         fillMode:           Image.PreserveAspectFit
         color:              getMessageColor()
@@ -92,9 +94,8 @@ Item {
             width:          mainWindow.width  * 0.500
             height:         mainWindow.height * 0.666
             radius:         ScreenTools.defaultFontPixelHeight / 2
-            color:          /*qgcPal.window*/ "#2c3e50"
+            color:          qgcPal.window
             border.color:   qgcPal.text
-
 
             Component.onCompleted: {
                 messageText.text = formatMessage(_activeVehicle.formattedMessages)
@@ -120,7 +121,6 @@ Item {
                 visible:            messageText.length === 0
             }
 
-            //-- Clear Messages
             QGCColoredImage {
                 anchors.bottom:     parent.bottom
                 anchors.right:      parent.right
@@ -161,7 +161,7 @@ Item {
                     id:                 messageText
                     readOnly:           true
                     textFormat:         TextEdit.RichText
-                    selectByMouse:      true
+                    //selectByMouse:      true
                     color:              qgcPal.text
                     selectionColor:     qgcPal.text
                     selectedTextColor:  qgcPal.window

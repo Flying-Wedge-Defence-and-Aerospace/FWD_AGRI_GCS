@@ -31,6 +31,9 @@ ApplicationWindow {
     property bool loggedIn: false
     property bool linkDisconnected: false
     property bool loggedOut: false
+    property bool videoPanelVisible: true
+
+    property alias settingsDrawer: qgcSettingsDrawer
 
     Keys.onReleased: (event) => {
         if (event.key === Qt.Key_Escape && toolDrawer.visible) {
@@ -122,6 +125,7 @@ ApplicationWindow {
 
         // Property to manage RemoteID quick acces to settings page
         property bool               commingFromRIDIndicator:        false
+        property bool               commingFromCommLinks:           false
     }
 
     /// Default color palette used throughout the UI
@@ -165,20 +169,20 @@ ApplicationWindow {
         toolDrawer.toolSource   = ""
         flightView/*flightViewLoader.item*/.visible      = false
         planView.visible        = false
-        toolbar.currentToolbar  = currentToolbar
+        toolBar.currentToolbar  = currentToolbar
     }
 
     function showFlyView() {
         if (!flightView.visible) {
             mainWindow.showPreFlightChecklistIfNeeded()
         }
-        viewSwitch(toolbar.flyViewToolbar)
+        viewSwitch(toolBar.flyViewToolbar)
         planView.visible = false
         flightView.visible = true
     }
 
     function showPlanView() {
-        viewSwitch(toolbar.planViewToolbar)
+        viewSwitch(toolBar.planViewToolbar)
         flightView.visible = false
         planView.visible = true
     }
@@ -191,10 +195,30 @@ ApplicationWindow {
         toolDrawer.visible      = true
     }
 
-    function showSettingsPage() {
-        showTool(qsTr("Settings"), "Settings.qml", "/res/settings_icon")
+    // function showSettingsPage() {
+    //     showTool(qsTr("Settings"), "Settings.qml", "/res/settings_icon")
+    // }
+
+    function showAnalyzeTool() {
+        qgcSettingsDrawer.visible = false
+        showTool(qsTr("Analyze Tools"), "AnalyzeView.qml", "/qmlimages/Analyze.svg")
     }
 
+    function showSetupTool() {
+        qgcSettingsDrawer.visible = false
+        showTool(qsTr("Vehicle Setup"), "SetupView.qml", "/qmlimages/Gears.svg")
+    }
+
+    function showSettingsTool() {
+        qgcSettingsDrawer.visible = false
+        showTool(qsTr("Application Settings"), "AppSettings.qml", "/res/FWD_only_logo")
+    }
+
+    function showCommLinksSettings() {
+        qgcSettingsDrawer.visible = false
+        globals.commingFromCommLinks = true
+        showTool(qsTr("Application Settings"), "AppSettings.qml", "/res/FWD_only_logo")
+    }
 
     //-------------------------------------------------------------------------
     //-- Global simple message dialog
@@ -318,10 +342,13 @@ ApplicationWindow {
     // //-------------------------------------------------------------------------
     // //Toolbar
     header: MainToolBar {
-        id:         toolbar
-        height:     ScreenTools.toolbarHeight
+        //id: toolBar
+    //}
+        id:         toolBar
+        height:     ScreenTools.isMobile ? ScreenTools.toolbarHeight - 30 : ScreenTools.toolbarHeight
+        //height:     ScreenTools.toolbarHeight
         visible:    !(QGroundControl.videoManager.fullScreen && flightView.visible) && loggedIn
-        userName:   mainWindow.loggedInUser
+        //userName:   mainWindow.loggedInUser
         onLogOutRequested: {
             checkForActiveConnectionsForLogout()
         }
@@ -334,13 +361,13 @@ ApplicationWindow {
     FlyView {
         id: flightView
         anchors.fill: parent
-        visible: mainWindow.loggedIn && toolbar.currentToolbar === toolbar.flyViewToolbar
+        visible: mainWindow.loggedIn && toolBar.currentToolbar === toolBar.flyViewToolbar
     }
 
     PlanView {
         id: planView
         anchors.fill: parent
-        visible: mainWindow.loggedIn && toolbar.currentToolbar === toolbar.planViewToolbar
+        visible: mainWindow.loggedIn && toolBar.currentToolbar === toolBar.planViewToolbar
     }
 
 
@@ -413,7 +440,7 @@ ApplicationWindow {
                 }
 
                 RowLayout {
-                    spacing: 5
+                    spacing: ScreenTools.defaultFontPixelWidth
                     Layout.rightMargin: 20
 
                     QGCLabel {
@@ -424,8 +451,8 @@ ApplicationWindow {
 
                     QGCColoredImage {
                         id:                     backIcon
-                        width:                  ScreenTools.defaultFontPixelHeight * 1.2
-                        height:                 ScreenTools.defaultFontPixelHeight * 1.2
+                        width:                  /*ScreenTools.isMobile ? ScreenTools.defaultFontPixelwidth * 2 :*/ ScreenTools.defaultFontPixelWidth * 5
+                        height:                 /*ScreenTools.isMobile ? ScreenTools.defaultFontPixelHeight * 2 :*/ ScreenTools.defaultFontPixelHeight * 2.5
                         fillMode:               Image.PreserveAspectFit
                         mipmap:                 true
                         color:                  qgcPal.text
@@ -454,6 +481,21 @@ ApplicationWindow {
                 ignoreUnknownSignals:   true
                 onPopout:               toolDrawer.visible = false
             }
+        }
+    }
+
+    Drawer {
+        id: qgcSettingsDrawer
+        width: ScreenTools.isMobile ? mainWindow.width * 0.08 : mainWindow.width * 0.10
+        height: mainWindow.height
+        edge: Qt.RightEdge
+        dragMargin: 0
+        closePolicy: Drawer.NoAutoClose
+        visible: false
+
+        SettingsDrawer {
+            anchors.fill: parent
+            onCloseDrawer: qgcSettingsDrawer.visible = false
         }
     }
 
@@ -565,10 +607,11 @@ ApplicationWindow {
     //-------------------------------------------------------------------------
     //-- Indicator Popups
 
-    function showIndicatorPopup(item, dropItem, dim = true) {
+    function showIndicatorPopup(item, dropItem, position, dim = true) {
         indicatorPopup.currentIndicator = dropItem
         indicatorPopup.currentItem = item
         indicatorPopup.dim = dim
+        indicatorPopup.position = position
         indicatorPopup.open()
     }
 
@@ -587,6 +630,7 @@ ApplicationWindow {
         closePolicy:    Popup.CloseOnEscape | Popup.CloseOnPressOutside
         property var    currentItem:        null
         property var    currentIndicator:   null
+        property var    position:           null
         background: Rectangle {
             width:  loader.width
             height: loader.height
@@ -600,6 +644,16 @@ ApplicationWindow {
                     centerX = mainWindow.width - indicatorPopup.width - ScreenTools.defaultFontPixelWidth
                 }
                 indicatorPopup.x = centerX - 5
+
+                indicatorPopup.y = mainWindow.contentItem.mapFromItem(indicatorPopup.currentItem, 0, 0).y
+
+                // if(indicatorPopup.position === "bottom") {
+                //     indicatorPopup.y = mainWindow.contentItem.mapFromItem(indicatorPopup.currentItem, 0, indicatorPopup.currentItem.height).y
+                // } else if(indicatorPopup.position === "top"){
+                //     indicatorPopup.y = 0
+                // } else {
+                //     indicatorPopup.y = (mainWindow.height - indicatorPopup.height) / 2
+                // }
             }
         }
         onOpened: {

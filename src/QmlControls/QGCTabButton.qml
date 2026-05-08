@@ -21,7 +21,7 @@ T.TabButton {
     implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
                             implicitContentWidth + leftPadding + rightPadding)
     implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
-                             implicitContentHeight + topPadding + bottomPadding)
+                             implicitContentHeight + topPadding + bottomPadding) + 35
 
     QGCPalette { id: qgcPal; colorGroupEnabled: enabled }
 
@@ -44,19 +44,19 @@ T.TabButton {
         icon: control.icon
         text: control.text
         font: control.font
-        color: checked ? qgcPal.buttonHighlightText : qgcPal.buttonText
+        color:/* checked ? qgcPal.buttonHighlightText : qgcPal.buttonText*/ qgcPal.globalTheme === QGCPalette.Light ? "white" : "black"
     }
 
     background: Rectangle {
         implicitHeight: 40
         //color: checked ? qgcPal.buttonHighlight : qgcPal.button
-        // color: Color.blend(control.checked ? control.palette.window : control.palette.dark,
-        //                                      control.palette.mid, control.down ? 0.5 : 0.0)
+        color: Color.blend(control.checked ? control.palette.window : control.palette.dark,
+                                             control.palette.mid, control.down ? 0.5 : 0.0)
 
-        color: Color.blend(
-            control.checked ? "#90a010" : "#800000",   // Blue when checked, dark navy otherwise
-            control.down ? "#1ABC9C" : "#BDC3C7",      // Teal highlight when pressed, light gray otherwise
-            control.down ? 0.5 : 0.2                   // Blend ratio
-        )
+        // color: Color.blend(
+        //     control.checked ? "#90a010" : "#800000",   // Blue when checked, dark navy otherwise
+        //     control.down ? "#1ABC9C" : "#BDC3C7",      // Teal highlight when pressed, light gray otherwise
+        //     control.down ? 0.5 : 0.2                   // Blend ratio
+        // )
     }
 }

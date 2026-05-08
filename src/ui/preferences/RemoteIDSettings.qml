@@ -136,7 +136,9 @@ Rectangle {
                 id:                     flagsRectangle
                 Layout.preferredHeight: statusGrid.height + (_margins * 2)
                 Layout.preferredWidth:  statusGrid.width + (_margins * 2)
-                color:                  qgcPal.windowShade
+                color: "transparent"
+                radius: 6
+                // color:                  qgcPal.windowShade
                 visible:                _activeVehicle
                 Layout.fillWidth:       true
 
@@ -277,7 +279,7 @@ Rectangle {
         anchors.margins:    ScreenTools.defaultFontPixelWidth
         contentHeight:      outerItem.height
         contentWidth:       outerItem.width
-        flickableDirection: Flickable.VerticalFlick
+        flickableDirection: ScreenTools.isMobile ? Flickable.VerticalFlick | Flickable.HorizontalFlick : Flickable.VerticalFlick
 
         property var innerWidth:   settingsItem.width
 
@@ -303,20 +305,22 @@ Rectangle {
                 QGCLabel {
                     id:                 armStatusLabel
                     text:               qsTr("ARM STATUS")
-                    font.bold: true
                     Layout.alignment:   Qt.AlignHCenter
                     font.pointSize:     ScreenTools.mediumFontPointSize
                     visible:            _activeVehicle && !_activeVehicle.remoteIDManager.armStatusGood
+                    font.bold: true
                 }
 
                 Rectangle {
                     id:                     armStatusRectangle
                     Layout.preferredHeight: armStatusGrid.height + (_margins * 2)
                     Layout.preferredWidth:  armStatusGrid.width + (_margins * 2)
-                    color:                  /*qgcPal.windowShade*/ "#2c3e50"
+                    color: "transparent"
+                    radius: 6
+                    // color:                  qgcPal.windowShade
                     Layout.fillWidth:       true
                     border.width:           _borderWidth
-                    border.color:           _activeRID ? (_activeVehicle.remoteIDManager.armStatusGood ? color : qgcPal.colorRed) : color
+                    border.color:           _activeRID ? (_activeVehicle.remoteIDManager.armStatusGood ? "#888" : qgcPal.colorRed) : "#888"
 
                     visible:                _activeVehicle && !_activeVehicle.remoteIDManager.armStatusGood
 
@@ -355,7 +359,9 @@ Rectangle {
                     id:                     regionRectangle
                     Layout.preferredHeight: regionGrid.height + (_margins * 2)
                     Layout.preferredWidth:  regionGrid.width + (_margins * 2)
-                    color:                  /*qgcPal.windowShade*/ "#2c3e50"
+                    radius: 6
+                    color: "transparent"
+                    border.color: "#888"
                     visible:                true
                     Layout.fillWidth:       true
 
@@ -365,7 +371,7 @@ Rectangle {
                         anchors.top:                parent.top
                         anchors.horizontalCenter:   parent.horizontalCenter
                         columns:                    2
-                        rowSpacing:                 _margins * 3
+                        rowSpacing:                 _margins * 1.5
                         columnSpacing:              _margins * 2
 
                         QGCLabel {
@@ -373,6 +379,7 @@ Rectangle {
                             visible:            QGroundControl.settingsManager.remoteIDSettings.region.visible
                             Layout.fillWidth:   true
                         }
+
                         FactComboBox {
                             fact:               QGroundControl.settingsManager.remoteIDSettings.region
                             visible:            QGroundControl.settingsManager.remoteIDSettings.region.visible
@@ -384,6 +391,14 @@ Rectangle {
                                 if (currentIndex == RemoteIDSettings.RegionOperation.FAA && QGroundControl.settingsManager.remoteIDSettings.locationType.value != RemoteIDSettings.LocationType.LIVE)
                                 QGroundControl.settingsManager.remoteIDSettings.locationType.value = RemoteIDSettings.LocationType.LIVE
                             }
+                        }
+
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                            visible: _regionOperation == RemoteIDSettings.RegionOperation.EU
                         }
 
                         QGCLabel {
@@ -398,6 +413,14 @@ Rectangle {
                             sizeToContents:     true
                         }
 
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                            visible: (_classificationType == RemoteIDSettings.ClassificationType.EU) && (_regionOperation == RemoteIDSettings.RegionOperation.EU)
+                        }
+
                         QGCLabel {
                             text:               QGroundControl.settingsManager.remoteIDSettings.categoryEU.shortDescription
                             visible:            (_classificationType == RemoteIDSettings.ClassificationType.EU) && (_regionOperation == RemoteIDSettings.RegionOperation.EU)
@@ -408,6 +431,14 @@ Rectangle {
                             visible:            (_classificationType == RemoteIDSettings.ClassificationType.EU) && (_regionOperation == RemoteIDSettings.RegionOperation.EU)
                             Layout.fillWidth:   true
                             sizeToContents:     true
+                        }
+
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                            visible: (_classificationType == RemoteIDSettings.ClassificationType.EU) && (_regionOperation == RemoteIDSettings.RegionOperation.EU)
                         }
 
                         QGCLabel {
@@ -439,12 +470,14 @@ Rectangle {
                     id:                     gpsRectangle
                     Layout.preferredHeight: gpsGrid.height + gpsGridData.height + (_margins * 3)
                     Layout.preferredWidth:  gpsGrid.width + (_margins * 2)
-                    color:                  /*qgcPal.windowShade*/ "#2c3e50"
+                    radius: 6
+                    color: "transparent"
+                    //border.color: "#888"
                     visible:                true
                     Layout.fillWidth:       true
 
                     border.width:   _borderWidth
-                    border.color:   _activeRID ? (_activeVehicle.remoteIDManager.gcsGPSGood ? color : qgcPal.colorRed) : color
+                    border.color:   _activeRID ? (_activeVehicle.remoteIDManager.gcsGPSGood ? color : qgcPal.colorRed) : "#888"
 
                     property var locationTypeValue: QGroundControl.settingsManager.remoteIDSettings.locationType.value
 
@@ -498,6 +531,14 @@ Rectangle {
                             }
                         }
 
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                            visible: _locationType == RemoteIDSettings.LocationType.FIXED
+                        }
+
                         QGCLabel {
                             text:               qsTr("Latitude Fixed(-90 to 90)")
                             visible:            _locationType == RemoteIDSettings.LocationType.FIXED
@@ -507,6 +548,14 @@ Rectangle {
                             visible:            _locationType == RemoteIDSettings.LocationType.FIXED
                             Layout.fillWidth:   true
                             fact:               QGroundControl.settingsManager.remoteIDSettings.latitudeFixed
+                        }
+
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                            visible: _locationType == RemoteIDSettings.LocationType.FIXED
                         }
 
                         QGCLabel {
@@ -520,6 +569,14 @@ Rectangle {
                             fact:               QGroundControl.settingsManager.remoteIDSettings.longitudeFixed
                         }
 
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                            visible: _locationType == RemoteIDSettings.LocationType.FIXED
+                        }
+
                         QGCLabel {
                             text:               qsTr("Altitude Fixed")
                             visible:            _locationType == RemoteIDSettings.LocationType.FIXED
@@ -529,6 +586,14 @@ Rectangle {
                             visible:            _locationType == RemoteIDSettings.LocationType.FIXED
                             Layout.fillWidth:   true
                             fact:               QGroundControl.settingsManager.remoteIDSettings.altitudeFixed
+                        }
+
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                            visible: _locationType != RemoteIDSettings.LocationType.TAKEOFF
                         }
 
                         QGCLabel {
@@ -542,6 +607,14 @@ Rectangle {
                             visible:            _locationType != RemoteIDSettings.LocationType.TAKEOFF
                         }
 
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                            visible: _locationType != RemoteIDSettings.LocationType.TAKEOFF
+                        }
+
                         QGCLabel {
                             text:               qsTr("Longitude")
                             Layout.fillWidth:   true
@@ -551,6 +624,14 @@ Rectangle {
                             text:               gcsPosition.isValid ? gcsPosition.longitude : "N/A"
                             Layout.fillWidth:   true
                             visible:            _locationType != RemoteIDSettings.LocationType.TAKEOFF
+                        }
+
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                            visible: _locationType != RemoteIDSettings.LocationType.TAKEOFF
                         }
 
                         QGCLabel {
@@ -566,6 +647,14 @@ Rectangle {
                             visible:            _locationType != RemoteIDSettings.LocationType.TAKEOFF
                         }
 
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                            visible: _locationType != RemoteIDSettings.LocationType.TAKEOFF
+                        }
+
                         QGCLabel {
                             text:               qsTr("Heading")
                             Layout.fillWidth:   true
@@ -575,6 +664,14 @@ Rectangle {
                             text:               gcsPosition.isValid && !isNaN(gcsHeading) ? gcsHeading : "N/A"
                             Layout.fillWidth:   true
                             visible:            _locationType != RemoteIDSettings.LocationType.TAKEOFF
+                        }
+
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                            visible: _locationType != RemoteIDSettings.LocationType.TAKEOFF
                         }
 
                         QGCLabel {
@@ -587,7 +684,16 @@ Rectangle {
                             Layout.fillWidth:   true
                             visible:            _locationType != RemoteIDSettings.LocationType.TAKEOFF
                         }
+
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                            visible: gpsGrid.visible
+                        }
                     }
+
 
                     GridLayout {
                         id:                         gpsGrid
@@ -598,7 +704,7 @@ Rectangle {
                         anchors.margins:            _margins
                         anchors.top:                gpsGridData.bottom
                         anchors.horizontalCenter:   parent.horizontalCenter
-                        rowSpacing:                 _margins * 3
+                        rowSpacing:                 _margins * 1.5
                         columns:                    2
                         columnSpacing:              _margins * 2
 
@@ -632,6 +738,14 @@ Rectangle {
                             }
                         }
 
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                            visible:  nmeaPortCombo.currentText !== gpsUdpPort && nmeaPortCombo.currentText !== gpsDisabled
+                        }
+
                         QGCLabel {
                             visible:          nmeaPortCombo.currentText !== gpsUdpPort && nmeaPortCombo.currentText !== gpsDisabled
                             text:             qsTr("NMEA GPS Baudrate")
@@ -653,6 +767,14 @@ Rectangle {
                             }
                         }
 
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                            visible: nmeaPortCombo.currentText === gpsUdpPort
+                        }
+
                         QGCLabel {
                             text:       qsTr("NMEA stream UDP port")
                             visible:    nmeaPortCombo.currentText === gpsUdpPort
@@ -670,8 +792,8 @@ Rectangle {
                 QGCLabel {
                     id:                 basicIDLabel
                     text:               qsTr("BASIC ID")
-                    Layout.alignment:   Qt.AlignHCenter
                     font.bold: true
+                    Layout.alignment:   Qt.AlignHCenter
                     font.pointSize:     ScreenTools.mediumFontPointSize
                 }
 
@@ -679,11 +801,12 @@ Rectangle {
                     id:                     basicIDRectangle
                     Layout.preferredHeight: basicIDGrid.height + basicIDnote.height + (_margins * 4)
                     Layout.preferredWidth:  basicIDGrid.width  + basicIDnote.width  + (_margins * 2)
-                    color:                  /*qgcPal.windowShade*/ "#2c3e50"
+                    radius: 6
+                    color: "transparent"
                     Layout.fillWidth:       true
 
                     border.width:   _borderWidth
-                    border.color:   _activeRID ? (_activeVehicle.remoteIDManager.basicIDGood ? color : qgcPal.colorRed) : color
+                    border.color:   _activeRID ? (_activeVehicle.remoteIDManager.basicIDGood ? "#888" : qgcPal.colorRed) : "#888"
 
                     QGCLabel {
                         id:                         basicIDnote
@@ -694,9 +817,9 @@ Rectangle {
                         width:                      basicIDGrid.width
                         text:                       qsTr("Note: This parameter is optional if Basic ID is already set on RID device. " +
                                                          "On that case, this one will be registered as Basic ID 2")
-                        wrapMode:                   Text.Wrap
-                        color: "yellow"
+                        color: qgcPal.buttonText
                         font.italic: true
+                        wrapMode:                   Text.Wrap
                         visible:                    QGroundControl.settingsManager.remoteIDSettings.basicIDType.visible
 
                     }
@@ -707,7 +830,7 @@ Rectangle {
                         anchors.top:                basicIDnote.bottom
                         anchors.horizontalCenter:   parent.horizontalCenter
                         columns:                    2
-                        rowSpacing:                 _margins * 3
+                        rowSpacing:                 _margins * 1.5
                         columnSpacing:              _margins * 2
 
                         QGCLabel {
@@ -722,6 +845,14 @@ Rectangle {
                             sizeToContents:     true
                         }
 
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                            visible: QGroundControl.settingsManager.remoteIDSettings.basicIDUaType.visible
+                        }
+
                         QGCLabel {
                             text:               QGroundControl.settingsManager.remoteIDSettings.basicIDUaType.shortDescription
                             visible:            QGroundControl.settingsManager.remoteIDSettings.basicIDUaType.visible
@@ -732,6 +863,14 @@ Rectangle {
                             visible:            QGroundControl.settingsManager.remoteIDSettings.basicIDUaType.visible
                             Layout.fillWidth:   true
                             sizeToContents:     true
+                        }
+
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                            visible: QGroundControl.settingsManager.remoteIDSettings.basicID.visible
                         }
 
                         QGCLabel {
@@ -748,15 +887,26 @@ Rectangle {
                             Layout.fillWidth:   true
                         }
 
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                            visible: QGroundControl.settingsManager.remoteIDSettings.basicID.visible
+                        }
+
                         QGCLabel {
                             text:               QGroundControl.settingsManager.remoteIDSettings.sendBasicID.shortDescription
                             Layout.fillWidth:   true
                             visible:            QGroundControl.settingsManager.remoteIDSettings.basicID.visible
                         }
-                        FactCheckBox {
-                            fact:       QGroundControl.settingsManager.remoteIDSettings.sendBasicID
-                            visible:    QGroundControl.settingsManager.remoteIDSettings.basicID.visible
+                        FactToggleSwitch {
+                            fact: QGroundControl.settingsManager.remoteIDSettings.sendBasicID
                         }
+                        // FactCheckBox {
+                        //     fact:       QGroundControl.settingsManager.remoteIDSettings.sendBasicID
+                        //     visible:    QGroundControl.settingsManager.remoteIDSettings.basicID.visible
+                        // }
                     }
                 }
                 // ------------------------------------------------------------------------------------------
@@ -765,8 +915,8 @@ Rectangle {
                 QGCLabel {
                     id:                 operatorIDLabel
                     text:               qsTr("OPERATOR ID")
-                    font.bold: true
                     Layout.alignment:   Qt.AlignHCenter
+                    font.bold: true
                     font.pointSize:     ScreenTools.mediumFontPointSize
                 }
 
@@ -774,12 +924,14 @@ Rectangle {
                     id:                     operatorIDRectangle
                     Layout.preferredHeight: operatorIDGrid.height + (_margins * 3)
                     Layout.preferredWidth:  operatorIDGrid.width + (_margins * 2)
-                    color:                  /*qgcPal.windowShade*/ "#2c3e50"
+                    radius: 6
+                    color: "transparent"
+                    // color:                  qgcPal.windowShade
                     Layout.fillWidth:       true
 
                     border.width:   _borderWidth
                     border.color:   (_regionOperation == RemoteIDSettings.RegionOperation.EU || QGroundControl.settingsManager.remoteIDSettings.sendOperatorID.value) ?
-                                    (_activeRID && !_activeVehicle.remoteIDManager.operatorIDGood ? qgcPal.colorRed : color) : color
+                                    (_activeRID && !_activeVehicle.remoteIDManager.operatorIDGood ? qgcPal.colorRed : "#888") : "#888"
 
                     GridLayout {
                         id:                         operatorIDGrid
@@ -802,6 +954,7 @@ Rectangle {
                             Layout.fillWidth:   true
                             sizeToContents:     true
                         }
+
                         QGCLabel{
                             text:               QGroundControl.settingsManager.remoteIDSettings.operatorIDType.enumStringValue
                             visible:            !operatorIDFactComboBox.visible
@@ -822,7 +975,7 @@ Rectangle {
                             visible:            QGroundControl.settingsManager.remoteIDSettings.operatorID.visible
                             Layout.fillWidth:   true
                             maximumLength:      20 // Maximum defined by Mavlink definition of OPEN_DRONE_ID_OPERATOR_ID message
-	                    onTextChanged: {
+                        onTextChanged: {
                                 if (_activeVehicle) {
                                     _activeVehicle.remoteIDManager.checkOperatorID(text)
                                 } else {
@@ -877,8 +1030,8 @@ Rectangle {
                 QGCLabel {
                     id:                 selfIDLabel
                     text:               qsTr("SELF ID")
-                    Layout.alignment:   Qt.AlignHCenter
                     font.bold: true
+                    Layout.alignment:   Qt.AlignHCenter
                     font.pointSize:     ScreenTools.mediumFontPointSize
                 }
 
@@ -886,7 +1039,11 @@ Rectangle {
                     id:                     selfIDRectangle
                     Layout.preferredHeight: selfIDGrid.height + selfIDnote.height + (_margins * 3)
                     Layout.preferredWidth:  selfIDGrid.width + (_margins * 2)
-                    color:                  /*qgcPal.windowShade*/ "#2c3e50"
+                    color: "transparent"
+                    radius: 6
+                    border.color: "#888"
+                    border.width: _borderWidth
+                    // color:                  qgcPal.windowShade
                     visible:                true
                     Layout.fillWidth:       true
 
@@ -896,7 +1053,7 @@ Rectangle {
                         anchors.top:                parent.top
                         anchors.horizontalCenter:   parent.horizontalCenter
                         columns:                    2
-                        rowSpacing:                 _margins * 3
+                        rowSpacing:                 _margins * 1.5
                         columnSpacing:              _margins * 2
 
                         QGCLabel {
@@ -912,6 +1069,13 @@ Rectangle {
                             sizeToContents:     true
                         }
 
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                        }
+
                         QGCLabel {
                             text:               getSelfIdLabelText()
                             Layout.fillWidth:   true
@@ -922,15 +1086,36 @@ Rectangle {
                             maximumLength:      23 // Maximum defined by Mavlink definition of OPEN_DRONE_ID_SELF_ID message
                         }
 
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                            visible: QGroundControl.settingsManager.remoteIDSettings.sendSelfID.visible
+                        }
+
                         QGCLabel {
                             text:               QGroundControl.settingsManager.remoteIDSettings.sendSelfID.shortDescription
                             Layout.fillWidth:   true
                         }
-                        FactCheckBox {
-                            fact:       QGroundControl.settingsManager.remoteIDSettings.sendSelfID
+                        FactToggleSwitch {
+                            fact: QGroundControl.settingsManager.remoteIDSettings.sendSelfID
                             visible:    QGroundControl.settingsManager.remoteIDSettings.sendSelfID.visible
                         }
+                        // FactCheckBox {
+                        //     fact:       QGroundControl.settingsManager.remoteIDSettings.sendSelfID
+                        //     visible:    QGroundControl.settingsManager.remoteIDSettings.sendSelfID.visible
+                        // }
+
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                            visible: selfIDnote.visible
+                        }
                     }
+
 
                     QGCLabel {
                         id:                         selfIDnote
@@ -939,13 +1124,13 @@ Rectangle {
                         anchors.top:                selfIDGrid.bottom
                         anchors.horizontalCenter:   parent.horizontalCenter
                         anchors.bottomMargin:       _margins * 2
-                        text:                       qsTr("Note: Even if this box is unset, QGroundControl will send self ID message " +
+                        text:                       qsTr("Note: Even if this box is unset, GCS will send self ID message " +
                                                          "if an emergency is set, or after it has been cleared. \
                                                          The message for each kind of selfID is saved and preserves reboots. Select " +
                                                          "each type on the Self ID type dropdown to configure the message to be sent")
+                        color: qgcPal.buttonText
                         wrapMode:                   Text.Wrap
                         font.italic: true
-                        color: "yellow"
                         visible:                    QGroundControl.settingsManager.remoteIDSettings.selfIDType.visible
                     }
                 }

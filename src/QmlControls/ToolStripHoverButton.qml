@@ -17,7 +17,7 @@ import QGroundControl.Palette       1.0
 Button {
     id:             control
     width:          contentLayoutItem.contentWidth + (contentMargins * 2)
-    height:         width + 30
+    height:         width
     hoverEnabled:   !ScreenTools.isMobile
     enabled:        toolStripAction.enabled
     visible:        toolStripAction.visible
@@ -34,11 +34,11 @@ Button {
     property alias  contentWidth:       innerText.contentWidth
 
     property bool forceImageScale11: false
-    property real imageScale:        forceImageScale11 && (text == "") ? 0.8 : 0.6
+    property real   imageScale:        forceImageScale11 && (text == "") ? 0.8 : 0.6
     property real contentMargins:    innerText.height * 0.1
 
-    property color _currentContentColor:  (checked || pressed) ? qgcPal.buttonHighlightText : qgcPal.buttonText
-    property color _currentContentColorSecondary:  (checked || pressed) ? qgcPal.buttonText : qgcPal.buttonHighlight
+    property color _currentContentColor:  (checked || pressed) ? qgcPal.buttonHighlightText : qgcPal.buttonText /*"white"*/
+    property color _currentContentColorSecondary:  (checked || pressed) ? qgcPal.buttonText : qgcPal.buttonHighlight /*"white"*/
 
     signal dropped(int index)
 
@@ -61,16 +61,16 @@ Button {
     contentItem: Item {
         id:                 contentLayoutItem
         anchors.fill:       parent
-        anchors.margins:    contentMargins
+        //anchors.margins:    contentMargins
 
         Column {
             anchors.centerIn:   parent
-            spacing:        (contentMargins * 2) - 5
+            spacing:        contentMargins * 1
 
             Image {
                 id:                         innerImageColorful
-                height:                     contentLayoutItem.height * imageScale - 50
-                width:                      contentLayoutItem.width  * imageScale - 50
+                height:                     contentLayoutItem.height * imageScale
+                width:                      contentLayoutItem.width * imageScale
                 smooth:                     true
                 mipmap:                     true
                 fillMode:                   Image.PreserveAspectFit
@@ -84,60 +84,54 @@ Button {
 
             QGCColoredImage {
                 id:                         innerImage
-                height:                     contentLayoutItem.height * imageScale
-                width:                      contentLayoutItem.width  * imageScale
+                height:                     contentLayoutItem.height * imageScale + 5
+                width:                      contentLayoutItem.width  * imageScale + 5
                 smooth:                     true
                 mipmap:                     true
-                color:                      /*_currentContentColor*/ "white"
+                color:                      !control.enabled ? "gray" : _currentContentColor
                 fillMode:                   Image.PreserveAspectFit
                 antialiasing:               true
                 sourceSize.height:          height
                 sourceSize.width:           width
                 anchors.horizontalCenter:   parent.horizontalCenter
                 visible:                    source != "" && !modelData.fullColorIcon
-                
-                // QGCColoredImage {
-                //     id:                         innerImageSecondColor
-                //     source:                     modelData.alternateIconSource
-                //     height:                     contentLayoutItem.height * imageScale
-                //     width:                      contentLayoutItem.width  * imageScale
-                //     smooth:                     true
-                //     mipmap:                     true
-                //     color:                      /*_currentContentColorSecondary*/ "white"
-                //     fillMode:                   Image.PreserveAspectFit
-                //     antialiasing:               true
-                //     sourceSize.height:          height
-                //     sourceSize.width:           width
-                //     anchors.horizontalCenter:   parent.horizontalCenter
-                //     visible:                    source != "" && modelData.biColorIcon
-                // }
+
+                QGCColoredImage {
+                    id:                         innerImageSecondColor
+                    source:                     modelData.alternateIconSource
+                    height:                     contentLayoutItem.height * imageScale + 5
+                    width:                      contentLayoutItem.width  * imageScale + 5
+                    smooth:                     true
+                    mipmap:                     true
+                    color:                      !control.enabled ? "gray" : _currentContentColorSecondary
+                    fillMode:                   Image.PreserveAspectFit
+                    antialiasing:               true
+                    sourceSize.height:          height
+                    sourceSize.width:           width
+                    anchors.horizontalCenter:   parent.horizontalCenter
+                    visible:                    source != "" && modelData.biColorIcon
+                }
             }
 
             QGCLabel {
                 id:                         innerText
-                text:                       control.text
-                color:                      /*_currentContentColor*/ "white"
+                text:                       /*control.text*/ String(control.text).toUpperCase()
+                color:                      _currentContentColor
                 anchors.horizontalCenter:   parent.horizontalCenter
-                font.bold:                  !innerImage.visible && !innerImageColorful.visible
+                font.bold:                 /* !innerImage.visible && !innerImageColorful.visible*/ true
                 opacity:                    !innerImage.visible ? 0.8 : 1.0
-                //visible: false
+                font.pointSize: 6
             }
         }
     }
 
     background: Rectangle {
-        id: buttonBkRect
-        anchors.fill: parent
-        radius: 1
-        border.width: 1
-        border.color: "white"
-
-        color: !control.enabled
-               ? "gray"                          // disabled
-               : control.hovered
-                 ? "#1aa1a1"                     // hover effect (slightly lighter black)
-                 : "black"                       // normal enabled
-
-        Behavior on color { ColorAnimation { duration: 150 } }
+        id:             buttonBkRect
+        color:          (control.checked || control.pressed) ?
+                            qgcPal.buttonHighlight :
+                            (control.hovered ? qgcPal.toolStripHoverColor : "transparent")
+        anchors.fill:   parent
+        // border.color: "white"o
+        // border.width: 1
     }
 }

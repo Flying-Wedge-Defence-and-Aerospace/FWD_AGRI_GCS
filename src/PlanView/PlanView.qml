@@ -193,10 +193,10 @@ Item {
         }
 
         function checkReadyForSaveUpload(save) {
-            if (readyForSaveState() == VisualMissionItem.NotReadyForSaveData) {
+            if (readyForSaveState() === VisualMissionItem.NotReadyForSaveData) {
                 waitingOnIncompleteDataMessage(save)
                 return false
-            } else if (readyForSaveState() == VisualMissionItem.NotReadyForSaveTerrain) {
+            } else if (readyForSaveState() === VisualMissionItem.NotReadyForSaveTerrain) {
                 waitingOnTerrainDataMessage(save)
                 return false
             }
@@ -554,7 +554,7 @@ Item {
                 model: [
                     ToolStripAction {
                         text:           qsTr("Fly")
-                        iconSource:     "/qmlimages/PaperPlane.svg"
+                        iconSource:     "/res/flyView"
                         onTriggered:    mainWindow.showFlyView()
                     },
 
@@ -586,26 +586,26 @@ Item {
                         enabled:            toolStrip._isRallyLayer ? true : _missionController.flyThroughCommandsAllowed
                         visible:            toolStrip._isRallyLayer || toolStrip._isMissionLayer
                         checkable:          true
-                        onTriggered: {
-                            if(!wayPointStarted && addWaypointRallyPointAction.text === "Waypoint") {
-                                wayPointStarted = true
-                                waypointToast.show(qsTr("Waypoint enabled. You can create your waypoint now by clicking the point on screen."))
-                            } else if(!rallyPointStarted && addWaypointRallyPointAction.text === "Rally Point") {
-                                rallyPointStarted = true
-                                waypointToast.show(qsTr("Rally point enabled. You can choose your rally point by click the point."))
-                            } else if(wayPointStarted && addWaypointRallyPointAction.text === "Waypoint") {
-                                wayPointStarted = false
-                                waypointToast.show("Waypoint disabled")
-                            } else if(rallyPointStarted && addWaypointRallyPointAction.text === "Rally Point") {
-                                rallyPointStarted = false
-                                waypointToast.show("Rally point disabled")
-                            }
+                        // onTriggered: {
+                        //     if(!wayPointStarted && addWaypointRallyPointAction.text === "Waypoint") {
+                        //         wayPointStarted = true
+                        //         waypointToast.show(qsTr("Waypoint enabled. You can create your waypoint now by clicking the point on screen."))
+                        //     } else if(!rallyPointStarted && addWaypointRallyPointAction.text === "Rally Point") {
+                        //         rallyPointStarted = true
+                        //         waypointToast.show(qsTr("Rally point enabled. You can choose your rally point by click the point."))
+                        //     } else if(wayPointStarted && addWaypointRallyPointAction.text === "Waypoint") {
+                        //         wayPointStarted = false
+                        //         waypointToast.show("Waypoint disabled")
+                        //     } else if(rallyPointStarted && addWaypointRallyPointAction.text === "Rally Point") {
+                        //         rallyPointStarted = false
+                        //         waypointToast.show("Rally point disabled")
+                        //     }
 
-                            // } else {
-                            //     wayPointStarted = false
-                            //     waypointToast.show(qsTr("Waypoint disabled."))
-                            // }
-                        }
+                        //     // } else {
+                        //     //     wayPointStarted = false
+                        //     //     waypointToast.show(qsTr("Waypoint disabled."))
+                        //     // }
+                        // }
                     },
 
                     // ToolStripAction {
@@ -686,9 +686,9 @@ Item {
         // Right pane for mission editing controls
         Rectangle {
             id:                 rightPanel
-            height:             ScreenTools.isMobile ? parent.height : parent.height - 300
+            height:             parent.height
             width:              ScreenTools.isMobile ? _rightPanelWidth - 30 :_rightPanelWidth + 60
-            color:              /*qgcPal.window*/ /*"#2c3e50"*/ "#99800000"
+            color:              qgcPal.window /*"#2c3e50"*/ /*"#99800000"*/
             opacity:            layerTabBar.visible ? 0.2 : 0
             anchors.verticalCenter: parent.verticalCenter
             anchors.right:      parent.right
@@ -719,16 +719,19 @@ Item {
                     QGCTabButton {
                         text:       qsTr("MISSION")
                         font.bold: true
+                        //color: qgcPal.globalTheme === QGCPalette.Light ? "white" : "black"
                     }
                     QGCTabButton {
                         text:       qsTr("FENCE")
                         font.bold: true
                         enabled:    _geoFenceController.supported
+                        //color: qgcPal.globalTheme === QGCPalette.Light ? "white" : "black"
                     }
                     QGCTabButton {
                         text:       qsTr("RALLY")
                         font.bold: true
                         enabled:    _rallyPointController.supported
+                        //color: qgcPal.globalTheme === QGCPalette.Light ? "white" : "black"
                     }
                 }
             }
@@ -953,7 +956,6 @@ Item {
                                         qsTr("You have unsaved changes.")
                 wrapMode:           Text.WordWrap
                 font.bold: true
-                color: "yellow"
                 visible:            _planMasterController.dirty
             }
 
@@ -994,8 +996,8 @@ Item {
                         width:  ScreenTools.defaultFontPixelHeight * 13
                         // Layout.fillWidth: true
                         height: planCreatorImage.y + planCreatorImage.height
-                        // color:  /*"green"*/ button.pressed || button.highlighted ? qgcPal.buttonHighlight : qgcPal.button
-                        color: button.pressed || button.highlighted ? "#00E676": "#2c3e50"
+                        color:  /*"green"*/ button.pressed || button.highlighted ? qgcPal.buttonHighlight : qgcPal.button
+                        // color: button.pressed || button.highlighted ? "#00E676": "#2c3e50"
 
 
                         property bool highlighted: mouseArea.containsMouse
@@ -1068,7 +1070,6 @@ Item {
                         text: qsTr("STORAGE")
                         font.bold: true
                         font.pointSize: 13
-                        color: "white"
                     }
 
                     // QGCMouseArea {
@@ -1184,7 +1185,6 @@ Item {
                         text: qsTr("VEHICLE")
                         font.bold: true
                         font.pointSize: 13
-                        color: "white"
                     }
 
                     // QGCMouseArea {

@@ -27,10 +27,10 @@ Rectangle {
     color:          qgcPal.window
     anchors.fill:   parent
 
-    property real _labelWidth:          ScreenTools.defaultFontPixelWidth * 28
+    property real _labelWidth:          ScreenTools.defaultFontPixelWidth * 35
     property real _valueWidth:          ScreenTools.defaultFontPixelWidth * 24
     property int  _selectedCount:       0
-    property real _columnSpacing:       ScreenTools.defaultFontPixelHeight * 0.25
+    property real _columnSpacing:       ScreenTools.defaultFontPixelHeight * 1
     property bool _uploadedSelected:    false
     property bool _showMavlinkLog:      QGroundControl.corePlugin.options.showMavlinkLogOptions
     property bool _showAPMStreamRates:  QGroundControl.apmFirmwareSupported && QGroundControl.settingsManager.apmMavlinkStreamRateSettings.visible && _isAPM
@@ -39,6 +39,11 @@ Rectangle {
     property bool _isAPM:               _activeVehicle ? _activeVehicle.apmFirmware : false
     property Fact _disableDataPersistenceFact: QGroundControl.settingsManager.appSettings.disableAllPersistence
     property bool _disableDataPersistence:     _disableDataPersistenceFact ? _disableDataPersistenceFact.rawValue : false
+
+    property bool   _disableAllDataPersistence: QGroundControl.settingsManager.appSettings.disableAllPersistence.rawValue
+    property Fact _telemetrySave: QGroundControl.settingsManager.appSettings.telemetrySave
+    property Fact _telemetrySaveNotArmed: QGroundControl.settingsManager.appSettings.telemetrySaveNotArmed
+    property Fact _saveCsvTelemetry: QGroundControl.settingsManager.appSettings.saveCsvTelemetry
 
     QGCPalette { id: qgcPal }
 
@@ -102,78 +107,182 @@ Rectangle {
             //-----------------------------------------------------------------
             //-- Ground Station
             Item {
-                width:              __mavlinkRoot.width * 0.8
+                width:              ScreenTools.defaultFontPixelWidth * 75
                 height:             gcsLabel.height
                 anchors.margins:    ScreenTools.defaultFontPixelWidth
                 anchors.horizontalCenter: parent.horizontalCenter
                 QGCLabel {
                     id:             gcsLabel
                     text:           qsTr("Ground Station")
-                    font.weight: Font.Bold
-                    font.family: ScreenTools.demiboldFontFamily
-                    font.pointSize: 16
-                    //font.family:    ScreenTools.demiboldFontFamily
+                    font.family:    ScreenTools.demiboldFontFamily
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    font.bold: true
                 }
             }
             Rectangle {
                 height:         gcsColumn.height + (ScreenTools.defaultFontPixelHeight * 2)
-                width:          __mavlinkRoot.width * 0.8
-                color:          /*qgcPal.windowShade*/ "#2c3e50"
-                anchors.margins: ScreenTools.defaultFontPixelWidth
+                width:          ScreenTools.defaultFontPixelWidth * 75
+                color:          "transparent"
+                radius: 6
+                border.color: "#888"
+                //anchors.margins: ScreenTools.defaultFontPixelWidth
                 anchors.horizontalCenter: parent.horizontalCenter
-                Column {
+                ColumnLayout {
                     id:         gcsColumn
                     spacing:    _columnSpacing
                     anchors.centerIn: parent
-                    Row {
+                    RowLayout {
                         spacing:    ScreenTools.defaultFontPixelWidth
                         QGCLabel {
                             width:              _labelWidth
-                            anchors.baseline:   sysidField.baseline
-                            text:               qsTr("MAVLink System ID:")
+                            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                            horizontalAlignment: Text.AlignLeft
+                            //anchors.baseline:   sysidField.baseline
+                            text:               qsTr("MAVLink System ID:                ")
                         }
                         QGCTextField {
                             id:     sysidField
                             text:   QGroundControl.mavlinkSystemID.toString()
                             width:  _valueWidth
+                            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                            horizontalAlignment: Text.AlignLeft
                             inputMethodHints:       Qt.ImhFormattedNumbersOnly
-                            anchors.verticalCenter: parent.verticalCenter
+                            //anchors.verticalCenter: parent.verticalCenter
                             onEditingFinished: {
                                 saveItems();
                             }
                         }
                     }
 
-                    QGCCheckBox {
-                        text:       qsTr("Emit heartbeat")
-                        checked:    QGroundControl.multiVehicleManager.gcsHeartBeatEnabled
-                        onClicked: {
-                            QGroundControl.multiVehicleManager.gcsHeartBeatEnabled = checked
+                    Rectangle {
+                        height: 1
+                        Layout.fillWidth: true
+                        color: "gray"
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
+                        spacing: ScreenTools.defaultFontPixelWidth * 5
+
+                        QGCLabel {
+                            text: "Emit Heartbeat                            "
+                            font.pointSize: 10
+                            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                            horizontalAlignment: Text.AlignLeft
+                        }
+
+                        Item { Layout.fillWidth: true }
+
+                        QGCToggleSwitch {
+                            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                            checked: QGroundControl.multiVehicleManager.gcsHeartBeatEnabled
+                            onCheckedChanged: QGroundControl.multiVehicleManager.gcsHeartBeatEnabled = checked
                         }
                     }
 
-                    QGCCheckBox {
-                        text:       qsTr("Only accept MAVs with same protocol version")
-                        checked:    QGroundControl.isVersionCheckEnabled
-                        onClicked: {
-                            QGroundControl.isVersionCheckEnabled = checked
+                    Rectangle {
+                        height: 1
+                        Layout.fillWidth: true
+                        color: "gray"
+                    }
+
+                    // QGCCheckBox {
+                    //     text:       qsTr("Emit heartbeat")
+                    //     checked:    QGroundControl.multiVehicleManager.gcsHeartBeatEnabled
+                    //     onClicked: {
+                    //         QGroundControl.multiVehicleManager.gcsHeartBeatEnabled = checked
+                    //     }
+                    // }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
+                        spacing: ScreenTools.defaultFontPixelWidth * 2
+
+                        QGCLabel {
+                            text: "Only accept MAVs with same protocol version"
+                            font.pointSize: 10
+                            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                            horizontalAlignment: Text.AlignLeft
+                        }
+
+                        Item { Layout.fillWidth: true }
+
+                        QGCToggleSwitch {
+                            id: versionSwitch
+                            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                            checked: _checkedState
+
+                            property bool _checkedState: QGroundControl.isVersionCheckEnabled
+
+                            onCheckedChanged: {
+                                QGroundControl.isVersionCheckEnabled = checked
+                                _checkedState = checked
+                            }
                         }
                     }
 
-                    FactCheckBox {
-                        id:         mavlinkForwardingChecked
-                        text:       qsTr("Enable MAVLink forwarding")
-                        fact:       QGroundControl.settingsManager.appSettings.forwardMavlink
-                        visible:    QGroundControl.settingsManager.appSettings.forwardMavlink.visible
+                    Rectangle {
+                        height: 1
+                        Layout.fillWidth: true
+                        color: "gray"
+                        visible: QGroundControl.settingsManager.appSettings.forwardMavlink.visible
                     }
 
-                    Row {
-                        spacing:    ScreenTools.defaultFontPixelWidth
+                    // QGCCheckBox {
+                    //     text:       qsTr("Only accept MAVs with same protocol version")
+                    //     checked:    QGroundControl.isVersionCheckEnabled
+                    //     onClicked: {
+                    //         QGroundControl.isVersionCheckEnabled = checked
+                    //     }
+                    // }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
+                        spacing: ScreenTools.defaultFontPixelWidth * 2
+                        visible: QGroundControl.settingsManager.appSettings.forwardMavlink.visible
+
+                        QGCLabel {
+                            text: "Enable MAVLink forwarding"
+                            font.pointSize: 10
+                            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                            horizontalAlignment: Text.AlignLeft
+                        }
+
+                        Item { Layout.fillWidth: true }
+                        Item { Layout.fillWidth: true }
+
+                        FactToggleSwitch {
+                            Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                            fact:       QGroundControl.settingsManager.appSettings.forwardMavlink
+                        }
+                    }
+
+                    Rectangle {
+                        height: 1
+                        Layout.fillWidth: true
+                        color: "gray"
+                        visible:            QGroundControl.settingsManager.appSettings.forwardMavlinkHostName.visible
+                    }
+
+                    // FactCheckBox {
+                    //     id:         mavlinkForwardingChecked
+                    //     text:       qsTr("Enable MAVLink forwarding")
+                    //     fact:       QGroundControl.settingsManager.appSettings.forwardMavlink
+                    //     visible:    QGroundControl.settingsManager.appSettings.forwardMavlink.visible
+                    // }
+
+                    RowLayout {
+                        spacing:    ScreenTools.defaultFontPixelWidth * 2
                         QGCLabel {
                             width:              _labelWidth
-                            anchors.baseline:   mavlinkForwardingHostNameField.baseline
+                            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                            horizontalAlignment: Text.AlignLeft
+                            //anchors.baseline:   mavlinkForwardingHostNameField.baseline
                             visible:            QGroundControl.settingsManager.appSettings.forwardMavlinkHostName.visible
-                            text:               qsTr("Host name:")
+                            text:               qsTr("Host name:                         ")
                         }
                         FactTextField {
                             id:                     mavlinkForwardingHostNameField
@@ -181,39 +290,173 @@ Rectangle {
                             width:                  _valueWidth
                             visible:                QGroundControl.settingsManager.appSettings.forwardMavlinkHostName.visible
                             enabled:                QGroundControl.settingsManager.appSettings.forwardMavlink.rawValue
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                            //anchors.verticalCenter: parent.verticalCenter
                         }
 
                     }
+
+                    Rectangle {
+                        height: 1
+                        Layout.fillWidth: true
+                        color: "gray"
+                        visible:    QGroundControl.settingsManager.appSettings.forwardMavlinkHostName.visible
+                    }
+
                    QGCLabel {
                         text:       qsTr("<i> Changing the host name requires restart of application. </i>")
-                        color: "yellow"
                         visible:    QGroundControl.settingsManager.appSettings.forwardMavlinkHostName.visible
                     }
                 }
             }
+
+
+            Item {
+                id: flightLoggingLabel
+                width: ScreenTools.defaultFontPixelWidth * 75
+                height:                     flightLogLabel.height
+                anchors.margins:            ScreenTools.defaultFontPixelWidth
+                anchors.topMargin: ScreenTools.defaultFontPixelWidth * 2
+                anchors.horizontalCenter:   parent.horizontalCenter
+                visible: _telemetrySave.visible
+
+                QGCLabel {
+                    id:             flightLogLabel
+                    text:           qsTr("Flight Logging")
+                    anchors.topMargin: ScreenTools.defaultFontPixelWidth * 2
+                    font.family:    ScreenTools.demiboldFontFamily
+                    visible: _telemetrySave.visible
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    font.bold: true
+                }
+            }
+
+            Rectangle {
+                height: flightLogLayout.height + (ScreenTools.defaultFontPixelHeight * 2)
+                width: ScreenTools.defaultFontPixelWidth * 75
+                color: "transparent"
+                radius: 6
+                border.color: "#888"
+                anchors.margins:            ScreenTools.defaultFontPixelWidth
+                anchors.horizontalCenter:   parent.horizontalCenter
+                visible: _telemetrySave.visible
+
+                ColumnLayout {
+                    id: flightLogLayout
+                    spacing:            ScreenTools.defaultFontPixelHeight / 2
+                    anchors.centerIn:   parent
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
+                        spacing: ScreenTools.defaultFontPixelWidth * 2
+                         visible:    _telemetrySave.visible
+
+                        QGCLabel {
+                            id: promptSaveLog
+                            text: "Save log after each flight"
+                            font.pointSize: 10
+                            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                            horizontalAlignment: Text.AlignLeft
+                        }
+
+                        Item { Layout.fillWidth: true }
+
+                        FactToggleSwitch {
+                            id: logSwitch
+                            Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                            fact:       _telemetrySave
+                            enabled:    !_disableAllDataPersistence
+                        }
+                    }
+
+                    Rectangle {
+                        height: 1
+                        Layout.fillWidth: true
+                        color: "gray"
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
+                        spacing: ScreenTools.defaultFontPixelWidth * 2
+                        visible: _telemetrySaveNotArmed.visible
+
+                        QGCLabel {
+                            text: "Save logs even if vehicle was not armed"
+                            font.pointSize: 10
+                            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                            horizontalAlignment: Text.AlignLeft
+                            opacity: logSwitch.checked ? 1.0 : 0.4
+                        }
+
+                        Item { Layout.fillWidth: true }
+
+                        FactToggleSwitch {
+                            Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                            fact:       _telemetrySaveNotArmed
+                            enabled: logSwitch.checked && !_disableAllDataPersistence
+                            opacity: logSwitch.checked ? 1.0 : 0.4
+                        }
+                    }
+
+                    Rectangle {
+                        height: 1
+                        Layout.fillWidth: true
+                        color: "gray"
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
+                        spacing: ScreenTools.defaultFontPixelWidth * 2
+                        visible: _saveCsvTelemetry.visible
+
+                        QGCLabel {
+                            text: "Save CSV log of telemetry data"
+                            font.pointSize: 10
+                            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                            horizontalAlignment: Text.AlignLeft
+                        }
+
+                        Item { Layout.fillWidth: true }
+
+                        FactToggleSwitch {
+                            Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                            fact:       _saveCsvTelemetry
+                            enabled:    !(QGroundControl.settingsManager.appSettings.disableAllPersistence.rawValue)
+                        }
+                    }
+                }
+            }
+
+
+
             //-----------------------------------------------------------------
             //-- Stream Rates
             Item {
                 id:                         apmStreamRatesLabel
-                width:                      __mavlinkRoot.width * 0.8
+                width:                      ScreenTools.defaultFontPixelWidth * 75
                 height:                     streamRatesLabel.height
                 anchors.margins:            ScreenTools.defaultFontPixelWidth
+                anchors.topMargin: ScreenTools.defaultFontPixelWidth * 2
                 anchors.horizontalCenter:   parent.horizontalCenter
                 visible:                    _showAPMStreamRates
                 QGCLabel {
                     id:             streamRatesLabel
                     text:           qsTr("Telemetry Stream Rates (ArduPilot Only)")
-                    font.weight: Font.Bold
-                    font.family: ScreenTools.demiboldFontFamily
-                    font.pointSize: 16
-                    //font.family:    ScreenTools.demiboldFontFamily
+                    anchors.topMargin: ScreenTools.defaultFontPixelWidth * 2
+                    font.family:    ScreenTools.demiboldFontFamily
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    font.bold: true
                 }
             }
             Rectangle {
                 height:                     streamRatesColumn.height + (ScreenTools.defaultFontPixelHeight * 2)
-                width:                      __mavlinkRoot.width * 0.8
-                color:                      /*qgcPal.windowShade*/ "#2c3e50"
+                width:                      ScreenTools.defaultFontPixelWidth * 75
+                color:          "transparent"
+                radius: 6
+                border.color: "#888"
                 anchors.margins:            ScreenTools.defaultFontPixelWidth
                 anchors.horizontalCenter:   parent.horizontalCenter
                 visible:                    _showAPMStreamRates
@@ -235,39 +478,74 @@ Rectangle {
                         columns:    2
                         enabled:    !streamRatesColumn.allStreamsControlledByVehicle
 
-                        QGCLabel { text:  qsTr("Raw Sensors"); font.bold: true }
+                        QGCLabel { text:  qsTr("Raw Sensors") }
                         FactComboBox {
                             fact:                   QGroundControl.settingsManager.apmMavlinkStreamRateSettings ? QGroundControl.settingsManager.apmMavlinkStreamRateSettings.streamRateRawSensors : null
                             indexModel:             false
                             Layout.preferredWidth:  _valueWidth
                         }
 
-                        QGCLabel { text:  qsTr("Extended Status"); font.bold: true }
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                        }
+
+                        QGCLabel { text:  qsTr("Extended Status") }
                         FactComboBox {
                             fact:                   QGroundControl.settingsManager.apmMavlinkStreamRateSettings ? QGroundControl.settingsManager.apmMavlinkStreamRateSettings.streamRateExtendedStatus : null
                             indexModel:             false
                             Layout.preferredWidth:  _valueWidth
                         }
 
-                        QGCLabel { text:  qsTr("RC Channel"); font.bold: true }
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                        }
+
+                        QGCLabel { text:  qsTr("RC Channel") }
                         FactComboBox {
                             fact:                   QGroundControl.settingsManager.apmMavlinkStreamRateSettings ? QGroundControl.settingsManager.apmMavlinkStreamRateSettings.streamRateRCChannels : null
                             indexModel:             false
                             Layout.preferredWidth:  _valueWidth
                         }
 
-                        QGCLabel { text:  qsTr("Position"); font.bold: true }
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                        }
+
+                        QGCLabel { text:  qsTr("Position") }
                         FactComboBox {
                             fact:                   QGroundControl.settingsManager.apmMavlinkStreamRateSettings ? QGroundControl.settingsManager.apmMavlinkStreamRateSettings.streamRatePosition : null
                             indexModel:             false
                             Layout.preferredWidth:  _valueWidth
                         }
 
-                        QGCLabel { text:  qsTr("Extra 1"); font.bold: true }
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                        }
+
+                        QGCLabel { text:  qsTr("Extra 1") }
                         FactComboBox {
                             fact:                   QGroundControl.settingsManager.apmMavlinkStreamRateSettings ? QGroundControl.settingsManager.apmMavlinkStreamRateSettings.streamRateExtra1 : null
                             indexModel:             false
                             Layout.preferredWidth:  _valueWidth
+                        }
+
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
                         }
 
                         QGCLabel { text:  qsTr("Extra 2") }
@@ -277,7 +555,14 @@ Rectangle {
                             Layout.preferredWidth:  _valueWidth
                         }
 
-                        QGCLabel { text:  qsTr("Extra 3"); font.bold: true }
+                        Rectangle {
+                            height: 1
+                            Layout.fillWidth: true
+                            Layout.columnSpan: 2
+                            color: "gray"
+                        }
+
+                        QGCLabel { text:  qsTr("Extra 3") }
                         FactComboBox {
                             fact:                   QGroundControl.settingsManager.apmMavlinkStreamRateSettings ? QGroundControl.settingsManager.apmMavlinkStreamRateSettings.streamRateExtra3 : null
                             indexModel:             false
@@ -289,23 +574,24 @@ Rectangle {
             //-----------------------------------------------------------------
             //-- Mavlink Status
             Item {
-                width:              __mavlinkRoot.width * 0.8
+                width:              ScreenTools.defaultFontPixelWidth * 75
                 height:             mavStatusLabel.height
                 anchors.margins:    ScreenTools.defaultFontPixelWidth
                 anchors.horizontalCenter: parent.horizontalCenter
                 QGCLabel {
                     id:             mavStatusLabel
                     text:           qsTr("MAVLink Link Status (Current Vehicle)")
-                    font.weight: Font.Bold
-                    font.family: ScreenTools.demiboldFontFamily
-                    font.pointSize: 16
-                    //font.family:    ScreenTools.demiboldFontFamily
+                    font.family:    ScreenTools.demiboldFontFamily
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    font.bold: true
                 }
             }
             Rectangle {
                 height:         mavStatusColumn.height + (ScreenTools.defaultFontPixelHeight * 2)
-                width:          __mavlinkRoot.width * 0.8
-                color:          /*qgcPal.windowShade*/ "#2c3e50"
+                width:          ScreenTools.defaultFontPixelWidth * 75
+                color:          "transparent"
+                radius: 6
+                border.color: "#888"
                 anchors.margins: ScreenTools.defaultFontPixelWidth
                 anchors.horizontalCenter: parent.horizontalCenter
                 Column {
@@ -315,12 +601,11 @@ Rectangle {
                     anchors.centerIn: parent
                     //-----------------------------------------------------------------
                     Row {
-                        spacing:    ScreenTools.defaultFontPixelWidth + 50
+                        spacing:    ScreenTools.defaultFontPixelWidth
                         anchors.horizontalCenter: parent.horizontalCenter
                         QGCLabel {
                             width:              _labelWidth
                             text:               qsTr("Total messages sent (computed):")
-                            font.bold: true
                             anchors.verticalCenter: parent.verticalCenter
                         }
                         QGCLabel {
@@ -329,14 +614,21 @@ Rectangle {
                             anchors.verticalCenter: parent.verticalCenter
                         }
                     }
+
+                    Rectangle {
+                        height: 1
+                        Layout.fillWidth: true
+                        color: "gray"
+                        anchors.horizontalCenter: parent.horizontalCenter
+                    }
+
                     //-----------------------------------------------------------------
                     Row {
-                        spacing:    ScreenTools.defaultFontPixelWidth + 50
+                        spacing:    ScreenTools.defaultFontPixelWidth
                         anchors.horizontalCenter: parent.horizontalCenter
                         QGCLabel {
                             width:              _labelWidth
                             text:               qsTr("Total messages received:")
-                            font.bold: true
                             anchors.verticalCenter: parent.verticalCenter
                         }
                         QGCLabel {
@@ -345,14 +637,20 @@ Rectangle {
                             anchors.verticalCenter: parent.verticalCenter
                         }
                     }
+
+                    Rectangle {
+                        height: 1
+                        Layout.fillWidth: true
+                        color: "gray"
+                    }
+
                     //-----------------------------------------------------------------
                     Row {
-                        spacing:    ScreenTools.defaultFontPixelWidth + 50
+                        spacing:    ScreenTools.defaultFontPixelWidth
                         anchors.horizontalCenter: parent.horizontalCenter
                         QGCLabel {
                             width:              _labelWidth
                             text:               qsTr("Total message loss:")
-                            font.bold: true
                             anchors.verticalCenter: parent.verticalCenter
                         }
                         QGCLabel {
@@ -361,14 +659,20 @@ Rectangle {
                             anchors.verticalCenter: parent.verticalCenter
                         }
                     }
+
+                    Rectangle {
+                        height: 1
+                        Layout.fillWidth: true
+                        color: "gray"
+                    }
+
                     //-----------------------------------------------------------------
                     Row {
-                        spacing:    ScreenTools.defaultFontPixelWidth + 50
+                        spacing:    ScreenTools.defaultFontPixelWidth
                         anchors.horizontalCenter: parent.horizontalCenter
                         QGCLabel {
                             width:              _labelWidth
                             text:               qsTr("Loss rate:")
-                            font.bold: true
                             anchors.verticalCenter: parent.verticalCenter
                         }
                         QGCLabel {
@@ -382,7 +686,7 @@ Rectangle {
             //-----------------------------------------------------------------
             //-- Mavlink Logging
             Item {
-                width:              __mavlinkRoot.width * 0.8
+                width:              ScreenTools.defaultFontPixelWidth * 75
                 height:             mavlogLabel.height
                 anchors.margins:    ScreenTools.defaultFontPixelWidth
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -390,16 +694,17 @@ Rectangle {
                 QGCLabel {
                     id:             mavlogLabel
                     text:           qsTr("MAVLink 2.0 Logging (PX4 Pro Only)")
-                    font.weight: Font.Bold
-                    font.family: ScreenTools.demiboldFontFamily
-                    font.pointSize: 16
-                    //font.family:    ScreenTools.demiboldFontFamily
+                    font.family:    ScreenTools.demiboldFontFamily
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    font.bold: true
                 }
             }
             Rectangle {
                 height:         mavlogColumn.height + (ScreenTools.defaultFontPixelHeight * 2)
-                width:          __mavlinkRoot.width * 0.8
-                color:          /*qgcPal.windowShade*/ "#2c3e50"
+                width:          ScreenTools.defaultFontPixelWidth * 75
+                color:          "transparent"
+                radius: 6
+                border.color: "#888"
                 anchors.margins: ScreenTools.defaultFontPixelWidth
                 anchors.horizontalCenter: parent.horizontalCenter
                 visible:        _showMavlinkLog && _isPX4
@@ -420,7 +725,6 @@ Rectangle {
                         }
                         QGCButton {
                             text:               qsTr("Start Logging")
-                            backRadius: 7
                             width:              (_valueWidth * 0.5) - (ScreenTools.defaultFontPixelWidth * 0.5)
                             enabled:            !QGroundControl.mavlinkLogManager.logRunning && QGroundControl.mavlinkLogManager.canStartLog && !_disableDataPersistence
                             onClicked:          QGroundControl.mavlinkLogManager.startLogging()
@@ -428,7 +732,6 @@ Rectangle {
                         }
                         QGCButton {
                             text:               qsTr("Stop Logging")
-                            backRadius: 7
                             width:              (_valueWidth * 0.5) - (ScreenTools.defaultFontPixelWidth * 0.5)
                             enabled:            QGroundControl.mavlinkLogManager.logRunning && !_disableDataPersistence
                             onClicked:          QGroundControl.mavlinkLogManager.stopLogging()
@@ -450,7 +753,7 @@ Rectangle {
             //-----------------------------------------------------------------
             //-- Mavlink Logging
             Item {
-                width:              __mavlinkRoot.width * 0.8
+                width:          ScreenTools.defaultFontPixelWidth * 75
                 height:             logLabel.height
                 anchors.margins:    ScreenTools.defaultFontPixelWidth
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -458,16 +761,17 @@ Rectangle {
                 QGCLabel {
                     id:             logLabel
                     text:           qsTr("MAVLink 2.0 Log Uploads (PX4 Pro Only)")
-                    font.weight: Font.Bold
-                    font.family: ScreenTools.demiboldFontFamily
-                    font.pointSize: 16
-                    //font.family:    ScreenTools.demiboldFontFamily
+                    font.family:    ScreenTools.demiboldFontFamily
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    font.bold: true
                 }
             }
             Rectangle {
                 height:         logColumn.height + (ScreenTools.defaultFontPixelHeight * 2)
-                width:          __mavlinkRoot.width * 0.8
-                color:          /*qgcPal.windowShade*/ "#2c3e50"
+                width:          ScreenTools.defaultFontPixelWidth * 75
+                color:          "transparent"
+                radius: 6
+                border.color: "#888"
                 anchors.margins: ScreenTools.defaultFontPixelWidth
                 anchors.horizontalCenter: parent.horizontalCenter
                 visible:        _showMavlinkLog && _isPX4
@@ -496,6 +800,13 @@ Rectangle {
                             }
                         }
                     }
+
+                    Rectangle {
+                        height: 1
+                        Layout.fillWidth: true
+                        color: "gray"
+                    }
+
                     //-----------------------------------------------------------------
                     //-- Description Field
                     Row {
@@ -516,6 +827,13 @@ Rectangle {
                             }
                         }
                     }
+
+                    Rectangle {
+                        height: 1
+                        Layout.fillWidth: true
+                        color: "gray"
+                    }
+
                     //-----------------------------------------------------------------
                     //-- Upload URL
                     Row {
@@ -537,6 +855,13 @@ Rectangle {
                             }
                         }
                     }
+
+                    Rectangle {
+                        height: 1
+                        Layout.fillWidth: true
+                        color: "gray"
+                    }
+
                     //-----------------------------------------------------------------
                     //-- Video URL
                     Row {
@@ -555,6 +880,13 @@ Rectangle {
                             anchors.verticalCenter: parent.verticalCenter
                         }
                     }
+
+                    Rectangle {
+                        height: 1
+                        Layout.fillWidth: true
+                        color: "gray"
+                    }
+
                     //-----------------------------------------------------------------
                     //-- Wind Speed
                     Row {
@@ -593,6 +925,13 @@ Rectangle {
                             }
                         }
                     }
+
+                    Rectangle {
+                        height: 1
+                        Layout.fillWidth: true
+                        color: "gray"
+                    }
+
                     //-----------------------------------------------------------------
                     //-- Flight Rating
                     Row {
@@ -632,6 +971,13 @@ Rectangle {
                             }
                         }
                     }
+
+                    Rectangle {
+                        height: 1
+                        Layout.fillWidth: true
+                        color: "gray"
+                    }
+
                     //-----------------------------------------------------------------
                     //-- Feedback
                     Row {
@@ -654,6 +1000,13 @@ Rectangle {
                             }
                         }
                     }
+
+                    Rectangle {
+                        height: 1
+                        Layout.fillWidth: true
+                        color: "gray"
+                    }
+
                     //-----------------------------------------------------------------
                     //-- Public Log
                     QGCCheckBox {
@@ -664,6 +1017,13 @@ Rectangle {
                             QGroundControl.mavlinkLogManager.publicLog = checked
                         }
                     }
+
+                    Rectangle {
+                        height: 1
+                        Layout.fillWidth: true
+                        color: "gray"
+                    }
+
                     //-----------------------------------------------------------------
                     //-- Automatic Upload
                     QGCCheckBox {
@@ -677,6 +1037,13 @@ Rectangle {
                                 emptyEmailDialog.open()
                         }
                     }
+
+                    Rectangle {
+                        height: 1
+                        Layout.fillWidth: true
+                        color: "gray"
+                    }
+
                     //-----------------------------------------------------------------
                     //-- Delete log after upload
                     QGCCheckBox {
@@ -692,7 +1059,7 @@ Rectangle {
             //-----------------------------------------------------------------
             //-- Log Files
             Item {
-                width:              __mavlinkRoot.width * 0.8
+                width:              ScreenTools.defaultFontPixelWidth * 75
                 height:             logFilesLabel.height
                 anchors.margins:    ScreenTools.defaultFontPixelWidth
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -700,16 +1067,17 @@ Rectangle {
                 QGCLabel {
                     id:             logFilesLabel
                     text:           qsTr("Saved Log Files")
-                    font.weight: Font.Bold
-                    font.family: ScreenTools.demiboldFontFamily
-                    font.pointSize: 16
-                    //font.family:    ScreenTools.demiboldFontFamily
+                    font.family:    ScreenTools.demiboldFontFamily
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    font.bold: true
                 }
             }
             Rectangle {
                 height:         logFilesColumn.height + (ScreenTools.defaultFontPixelHeight * 2)
-                width:          __mavlinkRoot.width * 0.8
-                color:          /*qgcPal.windowShade*/ "#2c3e50"
+                width:          ScreenTools.defaultFontPixelWidth * 75
+                color:          "transparent"
+                radius: 6
+                border.color: "#888"
                 anchors.margins: ScreenTools.defaultFontPixelWidth
                 anchors.horizontalCenter: parent.horizontalCenter
                 visible:        _showMavlinkLog
@@ -789,7 +1157,6 @@ Rectangle {
                         anchors.horizontalCenter: parent.horizontalCenter
                         QGCButton {
                             text:      qsTr("Check All")
-                            backRadius: 7
                             enabled:    !QGroundControl.mavlinkLogManager.uploading && !QGroundControl.mavlinkLogManager.logRunning
                             onClicked: {
                                 for(var i = 0; i < QGroundControl.mavlinkLogManager.logFiles.count; i++) {
@@ -800,7 +1167,6 @@ Rectangle {
                         }
                         QGCButton {
                             text:      qsTr("Check None")
-                            backRadius: 7
                             enabled:    !QGroundControl.mavlinkLogManager.uploading && !QGroundControl.mavlinkLogManager.logRunning
                             onClicked: {
                                 for(var i = 0; i < QGroundControl.mavlinkLogManager.logFiles.count; i++) {
@@ -811,7 +1177,6 @@ Rectangle {
                         }
                         QGCButton {
                             text:      qsTr("Delete Selected")
-                            backRadius: 7
                             enabled:    _selectedCount > 0 && !QGroundControl.mavlinkLogManager.uploading && !QGroundControl.mavlinkLogManager.logRunning
                             onClicked:  deleteDialog.open()
                             MessageDialog {
@@ -828,7 +1193,6 @@ Rectangle {
                         }
                         QGCButton {
                             text:      qsTr("Upload Selected")
-                            backRadius: 7
                             enabled:    _selectedCount > 0 && !QGroundControl.mavlinkLogManager.uploading && !QGroundControl.mavlinkLogManager.logRunning && !_uploadedSelected
                             visible:    !QGroundControl.mavlinkLogManager.uploading
                             onClicked:  {

@@ -41,7 +41,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             height: 1
-            color: "white"
+            color: "gray"
             opacity: 0.3
         }
 
@@ -54,7 +54,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             height: 1
-            color: "white"
+            color: "gray"
             opacity: 0.3
         }
 
@@ -67,7 +67,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             height: 1
-            color: "white"
+            color: "gray"
             opacity: 0.3
         }
 

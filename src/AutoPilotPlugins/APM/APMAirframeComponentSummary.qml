@@ -29,8 +29,8 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             height: 1
-            color: "white"
             opacity: 0.3
+            color: "gray"
         }
 
         VehicleSummaryRow {
@@ -42,19 +42,19 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             height: 1
-            color: "white"
             opacity: 0.3
+            color: "gray"
         }
 
         VehicleSummaryRow {
             labelText: qsTr("Firmware Version")
-            valueText: globals.activeVehicle.firmwareMajorVersion == -1 ? qsTr("Unknown") : globals.activeVehicle.firmwareMajorVersion + "." + globals.activeVehicle.firmwareMinorVersion + "." + globals.activeVehicle.firmwarePatchVersion + globals.activeVehicle.firmwareVersionTypeString
+            valueText: globals.activeVehicle.firmwareMajorVersion === -1 ? qsTr("Unknown") : globals.activeVehicle.firmwareMajorVersion + "." + globals.activeVehicle.firmwareMinorVersion + "." + globals.activeVehicle.firmwarePatchVersion + globals.activeVehicle.firmwareVersionTypeString
         }
 
         Rectangle {
             Layout.fillWidth: true
             height: 1
-            color: "white"
+            color: "gray"
             opacity: 0.3
         }
     }

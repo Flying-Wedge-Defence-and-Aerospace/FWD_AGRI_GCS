@@ -14,7 +14,7 @@ import QGroundControl.Palette       1.0
 Rectangle {
     width:  availableWidth
     height: editorColumn.height + (_margin * 2)
-    color:  /*qgcPal.windowShadeDark*/ /*"#2c3e50"*/ "#77800000"
+    color:  qgcPal.windowShadeDark /*"#2c3e50"*/ /*"#77800000"*/
     radius: _radius
 
     property bool _specifiesAltitude:       missionItem.specifiesAltitude

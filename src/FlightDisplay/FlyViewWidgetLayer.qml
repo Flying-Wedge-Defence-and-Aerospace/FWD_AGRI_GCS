@@ -74,179 +74,15 @@ Item {
         rallyPointController:   _rallyPointController
     }
 
-    // Row {
-    //     id:                 multiVehiclePanelSelector
-    //     anchors.margins:    _toolsMargin
-    //     anchors.top:        parent.top
-    //     anchors.right:      parent.right
-    //     width:              _rightPanelWidth
-    //     spacing:            ScreenTools.defaultFontPixelWidth
-    //     visible:            QGroundControl.multiVehicleManager.vehicles.count > 1 && QGroundControl.corePlugin.options.flyView.showMultiVehicleList
-
-    //     property bool showSingleVehiclePanel:  !visible || singleVehicleRadio.checked
-
-    //     QGCMapPalette { id: mapPal; lightColors: true }
-
-    //     QGCRadioButton {
-    //         id:             singleVehicleRadio
-    //         text:           qsTr("Single")
-    //         checked:        true
-    //         textColor:      mapPal.text
-    //     }
-
-    //     QGCRadioButton {
-    //         text:           qsTr("Multi-Vehicle")
-    //         textColor:      mapPal.text
-    //     }
-    // }
-
-    // MultiVehicleList {
-    //     anchors.margins:    _toolsMargin
-    //     anchors.top:        multiVehiclePanelSelector.bottom
-    //     anchors.right:      parent.right
-    //     width:              _rightPanelWidth
-    //     height:             parent.height - y - _toolsMargin
-    //     visible:            !multiVehiclePanelSelector.showSingleVehiclePanel
-    // }
-
-
     GuidedActionConfirm {
         anchors.margins:            _toolsMargin
         anchors.top:               parent.top
         anchors.horizontalCenter:   parent.horizontalCenter
-        anchors.topMargin: 100
+        anchors.topMargin: ScreenTools.defaultFontPixelHeight * 2
         z:                          QGroundControl.zOrderTopMost
         guidedController:           _guidedController
         guidedValueSlider:          _guidedValueSlider
     }
-
-    // FlyViewInstrumentPanel {
-    //     id:                         instrumentPanel
-    //     anchors.margins:            _toolsMargin
-    //     anchors.top:                multiVehiclePanelSelector.visible ? multiVehiclePanelSelector.bottom : parent.top
-    //     anchors.right:              parent.right
-    //     width:                      _rightPanelWidth
-    //     spacing:                    _toolsMargin
-    //     visible:                    QGroundControl.corePlugin.options.flyView.showInstrumentPanel && multiVehiclePanelSelector.showSingleVehiclePanel
-    //     availableHeight:            parent.height - y - _toolsMargin
-
-    //     property real rightEdgeTopInset: visible ? parent.width - x : 0
-    //     property real topEdgeRightInset: visible ? y + height : 0
-    // }
-
-    // PhotoVideoControl {
-    //     id:                     photoVideoControl
-    //     anchors.margins:        _toolsMargin
-    //     anchors.right:          parent.right
-    //     width:                  _rightPanelWidth
-
-    //     property real rightEdgeCenterInset: visible ? parent.width - x : 0
-
-    //     state:                  _verticalCenter ? "verticalCenter" : "topAnchor"
-    //     states: [
-    //         State {
-    //             name: "verticalCenter"
-    //             AnchorChanges {
-    //                 target:                 photoVideoControl
-    //                 anchors.top:            undefined
-    //                 anchors.verticalCenter: _root.verticalCenter
-    //             }
-    //         },
-    //         State {
-    //             name: "topAnchor"
-    //             AnchorChanges {
-    //                 target:                 photoVideoControl
-    //                 anchors.verticalCenter: undefined
-    //                 anchors.top:            instrumentPanel.bottom
-    //             }
-    //         }
-    //     ]
-
-    //     property bool _verticalCenter: !QGroundControl.settingsManager.flyViewSettings.alternateInstrumentPanel.rawValue
-    // }
-
-    // TelemetryValuesBar {
-    //     id:                 telemetryPanel
-    //     x:                  recalcXPosition()
-    //     anchors.margins:    _toolsMargin
-
-    //     property real bottomEdgeCenterInset: 0
-    //     property real rightEdgeCenterInset: 0
-
-    //     // States for custom layout support
-    //     states: [
-    //         State {
-    //             name: "bottom"
-    //             when: telemetryPanel.bottomMode
-
-    //             AnchorChanges {
-    //                 target: telemetryPanel
-    //                 anchors.top: undefined
-    //                 anchors.bottom: parent.bottom
-    //                 anchors.right: undefined
-    //                 anchors.verticalCenter: undefined
-    //             }
-
-    //             PropertyChanges {
-    //                 target: telemetryPanel
-    //                 x: recalcXPosition()
-    //                 bottomEdgeCenterInset: visible ? parent.height-y : 0
-    //                 rightEdgeCenterInset: 0
-    //             }
-    //         },
-
-    //         State {
-    //             name: "right-video"
-    //             when: !telemetryPanel.bottomMode && photoVideoControl.visible
-
-    //             AnchorChanges {
-    //                 target: telemetryPanel
-    //                 anchors.top: photoVideoControl.bottom
-    //                 anchors.bottom: undefined
-    //                 anchors.right: parent.right
-    //                 anchors.verticalCenter: undefined
-    //             }
-    //             PropertyChanges {
-    //                 target: telemetryPanel
-    //                 bottomEdgeCenterInset: 0
-    //                 rightEdgeCenterInset: visible ? parent.width - x : 0
-    //             }
-    //         },
-
-    //         State {
-    //             name: "right-novideo"
-    //             when: !telemetryPanel.bottomMode && !photoVideoControl.visible
-
-    //             AnchorChanges {
-    //                 target: telemetryPanel
-    //                 anchors.top: undefined
-    //                 anchors.bottom: undefined
-    //                 anchors.right: parent.right
-    //                 anchors.verticalCenter: parent.verticalCenter
-    //             }
-    //             PropertyChanges {
-    //                 target: telemetryPanel
-    //                 bottomEdgeCenterInset: 0
-    //                 rightEdgeCenterInset: visible ? parent.width - x : 0
-    //             }
-    //         }
-    //     ]
-
-    //     function recalcXPosition() {
-    //         // First try centered
-    //         var halfRootWidth   = _root.width / 2
-    //         var halfPanelWidth  = telemetryPanel.width / 2
-    //         var leftX           = (halfRootWidth - halfPanelWidth) - _toolsMargin
-    //         var rightX          = (halfRootWidth + halfPanelWidth) + _toolsMargin
-    //         if (leftX >= parentToolInsets.leftEdgeBottomInset || rightX <= parentToolInsets.rightEdgeBottomInset ) {
-    //             // It will fit in the horizontalCenter
-    //             return halfRootWidth - halfPanelWidth
-    //         } else {
-    //             // Anchor to left edge
-    //             return parentToolInsets.leftEdgeBottomInset + _toolsMargin
-    //         }
-    //     }
-    // }
 
     //-- Virtual Joystick
     Loader {
@@ -273,23 +109,6 @@ Item {
         property real rightEdgeBottomInset: visible ? bottomEdgeRightInset + width/18 - ScreenTools.defaultFontPixelHeight*2 : 0
     }
 
-    FlyViewToolStrip {
-        id:                     toolStrip
-        anchors.leftMargin:     _toolsMargin + 10/*+ parentToolInsets.leftEdgeCenterInset*/
-        anchors.topMargin:      _toolsMargin + 50 /*+ parentToolInsets.topEdgeLeftInset*/
-        anchors.left:           parent.left
-        anchors.top:            parent.top
-        z:                      QGroundControl.zOrderWidgets
-        maxHeight:              parent.height/* - y - parentToolInsets.bottomEdgeLeftInset - _toolsMargin*/
-        visible:                !QGroundControl.videoManager.fullScreen
-
-        onDisplayPreFlightChecklist: preFlightChecklistPopup.createObject(mainWindow).open()
-
-
-        property real topEdgeLeftInset: visible ? y + height : 0
-        property real leftEdgeTopInset: visible ? x + width : 0
-    }
-
     GripperMenu {
         id: gripperOptions
     }
@@ -297,24 +116,5 @@ Item {
     VehicleWarnings {
         anchors.centerIn:   parent
         z:                  QGroundControl.zOrderTopMost
-    }
-
-    // MapScale {
-    //     id:                 mapScale
-    //     anchors.margins:    _toolsMargin
-    //     //anchors.left:       toolStrip.right
-    //     anchors.top:        parent.top
-    //     mapControl:         _mapControl
-    //     buttonsOnLeft:      true
-    //     visible:            !ScreenTools.isTinyScreen && QGroundControl.corePlugin.options.flyView.showMapScale && mapControl.pipState.state === mapControl.pipState.fullState
-
-    //     property real topEdgeCenterInset: visible ? y + height : 0
-    //     //visible: false
-    // }
-
-    Component {
-        id: preFlightChecklistPopup
-        FlyViewPreFlightChecklistPopup {
-        }
     }
 }

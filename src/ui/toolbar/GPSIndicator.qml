@@ -21,7 +21,11 @@ import QGroundControl.Palette               1.0
 //-- GPS Indicator
 Item {
     id:             _root
-    width:          (gpsValuesColumn.x + gpsValuesColumn.width) * 4
+    //width:          (gpsValuesColumn.x + gpsValuesColumn.width) * 4
+    //implicitWidth: (gpsValuesColumn.x + gpsValuesColumn.width) * 2
+
+    implicitWidth: gpsIcon.width + gpsValuesColumn.width + ScreenTools.defaultFontPixelWidth
+    implicitHeight: Math.max(gpsIcon.height, gpsValuesColumn.height)
     anchors.top:    parent.top
     anchors.bottom: parent.bottom
 
@@ -36,7 +40,7 @@ Item {
             width:  gpsCol.width   + ScreenTools.defaultFontPixelWidth  * 3
             height: gpsCol.height  + ScreenTools.defaultFontPixelHeight * 2
             radius: ScreenTools.defaultFontPixelHeight * 0.5
-            color:  /*qgcPal.window*/ "#2c3e50"
+            color:  qgcPal.window
             border.color:   qgcPal.text
 
             Column {
@@ -88,7 +92,7 @@ Item {
 
     QGCColoredImage {
         id:                 gpsIcon
-        width:              height - 15
+        width:              height - (ScreenTools.isMobile ? 50 : 30)
         anchors.top:        parent.top
         anchors.bottom:     parent.bottom
         source:             "/res/gps_icon"
@@ -103,7 +107,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         //anchors.leftMargin:     ScreenTools.defaultFontPixelWidth / 2
         anchors.left:           gpsIcon.right
-        anchors.leftMargin: 10
+        anchors.leftMargin: ScreenTools.defaultFontPixelWidth
         spacing: 1
 
         QGCLabel {
@@ -113,9 +117,9 @@ Item {
             color:                      /*qgcPal.buttonText*/ "white"
             //text:                       _activeVehicle ? _activeVehicle.gps.count.valueString : ""
             text:                       _activeVehicle && !isNaN(_activeVehicle.gps.count.value)
-                                                ? _activeVehicle.gps.count.valueString
+                                                ? _activeVehicle.gps.count.valueString + "  sats"
                                                 : "N/A"
-            font.pointSize: ScreenTools.isMobile ? 6.8 : 8
+            font.pointSize: ScreenTools.isMobile ? 6.8 : 11
             font.bold: true
 
             ToolTip.visible: count.containsMouse
@@ -134,10 +138,10 @@ Item {
             color:      /*qgcPal.buttonText*/ "white"
             //text:       _activeVehicle ? _activeVehicle.gps.hdop.value.toFixed(1) : ""
             text:       _activeVehicle && !isNaN(_activeVehicle.gps.hdop.value)
-                                ? _activeVehicle.gps.hdop.value.toFixed(1)
+                                ? _activeVehicle.gps.hdop.value.toFixed(1) + "  hdop"
                                 : "N/A"
             font.bold: true
-            font.pointSize: ScreenTools.isMobile ? 6.8 : 8
+            font.pointSize: ScreenTools.isMobile ? 6.8 : 11
 
             ToolTip.visible: hdop.containsMouse
             ToolTip.text: "HDOP value"
@@ -153,7 +157,7 @@ Item {
     MouseArea {
         anchors.fill:   parent
         onClicked: {
-            mainWindow.showIndicatorPopup(_root, gpsInfo)
+            mainWindow.showIndicatorPopup(_root, gpsInfo, "top")
         }
     }
 }

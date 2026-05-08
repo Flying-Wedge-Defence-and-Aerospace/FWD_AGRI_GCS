@@ -24,8 +24,10 @@ Item {
     id:             _root
     anchors.top:    parent.top
     anchors.bottom: parent.bottom
-    width:          batteryIndicatorRow.width * 3.5
-    height: 10
+    implicitWidth: batteryIndicatorRow.implicitWidth
+    implicitHeight: batteryIndicatorRow.implicitHeight
+    // width:          batteryIndicatorRow.width * 3.5
+    // height: 10
 
     property bool showIndicator: true
 
@@ -34,6 +36,7 @@ Item {
     Row {
         id:             batteryIndicatorRow
         anchors.top:    parent.top
+        anchors.topMargin: ScreenTools.isMobile ? 0 : 0
         anchors.bottom: parent.bottom
 
         Repeater {
@@ -60,17 +63,16 @@ Item {
     MouseArea {
         anchors.fill:   parent
         onClicked: {
-            mainWindow.showIndicatorPopup(_root, batteryPopup)
+            mainWindow.showIndicatorPopup(_root, batteryPopup, "top")
         }
     }
 
     Component {
         id: batteryVisual
 
-        Row {
-            anchors.top:    parent.top
-            anchors.bottom: parent.bottom
-            spacing: 5
+        Column {
+            spacing: ScreenTools.isMobile ? ScreenTools.isMobile * 2 : -10
+            anchors.margins: 0
 
             function getBatteryColor() {
                 switch (battery.chargeState.rawValue) {
@@ -104,9 +106,9 @@ Item {
             }
 
             QGCColoredImage {
-                anchors.top:        parent.top
-                anchors.bottom:     parent.bottom
-                width:              height > 0 ? height - 10 : 15
+                anchors.horizontalCenter: parent.horizontalCenter
+                height: ScreenTools.isMobile ? parent.height * 0.65 : parent.height * 0.75
+                width:              height - 10 /*> 0 ? height - 25 : 10*/
                 sourceSize.width:   width
                 source:             /*"qrc:/qmlimages/Battery.svg"*/ "/res/battery_icon"
                 opacity:            (_activeVehicle && _activeVehicle.gps.count.value >= 0) ? 1 : 0.5
@@ -115,12 +117,15 @@ Item {
             }
 
             QGCLabel {
-                text:                   /*getBatteryPercentageText()*/ _activeVehicle ? getBatteryPercentageText() : "N/A"
+                text: (_activeVehicle && _activeVehicle.batteries && _activeVehicle.batteries.count > 0
+                        && _activeVehicle.batteries.get(0))
+                      ? _activeVehicle.batteries.get(0).voltage.valueString + " V"
+                      : "N/A"
                 //font.pointSize:         ScreenTools.mediumFontPointSize
                 color:                  /*getBatteryColor()*/ _activeVehicle ? getBatteryColor() : "white"
-                anchors.verticalCenter: parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
                 font.bold: true
-                font.pointSize: ScreenTools.isMobile ? 6 : 11
+                font.pointSize: ScreenTools.isMobile ? 6 : 10
 
                 ToolTip.visible: batteryDet.containsMouse
                 ToolTip.text: "Battery Percentage"
@@ -131,22 +136,24 @@ Item {
                     hoverEnabled: true
                 }
             }
+
+            Item {
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
         }
     }
 
     Component {
         id: batteryNoVehicleVisual
 
-        Row {
-            spacing: 5
-            anchors.top:    parent.top
-            anchors.bottom: parent.bottom
+        Column {
+            spacing: 2
 
             QGCColoredImage {
-                anchors.top: parent.top
+                anchors.horizontalCenter: parent.horizontalCenter
+                height: ScreenTools.isMobile ? parent.height * 0.45 : parent.height * 0.6
                 source: "/res/battery_icon"
-                anchors.bottom:     parent.bottom
-                width:              height > 0 ? height : 30
+                width:              height > 0 ? height - 5 : 20
                 sourceSize.width:   width
                 color: "white"
                 opacity: 0.5
@@ -159,8 +166,8 @@ Item {
                 //font.pointSize: ScreenTools.mediumFontPointSize
                 color: "white"
                 font.bold: true
-                anchors.verticalCenter: parent.verticalCenter
-                font.pointSize: ScreenTools.isMobile ? 8 : 8
+                anchors.horizontalCenter: parent.horizontalCenter
+                font.pointSize: ScreenTools.isMobile ? 6 : 8
 
                 ToolTip.visible: batteryInfo.containsMouse
                 ToolTip.text: "Battery Percentage"
@@ -197,7 +204,7 @@ Item {
             width:          mainLayout.width   + mainLayout.anchors.margins * 2
             height:         mainLayout.height  + mainLayout.anchors.margins * 2
             radius:         ScreenTools.defaultFontPixelHeight / 2
-            color:          "#2c3e50"
+            color:          qgcPal.window
             border.color:   qgcPal.text
 
             ColumnLayout {
@@ -243,7 +250,7 @@ Item {
                                     property var battery: object
                                 }
 
-                                QGCLabel { text: qsTr("<u> Battery %1 </u>").arg(object.id.rawValue); font.bold: true; color: "yellow"}
+                                QGCLabel { text: qsTr("<u> Battery %1 </u>").arg(object.id.rawValue); font.bold: true}
                                 QGCLabel { text: qsTr("Charge State");  visible: batteryValuesAvailable.chargeStateAvailable; font.bold: true }
                                 QGCLabel { text: qsTr("Remaining");     visible: batteryValuesAvailable.timeRemainingAvailable; font.bold: true }
                                 QGCLabel { text: qsTr("Remaining"); font.bold: true }

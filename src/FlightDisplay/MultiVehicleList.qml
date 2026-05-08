@@ -20,7 +20,7 @@ import QGroundControl.FlightMap     1.0
 
 Item {
     property real   _margin:            ScreenTools.defaultFontPixelWidth / 2
-    property real   _widgetHeight:      ScreenTools.defaultFontPixelHeight * 3
+    property real   _widgetHeight:      ScreenTools.isMobile ? ScreenTools.defaultFontPixelHeight * 5 : ScreenTools.defaultFontPixelHeight * 6.5
     property color  _textColor:         "black"
     property real   _rectOpacity:       0.8
     property var    _guidedController:  globals.guidedControllerFlyView
@@ -29,11 +29,10 @@ Item {
 
     Rectangle {
         id:             mvCommands
-        width: 170
-        //anchors.right: parent.right
-        anchors.rightMargin: 5
+        anchors.left:   parent.left
+        anchors.right:  parent.right
         height:         mvCommandsColumn.height + (_margin *2)
-        color:          /*qgcPal.missionItemEditor*/  Qt.rgba(0.8, 0.8, 0.8, 0.6)
+        color:          qgcPal.globalTheme === QGCPalette.Light ? Qt.rgba(1, 1, 1, 0.5) : Qt.rgba(0, 0, 0, 0.5)  //qgcPal.missionItemEditor
         opacity:        _rectOpacity
         radius:         _margin
 
@@ -53,9 +52,9 @@ Item {
                 anchors.left:   parent.left
                 anchors.right:  parent.right
                 text:           qsTr("The following commands will be applied to all vehicles")
-                color:          /*_textColor*/ "black"
+                //color:          _textColor
                 wrapMode:       Text.WordWrap
-                font.pointSize: /*ScreenTools.smallFontPointSize*/ 10
+                font.pointSize: ScreenTools.mediumFontPointSize
             }
 
             Row {
@@ -63,13 +62,11 @@ Item {
 
                 QGCButton {
                     text:       qsTr("Pause")
-                    backRadius: 7
                     onClicked:  _guidedController.confirmAction(_guidedController.actionMVPause)
                 }
 
                 QGCButton {
                     text:       qsTr("Start Mission")
-                    backRadius: 7
                     onClicked:  _guidedController.confirmAction(_guidedController.actionMVStartMission)
                 }
             }
@@ -78,15 +75,11 @@ Item {
 
     QGCListView {
         id:                 missionItemEditorListView
-        width: 290
-        //anchors.left:       parent.left
+        anchors.left:       parent.left
         anchors.right:      parent.right
-        anchors.rightMargin: 1
         anchors.topMargin:  _margin
         anchors.top:        mvCommands.bottom
         anchors.bottom:     parent.bottom
-        // x: 100
-        // y: 100
         spacing:            ScreenTools.defaultFontPixelHeight / 2
         orientation:        ListView.Vertical
         model:              QGroundControl.multiVehicleManager.vehicles
@@ -96,12 +89,10 @@ Item {
         property real _cacheBuffer:     height * 2
 
         delegate: Rectangle {
-            width:      /*missionItemEditorListView.width*/290
-            // anchors.left: parent.left
-            // anchors.right: parent.right
-            anchors.rightMargin: 1
+            width:   missionItemEditorListView.width + 200
             height:     innerColumn.y + innerColumn.height + _margin
-            color:      /*qgcPal.missionItemEditor*/ /*Qt.rgba(0.8, 0.8, 0.8, 0.6)*/ "#77800000"
+            //color:      qgcPal.missionItemEditor
+            color: qgcPal.globalTheme === QGCPalette.Light ? Qt.rgba(1, 1, 1, 0.5) : Qt.rgba(0, 0, 0, 0.5)
             opacity:    _rectOpacity
             radius:     _margin
 
@@ -112,7 +103,7 @@ Item {
                 anchors.margins:    _margin
                 anchors.top:        parent.top
                 anchors.left:       parent.left
-                anchors.right:      parent.left
+                //anchors.right:      parent.left
                 spacing:            _margin
 
                 RowLayout {
@@ -121,7 +112,7 @@ Item {
                     QGCLabel {
                         Layout.alignment:   Qt.AlignTop
                         text:               _vehicle ? _vehicle.id : ""
-                        color:              _textColor
+                        //color:              _textColor
                     }
 
                     ColumnLayout {
@@ -130,15 +121,16 @@ Item {
 
                         FlightModeMenu {
                             Layout.alignment:           Qt.AlignHCenter
-                            font.pointSize:             ScreenTools.largeFontPointSize
-                            color:                      _textColor
+                            font.pointSize:             ScreenTools.isMobile ? ScreenTools.mediumFontPointSize : ScreenTools.largeFontPointSize
+                            //color:                      _textColor
                             currentVehicle:             _vehicle
                         }
 
                         QGCLabel {
                             Layout.alignment:           Qt.AlignHCenter
                             text:                       _vehicle && _vehicle.armed ? qsTr("Armed") : qsTr("Disarmed")
-                            color:                      _textColor
+                            font.bold: true
+                            //color:                      _textColor
                         }
                     }
 
@@ -155,39 +147,34 @@ Item {
                 } // RowLayout
 
                 Row {
-                    spacing: ScreenTools.defaultFontPixelWidth
+                    spacing: ScreenTools.isMobile ? ScreenTools.defaultFontPixelWidth / 2 : ScreenTools.defaultFontPixelWidth
 
                     QGCButton {
                         text:       qsTr("Arm")
-                        backRadius: 7
                         visible:    _vehicle && !_vehicle.armed
                         onClicked:  _vehicle.armed = true
                     }
 
                     QGCButton {
                         text:       qsTr("Start Mission")
-                        backRadius: 7
                         visible:    _vehicle && _vehicle.armed && _vehicle.flightMode !== _vehicle.missionFlightMode
                         onClicked:  _vehicle.startMission()
                     }
 
                     QGCButton {
                         text:       qsTr("Pause")
-                        backRadius: 7
                         visible:    _vehicle && _vehicle.armed && _vehicle.pauseVehicleSupported
                         onClicked:  _vehicle.pauseVehicle()
                     }
 
                     QGCButton {
                         text:       qsTr("RTL")
-                        backRadius: 7
                         visible:    _vehicle && _vehicle.armed && _vehicle.flightMode !== _vehicle.rtlFlightMode
                         onClicked:  _vehicle.flightMode = _vehicle.rtlFlightMode
                     }
 
                     QGCButton {
                         text:       qsTr("Take control")
-                        backRadius: 7
                         visible:    _vehicle && _vehicle.armed && _vehicle.flightMode !== _vehicle.takeControlFlightMode
                         onClicked:  _vehicle.flightMode = _vehicle.takeControlFlightMode
                     }

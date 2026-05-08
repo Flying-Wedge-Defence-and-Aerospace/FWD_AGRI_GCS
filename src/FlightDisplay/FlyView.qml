@@ -40,6 +40,8 @@ Item {
 
     property bool logOut: false
 
+    QGCPalette { id: qgcPal }
+
     PlanMasterController {
         id:                     _planController
         flyView:                true
@@ -65,6 +67,24 @@ Item {
     property real   _fullItemZorder:    0
     property real   _pipItemZorder:     QGroundControl.zOrderWidgets
 
+    property bool   telemetryVisible: QGroundControl.settingsManager.flyViewSettings.telemetryVisible.value
+    property bool   hudVisible: QGroundControl.settingsManager.flyViewSettings.hudVisible.value
+    property bool   toolStripVisible: QGroundControl.settingsManager.flyViewSettings.toolStripVisible.value
+    property bool   videoVisible: QGroundControl.settingsManager.flyViewSettings.videoVisible.value
+
+    // Loader {
+    //     id: configPanelLoader
+    //     anchors.fill: parent
+    //     z: QGroundControl.zOrderTopMost
+    //     source: "ConfigPanel.qml"
+
+    //     onLoaded: {
+    //         item._root = _root
+    //     }
+    // }
+
+    //property real   _pipItemZorder:     QGroundControl.zOrderWidgets
+
     property bool   _communicationLost: _activeVehicle ? _activeVehicle.vehicleLinkManager.communicationLost : false
     property bool   _healthAndArmingChecksSupported: _activeVehicle ? _activeVehicle.healthAndArmingCheckReport.supported : false
     property color  _mainStatusBGColor: qgcPal.brandingPurple
@@ -73,6 +93,7 @@ Item {
     property bool   _armed:             _activeVehicle ? _activeVehicle.armed : false
     //property real   _margins:           ScreenTools.defaultFontPixelWidth
     property real   _spacing:           ScreenTools.defaultFontPixelWidth
+    property bool   _isVideoFullscreen: false
 
     function _calcCenterViewPort() {
         var newToolInset = Qt.rect(0, 0, width, height)
@@ -97,7 +118,7 @@ Item {
         z:                      _fullItemZorder + 1
         parentToolInsets:       _toolInsets
         mapControl:             _mapControl
-        visible:                /*!QGroundControl.videoManager.fullScreen*/ true
+        visible:                !QGroundControl.videoManager.fullScreen
     }
 
 
@@ -173,7 +194,7 @@ Item {
         z:                  QGroundControl.zOrderTopMost
         radius:             ScreenTools.defaultFontPixelWidth / 2
         width:              ScreenTools.defaultFontPixelWidth * 10
-        color:              /*qgcPal.window*/ "#55800000"
+        color:               qgcPal.globalTheme === QGCPalette.Light ? Qt.rgba(1, 1, 1, 0.5) : Qt.rgba(0, 0, 0, 0.5) /*qgcPal.window*/
         visible:            false
     }
 
@@ -185,6 +206,7 @@ Item {
         pipMode:                !_mainWindowIsMap
         toolInsets:             customOverlay.totalToolInsets
         mapName:                "FlightDisplayView"
+        visible:                !_isVideoFullscreen || !ScreenTools.isMobile
     }
 
     FlyViewVideo {
@@ -193,8 +215,8 @@ Item {
 
     QGCPipOverlay {
         id:                     _pipOverlay
-        //anchors.left:           parent.left
-        anchors.right:          parent.right
+        anchors.left:           parent.left
+        //anchors.right:          parent.right
         anchors.bottom:         parent.bottom
         anchors.margins:        _toolsMargin
         anchors.rightMargin: 10
@@ -204,16 +226,15 @@ Item {
         fullZOrder:             _fullItemZorder
         pipZOrder:              _pipItemZorder
         show:                   !QGroundControl.videoManager.fullScreen &&
-                                    (videoControl.pipState.state === videoControl.pipState.pipState || mapControl.pipState.state === mapControl.pipState.pipState)
-        //onVideoClose: photoVideoControl.visible = false
-        //onVideoOpen: photoVideoControl.visible = true
+                                    (videoControl.pipState.state === videoControl.pipState.pipState || mapControl.pipState.state === mapControl.pipState.pipState) && _root.videoVisible
     }
 
     MultiVehicleList {
         anchors.margins:    _toolsMargin
         anchors.top:        multiVehiclePanelSelector.bottom
         anchors.right:      parent.right
-        width:              _rightPanelWidth
+        //anchors.centerIn: parent
+        width:              /*_rightPanelWidth*/ ScreenTools.isMobile ? ScreenTools.defaultFontPixelWidth * 47 : ScreenTools.defaultFontPixelWidth * 60
         height:             parent.height - y - _toolsMargin
         visible:            !multiVehiclePanelSelector.showSingleVehiclePanel
     }
@@ -222,259 +243,87 @@ Item {
     ToolStrip {
         id: toolStrip
         width: parent.width
-        //orientation: Qt.Horizontal
         title: qsTr("Fly")
-        // anchors.top: parent.top
-        // anchors.topMargin: 80
+        anchors.bottom: parent.botto
         signal displayPreFlightChecklist
+        anchors.margins: ScreenTools.defaultFontPixelWidth
 
         FlyViewToolStripActionList {
             id: flyViewToolStripActionList
-            //mapTypePanel: mapTypeDropPanel
             onDisplayPreFlightChecklist: toolStrip.displayPreFlightChecklist()
         }
         model: flyViewToolStripActionList.model
     }
 
 
-    // PhotoVideoControl {
-    //     id: photoVideoControl
-    //     anchors.right: videoControl.left
-    //     anchors.bottom: parent.bottom
-    //     anchors.bottomMargin: 5
-    //     anchors.rightMargin: 5
-    //     width: _rightPanelWidth
-    // }
+    PhotoVideoControl {
+        id: photoVideoControl
+        anchors.right: ScreenTools.isMobile ? undefined : parent.right
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: ScreenTools.isMobile ? parent.horizontalCenter : undefined
+        anchors.bottomMargin: 5
+        anchors.rightMargin: 5
+        width: _rightPanelWidth
+        visible: mapControl.pipState.state === mapControl.pipState.pipState
+    }
 
     FlyViewInstrumentPanel {
         id:                         instrumentPanel
         width:                      _rightPanelWidth
         spacing:                    _toolsMargin
-        visible:                    /*QGroundControl.corePlugin.options.flyView.showInstrumentPanel && multiVehiclePanelSelector.showSingleVehiclePanel*/true
+        visible:                    _root.hudVisible && /*QGroundControl.corePlugin.options.flyView.showInstrumentPanel && */multiVehiclePanelSelector.showSingleVehiclePanel
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.rightMargin: ScreenTools.isMobile ? -150 : 125
-        anchors.topMargin: 120
+        anchors.rightMargin: ScreenTools.isMobile ? -150 : 25
+        anchors.topMargin: ScreenTools.defaultFontPixelHeight * 2.5
     }
 
     ParameterDetails {
         id: parameterDetailsPanel
-        anchors.right: parent.right
-        anchors.top: instrumentPanel.bottom
-        anchors.rightMargin: ScreenTools.isMobile ? 49 : 10
-        anchors.topMargin: 20
-        //visible: _activeVehicle !== null
-    }
-
-    FlyViewTopBar {
-        id: topBar
-        anchors.top: parent.top
-        anchors.topMargin: ScreenTools.isMobile ? 25 : 15
-        anchors.horizontalCenter: parent.horizontalCenter
-        //visible: _activeVehicle !== null
-    }
-
-    MessageToolBar {
-        id: messageBar
-        anchors.top: parent.top
-        anchors.left: topBar.right
-        anchors.topMargin: 17
-        anchors.leftMargin: ScreenTools.isMobile ? 125 : 25
-        //z: 100   // make sure it’s above topBar
-        //visible: _activeVehicle !== null
-    }
-
-    MapTools {
-        id: mapTools
-        anchors.bottom: parent.bottom
         anchors.left: parent.left
-        anchors.leftMargin: 10
-        anchors.bottomMargin: 20
+        anchors.top: toolStrip1.bottom
+        anchors.margins: ScreenTools.defaultFontPixelWidth
+        anchors.topMargin: ScreenTools.defaultFontPixelHeight
+        visible: !(ScreenTools.isMobile) && _root.telemetryVisible
+    }
 
-        onToggleComponents: {
-            parameterDetailsPanel.visible = !hidden
-            instrumentPanel.visible = !hidden
-            telemetryPanel.visible = !hidden
-        }
+    AndroidTelemetry {
+        id: androidTelemetry
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: ScreenTools.defaultFontPixelWidth / 2
+        visible: ScreenTools.isMobile && _root.telemetryVisible
     }
 
     Rectangle {
-        id: messagesSection
-        width: parent.width * 0.16
-        // anchors.right: parent.right
-        // anchors.bottom: parent.bottom
-        // anchors.rightMargin: 5
-        // anchors.bottomMargin: 5
-        color: Qt.rgba(0.9, 0.9, 0.9, 0.6)
-        border.color: "black"
-        border.width: 1
-        visible: messageBar.showMessages
-
-        /*x: telemetryPanel.x - 350
-        y: telemetryPanel.y - 165  */ // places below timeDate
-
-        property bool expanded: false
-        property int collapsedHeight: 40
-        property int expandedHeight: 200
-
-        onVisibleChanged: {
-            if (visible) {
-               x = 10
-               y = parent.height - height - 10
-            }
-        }
-
-        onHeightChanged: {
-           y = parent.height - height - 10
-        }
-
-        height: /*expanded ? */expandedHeight /*: collapsedHeight*/
-
-        Behavior on height {
-            NumberAnimation { duration: 250; easing.type: Easing.InOutQuad }
-        }
-
-        Rectangle {
-            id: msgHeader
-            width: parent.width
-            height: 40
-            color: "#80CCCCCC"
-            border.color: "black"
-            border.width: 1
-
-            RowLayout {
-                anchors.fill: parent
-                anchors.margins: 10
-                spacing: 50
-
-                Text {
-                    text: "Messages"
-                    font.bold: true
-                    font.pointSize: 13
-                    color: "black"
-                    Layout.alignment: Qt.AlignVCenter | Qt.AlignCenter
-                }
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                drag.target: messagesSection
-                drag.axis: Drag.XAndYAxis
-            }
-        }
-
-        ListModel { id: messageListModel }
-
-        ListView {
-            id: listView
-            anchors.top: msgHeader.bottom
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            clip: true
-            model: messageListModel
-
-            delegate: Rectangle {
-                width: listView.width
-                color: "transparent"
-
-                Text {
-                    text: model.text
-                    textFormat: Text.RichText
-                    renderType: Text.NativeRendering
-                    wrapMode: Text.Wrap
-                    width: parent.width - 10
-                    anchors.left: parent.left
-                    anchors.margins: 5
-                    //color: "black"
-                    font.pointSize: 10
-                    //height: contentHeigh
-                }
-                height: childrenRect.height + 10
-            }
-        }
-
-        // Fill history when opened
-        function populateFromFormattedMessages() {
-            messageListModel.clear()
-            if (!_activeVehicle || !_activeVehicle.formattedMessages) return
-            var lines = _activeVehicle.formattedMessages.split("\n")
-            for (var i = 0; i < lines.length; ++i) {
-                var line = lines[i].trim()
-                if (line.length > 0) {
-                    messageListModel.append({ text: line })
-                }
-            }
-            Qt.callLater(function(){ listView.positionViewAtEnd() })
-        }
-
-        // Handle new incoming messages
-        Connections {
-            target: QGroundControl.multiVehicleManager
-            onActiveVehicleChanged: {
-                if (QGroundControl.multiVehicleManager.activeVehicle) {
-                    _activeVehicle = QGroundControl.multiVehicleManager.activeVehicle
-                    if (messagesSection.expanded) populateFromFormattedMessages()
-                }
-            }
-        }
-
-        Connections {
-            target: _activeVehicle
-            onNewFormattedMessage: function(msg) {
-                // add empty entry for the new message
-                var newIndex = messageListModel.count
-                messageListModel.append({ text: "" })
-
-                // typewriter effect
-                var i = 0
-                var timer = Qt.createQmlObject('import QtQuick 2.0; Timer { interval: 30; repeat: true }',
-                                               listView, "typewriterTimer")
-                timer.triggered.connect(function() {
-                    if (i < msg.length) {
-                        // append next character
-                        var current = messageListModel.get(newIndex).text
-                        messageListModel.setProperty(newIndex, "text", current + msg[i])
-                        i++
-                        listView.positionViewAtEnd()
-                    } else {
-                        timer.stop()
-                        timer.destroy()
-                    }
-                })
-                timer.start()
-            }
-        }
-    }
-
-
-    Row {
-        id:                 multiVehiclePanelSelector
+        id: multiVehiclePanelSelector
+        anchors.top: parent.top
+        anchors.right: parent.right
         anchors.margins:    _toolsMargin
-        anchors.top:        parameterDetailsPanel.bottom
-        anchors.topMargin: 30
-        anchors.right:      parent.right
-        anchors.rightMargin: 60
-        width:              _rightPanelWidth
-        spacing:            ScreenTools.defaultFontPixelWidth
+        //anchors.rightMargin: 60
+        width:  multiVehiclePanelSelector1.implicitWidth
+        height: multiVehiclePanelSelector1.implicitHeight
+        color:              qgcPal.globalTheme === QGCPalette.Light ? Qt.rgba(1, 1, 1, 0.5) : Qt.rgba(0, 0, 0, 0.5)
         visible:            QGroundControl.multiVehicleManager.vehicles.count > 1 && QGroundControl.corePlugin.options.flyView.showMultiVehicleList
-
         property bool showSingleVehiclePanel:  !visible ||   singleVehicleRadio.checked
 
         QGCMapPalette { id: mapPal; lightColors: true }
 
-        QGCRadioButton {
-            id:             singleVehicleRadio
-            text:           qsTr("SINGLE")
-            font.bold: true
-            checked:        true
-            textColor:      mapPal.text/*"black"*/
-        }
+        RowLayout {
+            id: multiVehiclePanelSelector1
+            anchors.fill: parent
 
-        QGCRadioButton {
-            text:           qsTr("MULTI-VEHICLE")
-            font.bold: true
-            textColor:      mapPal.text
+            QGCRadioButton {
+                id:             singleVehicleRadio
+                text:           qsTr("SINGLE")
+                font.bold: true
+                checked:        true
+            }
+
+            QGCRadioButton {
+                text:           qsTr("MULTI-VEHICLE")
+                font.bold: true
+            }
         }
     }
 
@@ -493,5 +342,30 @@ Item {
         id: telemetryPanel
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
+        visible: !(ScreenTools.isMobile) && _root.telemetryVisible
+    }
+
+    FlyViewToolStrip {
+        id:                     toolStrip1
+        //anchors.leftMargin:     _toolsMargin + 10/*+ parentToolInsets.leftEdgeCenterInset*/
+        //anchors.topMargin:      _toolsMargin + 50 /*+ parentToolInsets.topEdgeLeftInset*/
+        anchors.left:           parent.left
+        anchors.top:            parent.top
+        z:                      QGroundControl.zOrderWidgets
+        maxHeight:              parent.height/* - y - parentToolInsets.bottomEdgeLeftInset - _toolsMargin*/
+        visible:                !QGroundControl.videoManager.fullScreen && _root.toolStripVisible
+        anchors.margins: ScreenTools.defaultFontPixelWidth
+
+        onDisplayPreFlightChecklist: preFlightChecklistPopup.createObject(mainWindow).open()
+
+
+        property real topEdgeLeftInset: visible ? y + height : 0
+        property real leftEdgeTopInset: visible ? x + width : 0
+    }
+
+    Component {
+        id: preFlightChecklistPopup
+        FlyViewPreFlightChecklistPopup {
+        }
     }
 }

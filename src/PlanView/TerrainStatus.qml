@@ -18,7 +18,7 @@ import QGroundControl.Palette       1.0
 Rectangle {
     id:         root
     radius:     ScreenTools.defaultFontPixelWidth * 1
-    color:      /*qgcPal.window*/ "#77800000"
+    color:      qgcPal.window /*"#77800000"*/
     opacity:    0.80
     clip:       true
 
@@ -82,7 +82,7 @@ Rectangle {
                     labelsFont.pointSize:       ScreenTools.smallFontPointSize
                     labelsColor:                "white"
                     tickCount:                  5
-                    gridLineColor:              /*"#44FFFFFF"*/ "white"
+                    gridLineColor:              "#44FFFFFF"
                 }
 
                 ValueAxis {
@@ -95,7 +95,7 @@ Rectangle {
                     labelsFont.bold: true
                     labelsColor:                "white"
                     tickCount:                  4
-                    gridLineColor:              /*"#44FFFFFF"*/ "white"
+                    gridLineColor:              "#44FFFFFF"
                 }
 
                 LineSeries {
