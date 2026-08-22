@@ -214,6 +214,26 @@ if [ "$BUILD_ANDROID" = true ]; then
     # Update version define in existing Makefiles (skip qmake — it may reconfigure unsupported architectures)
     find "$ANDROID_BUILD_DIR" -name "Makefile" -exec sed -i "s/APP_VERSION_STR=\"\\\\\"[^\"]*\\\\\"\"/APP_VERSION_STR=\"\\\\\"$NEW_VERSION\\\\\"\"/g" {} +
 
+    # Update AndroidManifest.xml versionName and versionCode
+    # versionCode format: BBMIPPDDD (BB=66/arm64, M=major, I=minor, PP=patch, DDD=dev)
+    ANDROID_MANIFEST="$ANDROID_BUILD_DIR/android-build/AndroidManifest.xml"
+    if [ -f "$ANDROID_MANIFEST" ]; then
+        $PYTHON -c "
+import re
+new_version = '$NEW_VERSION'
+m = re.match(r'v?(\d+)\.(\d+)\.(\d+)', new_version)
+major, minor, patch = int(m.group(1)), int(m.group(2)), int(m.group(3))
+version_code = 66 * 100000000 + major * 10000000 + minor * 1000000 + patch * 10000 + 0
+with open('$ANDROID_MANIFEST', 'r') as f:
+    content = f.read()
+content = re.sub(r'android:versionName=\"[^\"]*\"', f'android:versionName=\"$NEW_VERSION\"', content)
+content = re.sub(r'android:versionCode=\"[^\"]*\"', f'android:versionCode=\"{version_code}\"', content)
+with open('$ANDROID_MANIFEST', 'w') as f:
+    f.write(content)
+print(f'AndroidManifest: versionName={new_version}, versionCode={version_code}')
+"
+    fi
+
     # Fix deployment settings to only include arm64-v8a (the architecture that was actually compiled)
     $PYTHON -c "
 import json
