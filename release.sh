@@ -5,6 +5,8 @@ set -e
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 BUILD_DIR="$REPO_DIR/build/Desktop_Qt_5_15_2_GCC_64bit-Release"
 QT_DIR="/home/fwd/Qt/5.15.2/gcc_64"
+ANDROID_QT_DIR="/home/fwd/Qt/5.15.2/android"
+ANDROID_BUILD_DIR="$REPO_DIR/build/Android_Qt_5_15_2_Clang_Multi_Abi-Release"
 BRANCH="Stable_V2"
 PRI_FILE="$REPO_DIR/QGCCommon.pri"
 GITHUB_OWNER="Flying-Wedge-Defence-AI"
@@ -16,24 +18,62 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
+# ---- Platform flags ----
+BUILD_LINUX=true
+BUILD_ANDROID=true
+
 # ---- Usage ----
 usage() {
-    echo "Usage: $0 <patch|minor|major|vX.Y.Z>"
+    echo "Usage: $0 <patch|minor|major|vX.Y.Z> [--linux-only|--android-only]"
+    echo ""
+    echo "Options:"
+    echo "  patch          Bump patch version (e.g., v1.0.2 -> v1.0.3)"
+    echo "  minor          Bump minor version (e.g., v1.0.2 -> v1.1.0)"
+    echo "  major          Bump major version (e.g., v1.0.2 -> v2.0.0)"
+    echo "  vX.Y.Z         Set exact version"
+    echo "  --linux-only   Build Linux AppImage only"
+    echo "  --android-only Build Android APK only"
     echo ""
     echo "Examples:"
-    echo "  $0 patch    # v1.0.2 -> v1.0.3"
-    echo "  $0 minor    # v1.0.2 -> v1.1.0"
-    echo "  $0 major    # v1.0.2 -> v2.0.0"
-    echo "  $0 v1.0.3   # set exact version (recreate release if deleted)"
+    echo "  $0 patch                  # Build both Linux + Android"
+    echo "  $0 patch --linux-only     # Linux AppImage only"
+    echo "  $0 patch --android-only   # Android APK only"
+    echo "  $0 v1.0.5 --linux-only    # Exact version, Linux only"
     exit 1
 }
 
 # ---- Check arguments ----
-if [ $# -ne 1 ]; then
+if [ $# -lt 1 ]; then
     usage
 fi
 
-BUMP_TYPE=$1
+# Parse arguments: first non-flag arg is bump type, flags set platform
+BUMP_TYPE=""
+for arg in "$@"; do
+    case "$arg" in
+        --linux-only)
+            BUILD_ANDROID=false
+            ;;
+        --android-only)
+            BUILD_LINUX=false
+            ;;
+        *)
+            if [ -z "$BUMP_TYPE" ]; then
+                BUMP_TYPE="$arg"
+            else
+                echo -e "${RED}Error: Unknown argument '$arg'${NC}"
+                usage
+            fi
+            ;;
+    esac
+done
+
+if [ -z "$BUMP_TYPE" ]; then
+    echo -e "${RED}Error: No version specified${NC}"
+    usage
+fi
+
+echo -e "${YELLOW}Build targets: Linux=$BUILD_LINUX, Android=$BUILD_ANDROID${NC}"
 
 # ---- Check for uncommitted changes ----
 cd "$REPO_DIR"
@@ -55,14 +95,12 @@ echo -e "${YELLOW}Current version: $CURRENT_TAG${NC}"
 
 # ---- Determine new version ----
 if [[ "$BUMP_TYPE" == v* ]]; then
-    # Exact version provided (e.g., v1.0.3)
     if [[ ! "$BUMP_TYPE" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
         echo -e "${RED}Error: Invalid version format '$BUMP_TYPE' (expected v1.2.3)${NC}"
         exit 1
     fi
     NEW_VERSION="$BUMP_TYPE"
 else
-    # Auto-bump
     if [[ "$BUMP_TYPE" != "patch" && "$BUMP_TYPE" != "minor" && "$BUMP_TYPE" != "major" ]]; then
         echo -e "${RED}Error: Invalid argument '$BUMP_TYPE'${NC}"
         usage
@@ -115,50 +153,83 @@ if ! grep -q "APP_VERSION_STR = \"$NEW_VERSION\"" "$PRI_FILE"; then
     exit 1
 fi
 
-# ---- Build ----
-echo -e "${YELLOW}Building $NEW_VERSION...${NC}"
-cd "$BUILD_DIR"
-
 # Touch source files that use APP_VERSION_STR to force recompile
 touch "$REPO_DIR/src/QGCApplication.cc"
 touch "$REPO_DIR/src/FWDUpdateManager/FWDUpdateManager.cc"
 
-"$QT_DIR/bin/qmake" "$REPO_DIR/qgroundcontrol.pro" -r
-make -j$(nproc)
-
-# ---- Verify binary ----
-BINARY="$BUILD_DIR/staging/FWD_AGRI_GCS"
-if [ ! -f "$BINARY" ]; then
-    echo -e "${RED}Error: Binary not found at $BINARY${NC}"
-    exit 1
-fi
-
-# ---- Create AppImage ----
-echo -e "${YELLOW}Creating AppImage...${NC}"
 OUTPUT_DIR="$BUILD_DIR/staging"
-APPDIR="$OUTPUT_DIR/AppDir"
+APK_NAME="FWDAgriGCS-${NEW_VERSION}.apk"
 APPIMAGE_NAME="FWDAgriGCS-${NEW_VERSION}.AppImage"
 
-# Copy freshly built binary into AppDir
-cp "$OUTPUT_DIR/FWD_AGRI_GCS" "$APPDIR/"
+# ---- Build Linux ----
+if [ "$BUILD_LINUX" = true ]; then
+    echo -e "${YELLOW}Building Linux $NEW_VERSION...${NC}"
+    cd "$BUILD_DIR"
 
-# Bundle OpenSSL 1.1 (required by Qt networking, not available on Ubuntu 22.04+)
-cp /lib/x86_64-linux-gnu/libcrypto.so.1.1 "$APPDIR/Qt/libs/"
-cp /lib/x86_64-linux-gnu/libssl.so.1.1 "$APPDIR/Qt/libs/"
+    "$QT_DIR/bin/qmake" "$REPO_DIR/qgroundcontrol.pro" -r
+    make -j$(nproc)
 
-# Remove old AppImage if exists
-rm -f "$OUTPUT_DIR"/*.AppImage
+    if [ ! -f "$OUTPUT_DIR/FWD_AGRI_GCS" ]; then
+        echo -e "${RED}Error: Linux binary not found at $OUTPUT_DIR/FWD_AGRI_GCS${NC}"
+        exit 1
+    fi
 
-# Create new AppImage
-cd "$OUTPUT_DIR"
-/home/fwd/appimagetool-x86_64.AppImage AppDir "$APPIMAGE_NAME"
+    echo -e "${YELLOW}Creating AppImage...${NC}"
+    APPDIR="$OUTPUT_DIR/AppDir"
 
-if [ ! -f "$OUTPUT_DIR/$APPIMAGE_NAME" ]; then
-    echo -e "${RED}Error: AppImage creation failed${NC}"
-    exit 1
+    cp "$OUTPUT_DIR/FWD_AGRI_GCS" "$APPDIR/"
+
+    cp /lib/x86_64-linux-gnu/libcrypto.so.1.1 "$APPDIR/Qt/libs/"
+    cp /lib/x86_64-linux-gnu/libssl.so.1.1 "$APPDIR/Qt/libs/"
+
+    rm -f "$OUTPUT_DIR"/*.AppImage
+
+    cd "$OUTPUT_DIR"
+    /home/fwd/appimagetool-x86_64.AppImage AppDir "$APPIMAGE_NAME"
+
+    if [ ! -f "$OUTPUT_DIR/$APPIMAGE_NAME" ]; then
+        echo -e "${RED}Error: AppImage creation failed${NC}"
+        exit 1
+    fi
+
+    echo -e "${GREEN}AppImage: $OUTPUT_DIR/$APPIMAGE_NAME${NC}"
 fi
 
-echo -e "${GREEN}AppImage: $OUTPUT_DIR/$APPIMAGE_NAME${NC}"
+# ---- Build Android ----
+if [ "$BUILD_ANDROID" = true ]; then
+    echo -e "${YELLOW}Building Android $NEW_VERSION...${NC}"
+
+    if [ ! -d "$ANDROID_BUILD_DIR" ]; then
+        echo -e "${RED}Error: Android build directory not found at $ANDROID_BUILD_DIR${NC}"
+        echo -e "${YELLOW}Run Qt Creator with Android kit once to set up the build directory.${NC}"
+        exit 1
+    fi
+
+    cd "$ANDROID_BUILD_DIR"
+
+    "$ANDROID_QT_DIR/bin/qmake" "$REPO_DIR/qgroundcontrol.pro" -r
+    make -j$(nproc)
+    make apk
+
+    APK_OUTPUT=""
+    for CANDIDATE in \
+        "$ANDROID_BUILD_DIR/android-build/build/outputs/apk/release/android-build-release-signed.apk" \
+        "$ANDROID_BUILD_DIR/android-build/build/outputs/apk/release/FWD_AGRI_GCS_V2.apk" \
+        "$ANDROID_BUILD_DIR/android-build/build/outputs/apk/release/android-build-release-unsigned.apk"; do
+        if [ -f "$CANDIDATE" ]; then
+            APK_OUTPUT="$CANDIDATE"
+            break
+        fi
+    done
+
+    if [ -z "$APK_OUTPUT" ]; then
+        echo -e "${RED}Error: Android APK not found after build${NC}"
+        exit 1
+    fi
+
+    cp "$APK_OUTPUT" "$OUTPUT_DIR/$APK_NAME"
+    echo -e "${GREEN}APK: $OUTPUT_DIR/$APK_NAME${NC}"
+fi
 
 # ---- Git commit + tag + push ----
 echo -e "${YELLOW}Creating git commit and tag $NEW_VERSION...${NC}"
@@ -166,7 +237,6 @@ cd "$REPO_DIR"
 git add QGCCommon.pri
 git commit -m "Release $NEW_VERSION" --allow-empty
 
-# Create tag only if it doesn't exist
 if ! git rev-parse "$NEW_VERSION" >/dev/null 2>&1; then
     git tag -a "$NEW_VERSION" -m "Version ${NEW_VERSION#v}"
 else
@@ -174,10 +244,9 @@ else
 fi
 git push origin "$BRANCH" --tags
 
-# ---- Create GitHub Release + upload AppImage ----
+# ---- Create GitHub Release ----
 echo -e "${YELLOW}Creating GitHub Release...${NC}"
 
-# Create release
 RELEASE_RESPONSE=$(curl -s -w "\n%{http_code}" \
     -X POST \
     -H "Authorization: token $PAT_TOKEN" \
@@ -203,10 +272,6 @@ fi
 RELEASE_ID=$(echo "$RELEASE_BODY" | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])" 2>/dev/null)
 echo -e "${GREEN}GitHub Release created (ID: $RELEASE_ID)${NC}"
 
-# Upload AppImage asset
-echo -e "${YELLOW}Uploading AppImage to GitHub Release...${NC}"
-
-# Get upload URL from release
 UPLOAD_URL=$(echo "$RELEASE_BODY" | python3 -c "import sys,json; print(json.load(sys.stdin)['upload_url'].replace('{?name,label}',''))" 2>/dev/null)
 
 upload_asset() {
@@ -236,31 +301,13 @@ upload_asset() {
     fi
 }
 
-upload_asset "$OUTPUT_DIR/$APPIMAGE_NAME" "$APPIMAGE_NAME"
+# ---- Upload assets ----
+if [ "$BUILD_LINUX" = true ] && [ -f "$OUTPUT_DIR/$APPIMAGE_NAME" ]; then
+    upload_asset "$OUTPUT_DIR/$APPIMAGE_NAME" "$APPIMAGE_NAME"
+fi
 
-# Upload APK if it exists
-APK_NAME="FWDAgriGCS-${NEW_VERSION}.apk"
-# Check common Android build output locations
-APK_SOURCE=""
-for CANDIDATE in \
-    "$REPO_DIR/build-android/release/outputs/apk/release/release.apk" \
-    "$REPO_DIR/build-android/FWDAgriGCS.apk" \
-    "$REPO_DIR/build-android/output/FWDAgriGCS.apk" \
-    "$OUTPUT_DIR/$APK_NAME"; do
-    if [ -f "$CANDIDATE" ]; then
-        APK_SOURCE="$CANDIDATE"
-        break
-    fi
-done
-
-if [ -n "$APK_SOURCE" ]; then
-    echo -e "${YELLOW}Uploading APK to GitHub Release...${NC}"
-    cp "$APK_SOURCE" "$OUTPUT_DIR/$APK_NAME"
+if [ "$BUILD_ANDROID" = true ] && [ -f "$OUTPUT_DIR/$APK_NAME" ]; then
     upload_asset "$OUTPUT_DIR/$APK_NAME" "$APK_NAME"
-else
-    echo -e "${YELLOW}No APK found. Skipping APK upload.${NC}"
-    echo -e "${YELLOW}To include APK, build with Android kit first, then place it at:${NC}"
-    echo -e "  $REPO_DIR/build-android/release/outputs/apk/release/release.apk"
 fi
 
 echo ""
@@ -268,8 +315,6 @@ echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}  Release $NEW_VERSION complete!${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
-echo -e "  AppImage: $OUTPUT_DIR/$APPIMAGE_NAME"
-echo -e "  APK:      ${APK_SOURCE:-Not built}"
-echo -e "  GitHub:   https://github.com/$GITHUB_OWNER/$GITHUB_REPO/releases/tag/$NEW_VERSION"
+echo -e "  GitHub: https://github.com/$GITHUB_OWNER/$GITHUB_REPO/releases/tag/$NEW_VERSION"
 echo ""
 echo -e "  Users running older versions will auto-update."
