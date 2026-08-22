@@ -205,6 +205,9 @@ if [ "$BUILD_ANDROID" = true ]; then
         exit 1
     fi
 
+    export ANDROID_NDK_ROOT="/home/fwd/Android/Sdk/ndk/21.3.6528147"
+    export ANDROID_SDK_ROOT="/home/fwd/Android/Sdk"
+
     cd "$ANDROID_BUILD_DIR"
 
     "$ANDROID_QT_DIR/bin/qmake" "$REPO_DIR/qgroundcontrol.pro" -r
