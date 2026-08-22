@@ -213,6 +213,16 @@ if [ "$BUILD_ANDROID" = true ]; then
     # Update version define in existing Makefiles (skip qmake — it may reconfigure unsupported architectures)
     find "$ANDROID_BUILD_DIR" -name "Makefile" -exec sed -i "s/APP_VERSION_STR=\"\\\\\"[^\"]*\\\\\"\"/APP_VERSION_STR=\"\\\\\"$NEW_VERSION\\\\\"\"/g" {} +
 
+    # Fix deployment settings to only include arm64-v8a (the architecture that was actually compiled)
+    python3 -c "
+import json
+with open('$ANDROID_BUILD_DIR/android-FWD_AGRI_GCS-deployment-settings.json', 'r') as f:
+    data = json.load(f)
+data['architectures'] = {'arm64-v8a': 'aarch64-linux-android'}
+with open('$ANDROID_BUILD_DIR/android-FWD_AGRI_GCS-deployment-settings.json', 'w') as f:
+    json.dump(data, f, indent=3)
+"
+
     make -j$(nproc)
     make apk
 
