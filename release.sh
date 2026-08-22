@@ -142,6 +142,10 @@ APPIMAGE_NAME="FWDAgriGCS-${NEW_VERSION}.AppImage"
 # Copy freshly built binary into AppDir
 cp "$OUTPUT_DIR/FWD_AGRI_GCS" "$APPDIR/"
 
+# Bundle OpenSSL 1.1 (required by Qt networking, not available on Ubuntu 22.04+)
+cp /lib/x86_64-linux-gnu/libcrypto.so.1.1 "$APPDIR/Qt/libs/"
+cp /lib/x86_64-linux-gnu/libssl.so.1.1 "$APPDIR/Qt/libs/"
+
 # Remove old AppImage if exists
 rm -f "$OUTPUT_DIR"/*.AppImage
 
