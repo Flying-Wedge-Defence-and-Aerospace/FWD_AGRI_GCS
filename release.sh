@@ -255,6 +255,24 @@ with open('$ANDROID_BUILD_DIR/android-FWD_AGRI_GCS-deployment-settings.json', 'w
     fi
 
     cp "$APK_OUTPUT" "$OUTPUT_DIR/$APK_NAME"
+
+    # Sign the APK with debug keystore (required for Android install)
+    DEBUG_KEYSTORE="$HOME/.android/debug.keystore"
+    if [ -f "$DEBUG_KEYSTORE" ]; then
+        echo -e "${YELLOW}Signing APK with debug keystore...${NC}"
+        BUILD_TOOLS=$(ls -d /home/fwd/Android/Sdk/build-tools/*/ 2>/dev/null | sort -V | tail -1)
+        if [ -n "$BUILD_TOOLS" ] && [ -f "${BUILD_TOOLS}lib/apksigner.jar" ]; then
+            /usr/bin/java -jar "${BUILD_TOOLS}lib/apksigner.jar" sign \
+                --ks "$DEBUG_KEYSTORE" \
+                --ks-pass pass:android \
+                --key-pass pass:android \
+                "$OUTPUT_DIR/$APK_NAME"
+            echo -e "${GREEN}APK signed successfully${NC}"
+        else
+            echo -e "${YELLOW}Warning: apksigner.jar not found, APK left unsigned${NC}"
+        fi
+    fi
+
     echo -e "${GREEN}APK: $OUTPUT_DIR/$APK_NAME${NC}"
 fi
 
