@@ -87,13 +87,16 @@ if [ -z "$PAT_TOKEN" ]; then
     exit 1
 fi
 
-EXISTING_RELEASE=$(curl -s -H "Authorization: token $PAT_TOKEN" -H "Accept: application/vnd.github.v3+json" \
-    "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/releases/tags/$NEW_VERSION" 2>/dev/null)
-EXISTING_HTTP=$(echo "$EXISTING_RELEASE" | python3 -c "import sys,json; d=json.load(sys.stdin); print('ok')" 2>/dev/null || echo "notfound")
+EXISTING_HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+    -H "Authorization: token $PAT_TOKEN" \
+    -H "Accept: application/vnd.github.v3+json" \
+    "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/releases/tags/$NEW_VERSION")
 
-if [ "$EXISTING_HTTP" != "notfound" ]; then
+if [ "$EXISTING_HTTP_CODE" = "200" ]; then
     echo -e "${YELLOW}GitHub release $NEW_VERSION already exists. Deleting and recreating...${NC}"
-    RELEASE_ID=$(echo "$EXISTING_RELEASE" | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])" 2>/dev/null)
+    RELEASE_ID=$(curl -s -H "Authorization: token $PAT_TOKEN" -H "Accept: application/vnd.github.v3+json" \
+        "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/releases/tags/$NEW_VERSION" | \
+        python3 -c "import sys,json; print(json.load(sys.stdin)['id'])" 2>/dev/null)
     if [ -n "$RELEASE_ID" ]; then
         curl -s -X DELETE -H "Authorization: token $PAT_TOKEN" \
             "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/releases/$RELEASE_ID" > /dev/null
