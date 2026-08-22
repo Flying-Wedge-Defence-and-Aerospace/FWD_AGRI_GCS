@@ -279,7 +279,14 @@ void FWDUpdateManager::installUpdate()
     qDebug() << "FWDUpdateManager: Installing update from:" << _downloadedFilePath;
 
 #if defined(Q_OS_LINUX)
-    QString currentBinPath = QCoreApplication::applicationFilePath();
+    // In an AppImage, applicationFilePath() points inside a read-only squashfs mount.
+    // Use $APPIMAGE env var to get the real file path on disk.
+    QString currentBinPath = qgetenv("APPIMAGE");
+    if (currentBinPath.isEmpty()) {
+        currentBinPath = QCoreApplication::applicationFilePath();
+    }
+    qDebug() << "FWDUpdateManager: Current binary path:" << currentBinPath;
+
     QFile currentFile(currentBinPath);
 
     if (!currentFile.open(QIODevice::WriteOnly)) {
