@@ -758,8 +758,8 @@ Popup {
 
             parent: Overlay.overlay
             anchors.centerIn: parent
-            width:  Math.min(ScreenTools.defaultFontPixelWidth * 60, parent.width * 0.8)
-            height: mainColumn.height + padding * 2
+            width:  Math.min(ScreenTools.defaultFontPixelWidth * 60, parent.width * 0.85)
+            height: Math.min(mainColumn.implicitHeight + padding * 2, parent.height * 0.85)
             padding: ScreenTools.defaultFontPixelHeight
             modal: true
             focus: true
@@ -813,9 +813,10 @@ Popup {
 
                 Flickable {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 12
+                    Layout.fillHeight: true
                     clip: true
                     contentHeight: changelogText.height
+                    flickableDirection: Flickable.VerticalFlick
 
                     QGCLabel {
                         id: changelogText
