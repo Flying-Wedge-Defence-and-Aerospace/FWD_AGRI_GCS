@@ -11,6 +11,7 @@ BRANCH="Stable_V2"
 PRI_FILE="$REPO_DIR/QGCCommon.pri"
 GITHUB_OWNER="Flying-Wedge-Defence-AI"
 GITHUB_REPO="FWDAgriGCS"
+PYTHON=$(command -v python3 2>/dev/null || command -v $PYTHON 2>/dev/null || echo "$PYTHON")
 
 # ---- Colors ----
 RED='\033[0;31m'
@@ -134,7 +135,7 @@ if [ "$EXISTING_HTTP_CODE" = "200" ]; then
     echo -e "${YELLOW}GitHub release $NEW_VERSION already exists. Deleting and recreating...${NC}"
     RELEASE_ID=$(curl -s -H "Authorization: token $PAT_TOKEN" -H "Accept: application/vnd.github.v3+json" \
         "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/releases/tags/$NEW_VERSION" | \
-        python3 -c "import sys,json; print(json.load(sys.stdin)['id'])" 2>/dev/null)
+        $PYTHON -c "import sys,json; print(json.load(sys.stdin)['id'])" 2>/dev/null)
     if [ -n "$RELEASE_ID" ]; then
         curl -s -X DELETE -H "Authorization: token $PAT_TOKEN" \
             "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/releases/$RELEASE_ID" > /dev/null
@@ -214,7 +215,7 @@ if [ "$BUILD_ANDROID" = true ]; then
     find "$ANDROID_BUILD_DIR" -name "Makefile" -exec sed -i "s/APP_VERSION_STR=\"\\\\\"[^\"]*\\\\\"\"/APP_VERSION_STR=\"\\\\\"$NEW_VERSION\\\\\"\"/g" {} +
 
     # Fix deployment settings to only include arm64-v8a (the architecture that was actually compiled)
-    python3 -c "
+    $PYTHON -c "
 import json
 with open('$ANDROID_BUILD_DIR/android-FWD_AGRI_GCS-deployment-settings.json', 'r') as f:
     data = json.load(f)
@@ -284,10 +285,10 @@ if [ "$HTTP_CODE" != "201" ]; then
     exit 1
 fi
 
-RELEASE_ID=$(echo "$RELEASE_BODY" | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])" 2>/dev/null)
+RELEASE_ID=$(echo "$RELEASE_BODY" | $PYTHON -c "import sys,json; print(json.load(sys.stdin)['id'])" 2>/dev/null)
 echo -e "${GREEN}GitHub Release created (ID: $RELEASE_ID)${NC}"
 
-UPLOAD_URL=$(echo "$RELEASE_BODY" | python3 -c "import sys,json; print(json.load(sys.stdin)['upload_url'].replace('{?name,label}',''))" 2>/dev/null)
+UPLOAD_URL=$(echo "$RELEASE_BODY" | $PYTHON -c "import sys,json; print(json.load(sys.stdin)['upload_url'].replace('{?name,label}',''))" 2>/dev/null)
 
 upload_asset() {
     local FILE_PATH="$1"
