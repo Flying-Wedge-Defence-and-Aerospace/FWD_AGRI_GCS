@@ -14,6 +14,7 @@
 #include <QApplication>
 #include <QRegularExpression>
 #include <QDebug>
+#include <QMessageBox>
 
 #if defined(Q_OS_ANDROID)
 #include <QAndroidJniObject>
@@ -278,10 +279,28 @@ void FWDUpdateManager::installUpdate()
     qDebug() << "FWDUpdateManager: Installing update from:" << _downloadedFilePath;
 
 #if defined(Q_OS_LINUX)
-    // Make executable and run
-    QProcess::startDetached("chmod", {"+x", _downloadedFilePath});
-    // Launch the new version and quit current
-    QProcess::startDetached(_downloadedFilePath, QStringList());
+    QString currentBinPath = QCoreApplication::applicationFilePath();
+    QFile currentFile(currentBinPath);
+
+    if (!currentFile.open(QIODevice::WriteOnly)) {
+        QMessageBox::critical(nullptr, tr("Update Failed"),
+            tr("Cannot write to:\n%1\n\nThe file may be read-only. "
+               "Try running from a writable location (e.g. your home directory).")
+            .arg(currentBinPath));
+        return;
+    }
+    currentFile.close();
+
+    QFile::remove(currentBinPath);
+
+    if (!QFile::copy(_downloadedFilePath, currentBinPath)) {
+        QMessageBox::critical(nullptr, tr("Update Failed"),
+            tr("Failed to copy update to:\n%1").arg(currentBinPath));
+        return;
+    }
+
+    QProcess::startDetached("chmod", {"+x", currentBinPath});
+    QProcess::startDetached(currentBinPath, QStringList());
     QApplication::quit();
 
 #elif defined(Q_OS_WIN)
