@@ -216,7 +216,7 @@ if [ "$BUILD_ANDROID" = true ]; then
 
     # Update source AndroidManifest.xml version (androiddeployqt reads from here)
     # versionCode format: BBMIPPDDD (BB=66/arm64, M=major, I=minor, PP=patch, DDD=dev)
-    ANDROID_MANIFEST_SRC="$PROJECT_ROOT/android/AndroidManifest.xml"
+    ANDROID_MANIFEST_SRC="$REPO_DIR/android/AndroidManifest.xml"
     cp "$ANDROID_MANIFEST_SRC" "$ANDROID_MANIFEST_SRC.bak"
     $PYTHON -c "
 import re, sys
