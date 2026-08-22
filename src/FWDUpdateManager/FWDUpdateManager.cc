@@ -278,39 +278,7 @@ void FWDUpdateManager::installUpdate()
 
     qDebug() << "FWDUpdateManager: Installing update from:" << _downloadedFilePath;
 
-#if defined(Q_OS_LINUX)
-    // In an AppImage, applicationFilePath() points inside a read-only squashfs mount.
-    // Use $APPIMAGE env var to get the real file path on disk.
-    QString currentBinPath = qgetenv("APPIMAGE");
-    if (currentBinPath.isEmpty()) {
-        currentBinPath = QCoreApplication::applicationFilePath();
-    }
-    qDebug() << "FWDUpdateManager: Current binary path:" << currentBinPath;
-
-    if (!QFile::remove(currentBinPath)) {
-        QMessageBox::critical(nullptr, tr("Update Failed"),
-            tr("Cannot delete:\n%1\n\nCheck that you have write permission to this folder.")
-            .arg(currentBinPath));
-        return;
-    }
-
-    if (!QFile::copy(_downloadedFilePath, currentBinPath)) {
-        QMessageBox::critical(nullptr, tr("Update Failed"),
-            tr("Failed to copy update to:\n%1").arg(currentBinPath));
-        return;
-    }
-
-    QProcess::startDetached("chmod", {"+x", currentBinPath});
-    QProcess::startDetached(currentBinPath, QStringList());
-    QApplication::quit();
-
-#elif defined(Q_OS_WIN)
-    // Run the installer
-    QDesktopServices::openUrl(QUrl::fromLocalFile(_downloadedFilePath));
-    // Quit current app so installer can overwrite
-    QApplication::quit();
-
-#elif defined(Q_OS_ANDROID)
+#if defined(Q_OS_ANDROID)
     // Copy APK to app cache dir (accessible via FileProvider)
     QString cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
     QString destApk = cacheDir + "/FWDUpdate.apk";
@@ -365,6 +333,35 @@ void FWDUpdateManager::installUpdate()
         "(Landroid/content/Intent;)V",
         intent.object());
 
+    QApplication::quit();
+
+#elif defined(Q_OS_WIN)
+    // Run the installer
+    QDesktopServices::openUrl(QUrl::fromLocalFile(_downloadedFilePath));
+    QApplication::quit();
+
+#elif defined(Q_OS_LINUX)
+    QString currentBinPath = qgetenv("APPIMAGE");
+    if (currentBinPath.isEmpty()) {
+        currentBinPath = QCoreApplication::applicationFilePath();
+    }
+    qDebug() << "FWDUpdateManager: Current binary path:" << currentBinPath;
+
+    if (!QFile::remove(currentBinPath)) {
+        QMessageBox::critical(nullptr, tr("Update Failed"),
+            tr("Cannot delete:\n%1\n\nCheck that you have write permission to this folder.")
+            .arg(currentBinPath));
+        return;
+    }
+
+    if (!QFile::copy(_downloadedFilePath, currentBinPath)) {
+        QMessageBox::critical(nullptr, tr("Update Failed"),
+            tr("Failed to copy update to:\n%1").arg(currentBinPath));
+        return;
+    }
+
+    QProcess::startDetached("chmod", {"+x", currentBinPath});
+    QProcess::startDetached(currentBinPath, QStringList());
     QApplication::quit();
 
 #elif defined(Q_OS_IOS)
