@@ -90,6 +90,11 @@ fi
 # ---- Build ----
 echo -e "${YELLOW}Building $NEW_VERSION...${NC}"
 cd "$BUILD_DIR"
+
+# Touch source files that use APP_VERSION_STR to force recompile
+touch "$REPO_DIR/src/QGCApplication.cc"
+touch "$REPO_DIR/src/FWDUpdateManager/FWDUpdateManager.cc"
+
 "$QT_DIR/bin/qmake" "$REPO_DIR/qgroundcontrol.pro" -r
 make -j$(nproc)
 
@@ -100,28 +105,27 @@ if [ ! -f "$BINARY" ]; then
     exit 1
 fi
 
-# ---- Find AppImage ----
-# The build process (Post Link Common) already creates the AppImage in staging
+# ---- Create AppImage ----
+echo -e "${YELLOW}Creating AppImage...${NC}"
 OUTPUT_DIR="$BUILD_DIR/staging"
+APPDIR="$OUTPUT_DIR/AppDir"
 APPIMAGE_NAME="FWDAgriGCS-${NEW_VERSION}.AppImage"
 
-# Find the AppImage created by the build (may have various names)
-APPIMAGE_SRC=""
-for f in "$OUTPUT_DIR"/*.AppImage; do
-    if [ -f "$f" ]; then
-        APPIMAGE_SRC="$f"
-        break
-    fi
-done
+# Copy freshly built binary into AppDir
+cp "$OUTPUT_DIR/FWD_AGRI_GCS" "$APPDIR/"
 
-if [ -z "$APPIMAGE_SRC" ]; then
-    echo -e "${RED}Error: No AppImage found in $OUTPUT_DIR${NC}"
-    echo "Make sure the build completed successfully."
+# Remove old AppImage if exists
+rm -f "$OUTPUT_DIR"/*.AppImage
+
+# Create new AppImage
+cd "$OUTPUT_DIR"
+/home/fwd/appimagetool-x86_64.AppImage AppDir "$APPIMAGE_NAME"
+
+if [ ! -f "$OUTPUT_DIR/$APPIMAGE_NAME" ]; then
+    echo -e "${RED}Error: AppImage creation failed${NC}"
     exit 1
 fi
 
-# Rename to versioned name
-mv "$APPIMAGE_SRC" "$OUTPUT_DIR/$APPIMAGE_NAME"
 echo -e "${GREEN}AppImage: $OUTPUT_DIR/$APPIMAGE_NAME${NC}"
 
 # ---- Git commit + tag + push ----
