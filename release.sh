@@ -214,25 +214,24 @@ if [ "$BUILD_ANDROID" = true ]; then
     # Update version define in existing Makefiles (skip qmake — it may reconfigure unsupported architectures)
     find "$ANDROID_BUILD_DIR" -name "Makefile" -exec sed -i "s/APP_VERSION_STR=\"\\\\\"[^\"]*\\\\\"\"/APP_VERSION_STR=\"\\\\\"$NEW_VERSION\\\\\"\"/g" {} +
 
-    # Update AndroidManifest.xml versionName and versionCode
+    # Update source AndroidManifest.xml version (androiddeployqt reads from here)
     # versionCode format: BBMIPPDDD (BB=66/arm64, M=major, I=minor, PP=patch, DDD=dev)
-    ANDROID_MANIFEST="$ANDROID_BUILD_DIR/android-build/AndroidManifest.xml"
-    if [ -f "$ANDROID_MANIFEST" ]; then
-        $PYTHON -c "
-import re
+    ANDROID_MANIFEST_SRC="$PROJECT_ROOT/android/AndroidManifest.xml"
+    cp "$ANDROID_MANIFEST_SRC" "$ANDROID_MANIFEST_SRC.bak"
+    $PYTHON -c "
+import re, sys
 new_version = '$NEW_VERSION'
 m = re.match(r'v?(\d+)\.(\d+)\.(\d+)', new_version)
 major, minor, patch = int(m.group(1)), int(m.group(2)), int(m.group(3))
 version_code = 66 * 100000000 + major * 10000000 + minor * 1000000 + patch * 10000 + 0
-with open('$ANDROID_MANIFEST', 'r') as f:
+with open('$ANDROID_MANIFEST_SRC', 'r') as f:
     content = f.read()
 content = re.sub(r'android:versionName=\"[^\"]*\"', f'android:versionName=\"$NEW_VERSION\"', content)
 content = re.sub(r'android:versionCode=\"[^\"]*\"', f'android:versionCode=\"{version_code}\"', content)
-with open('$ANDROID_MANIFEST', 'w') as f:
+with open('$ANDROID_MANIFEST_SRC', 'w') as f:
     f.write(content)
 print(f'AndroidManifest: versionName={new_version}, versionCode={version_code}')
 "
-    fi
 
     # Fix deployment settings to only include arm64-v8a (the architecture that was actually compiled)
     $PYTHON -c "
@@ -294,6 +293,11 @@ with open('$ANDROID_BUILD_DIR/android-FWD_AGRI_GCS-deployment-settings.json', 'w
     fi
 
     echo -e "${GREEN}APK: $OUTPUT_DIR/$APK_NAME${NC}"
+
+    # Restore source AndroidManifest.xml
+    if [ -f "$ANDROID_MANIFEST_SRC.bak" ]; then
+        mv "$ANDROID_MANIFEST_SRC.bak" "$ANDROID_MANIFEST_SRC"
+    fi
 fi
 
 # ---- Git commit + tag + push ----
