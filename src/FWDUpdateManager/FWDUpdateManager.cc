@@ -287,18 +287,12 @@ void FWDUpdateManager::installUpdate()
     }
     qDebug() << "FWDUpdateManager: Current binary path:" << currentBinPath;
 
-    QFile currentFile(currentBinPath);
-
-    if (!currentFile.open(QIODevice::WriteOnly)) {
+    if (!QFile::remove(currentBinPath)) {
         QMessageBox::critical(nullptr, tr("Update Failed"),
-            tr("Cannot write to:\n%1\n\nThe file may be read-only. "
-               "Try running from a writable location (e.g. your home directory).")
+            tr("Cannot delete:\n%1\n\nCheck that you have write permission to this folder.")
             .arg(currentBinPath));
         return;
     }
-    currentFile.close();
-
-    QFile::remove(currentBinPath);
 
     if (!QFile::copy(_downloadedFilePath, currentBinPath)) {
         QMessageBox::critical(nullptr, tr("Update Failed"),
