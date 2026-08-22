@@ -164,7 +164,7 @@ StableBuild {
 }
 
 # Set the QGC version from git
-APP_VERSION_STR = "v1.0.2"
+APP_VERSION_STR = "v1.0.3"
 VERSION         = 1.0.1   # Marker to indicate out-of-tree build
 MAC_VERSION     = 1.0
 MAC_BUILD       = 0
@@ -186,7 +186,7 @@ MAC_BUILD       = 0
 #     }
 
 #     DailyBuild {
-#         APP_VERSION_STR = "v1.0.4"
+#         APP_VERSION_STR = "v1.0.3"
 #     }
 
 #     message(QGroundControl APP_VERSION_STR VERSION $${APP_VERSION_STR} $${VERSION})
