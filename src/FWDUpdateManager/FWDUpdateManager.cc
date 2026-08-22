@@ -318,9 +318,10 @@ void FWDUpdateManager::installUpdate()
     }
 
     // Create install intent
+    QAndroidJniObject actionView = QAndroidJniObject::getStaticObjectField(
+        "android/content/Intent", "ACTION_VIEW", "Ljava/lang/String;");
     QAndroidJniObject intent("android/content/Intent", "(Ljava/lang/String;)V",
-        QAndroidJniObject::getStaticObjectField("android/content/Intent", "ACTION_VIEW",
-            "Ljava/lang/String;"));
+        actionView.object());
     intent.callObjectMethod("setDataAndType",
         "(Landroid/net/Uri;Ljava/lang/String;)Landroid/content/Intent;",
         contentUri.object(),
