@@ -74,7 +74,7 @@
         </activity>
         <!-- For adding service(s) please check: https://wiki.qt.io/AndroidServices -->
         <provider
-            android:name="android.support.v4.content.FileProvider"
+            android:name="androidx.core.content.FileProvider"
             android:authorities="com.fwd.agri.gcs.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">

@@ -336,7 +336,7 @@ void FWDUpdateManager::installUpdate()
 
     // Get content:// URI from FileProvider
     QAndroidJniObject contentUri = QAndroidJniObject::callStaticObjectMethod(
-        "android/support/v4/content/FileProvider",
+        "androidx/core/content/FileProvider",
         "getUriForFile",
         "(Landroid/content/Context;Ljava/lang/String;Ljava/io/File;)Landroid/net/Uri;",
         activity.object(),
