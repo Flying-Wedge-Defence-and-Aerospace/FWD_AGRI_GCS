@@ -151,12 +151,12 @@ QString FWDUpdateManager::_platformAssetName() const
 {
 #if defined(Q_OS_WIN)
     return QStringLiteral(".exe");
-#elif defined(Q_OS_LINUX)
-    return QStringLiteral(".AppImage");
 #elif defined(Q_OS_ANDROID)
     return QStringLiteral(".apk");
 #elif defined(Q_OS_IOS)
     return QStringLiteral(".ipa");
+#elif defined(Q_OS_LINUX)
+    return QStringLiteral(".AppImage");
 #else
     return QString();
 #endif
