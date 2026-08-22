@@ -220,6 +220,7 @@ import json
 with open('$ANDROID_BUILD_DIR/android-FWD_AGRI_GCS-deployment-settings.json', 'r') as f:
     data = json.load(f)
 data['architectures'] = {'arm64-v8a': 'aarch64-linux-android'}
+data['qrcFiles'] = [q for q in data['qrcFiles'] if '/x86/' not in q and '/x86_64/' not in q and '/armeabi-v7a/' not in q]
 with open('$ANDROID_BUILD_DIR/android-FWD_AGRI_GCS-deployment-settings.json', 'w') as f:
     json.dump(data, f, indent=3)
 "
