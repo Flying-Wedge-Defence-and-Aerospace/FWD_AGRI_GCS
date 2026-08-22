@@ -210,7 +210,9 @@ if [ "$BUILD_ANDROID" = true ]; then
 
     cd "$ANDROID_BUILD_DIR"
 
-    "$ANDROID_QT_DIR/bin/qmake" "$REPO_DIR/qgroundcontrol.pro" -r
+    # Update version define in existing Makefiles (skip qmake — it may reconfigure unsupported architectures)
+    find "$ANDROID_BUILD_DIR" -name "Makefile" -exec sed -i "s/APP_VERSION_STR=\"\\\\\"[^\"]*\\\\\"\"/APP_VERSION_STR=\"\\\\\"$NEW_VERSION\\\\\"\"/g" {} +
+
     make -j$(nproc)
     make apk
 
