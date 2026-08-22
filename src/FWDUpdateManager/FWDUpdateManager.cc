@@ -292,7 +292,7 @@ void FWDUpdateManager::installUpdate()
 
     // Get context and FileProvider
     QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod(
-        "org/qtproject/qt5/android/bindings/QtActivity",
+        "org/qtproject/qt5/android/QtNative",
         "activity",
         "()Landroid/app/Activity;");
 
