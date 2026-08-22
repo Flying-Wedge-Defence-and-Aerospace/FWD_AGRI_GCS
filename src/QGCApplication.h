@@ -31,6 +31,7 @@
 #include "UASMessageHandler.h"
 #include "FactSystem.h"
 #include "GPSRTKFactGroup.h"
+#include "FWDUpdateManager/FWDUpdateManager.h"
 
 #ifdef QGC_RTLAB_ENABLED
 #include "OpalLink.h"
@@ -139,6 +140,10 @@ public slots:
     /// one after the other.
     void showRebootAppMessage(const QString& message, const QString& title = QString());
 
+    /// FWD Auto-Update: called from QML to trigger download/install
+    Q_INVOKABLE void fwdStartDownload();
+    Q_INVOKABLE void fwdInstallUpdate();
+
 signals:
     /// This is connected to MAVLinkProtocol::checkForLostLogFiles. We signal this to ourselves to call the slot
     /// on the MAVLinkProtocol thread;
@@ -184,6 +189,11 @@ private slots:
     void _gpsSurveyInStatus                         (float duration, float accuracyMM,  double latitude, double longitude, float altitude, bool valid, bool active);
     void _gpsNumSatellites                          (int numSatellites);
     void _showDelayedAppMessages                    (void);
+    void _onFWDUpdateAvailable                      (const QString& version, const QString& changelog);
+    void _onFWDUpdateDownloadProgress               (qint64 bytesReceived, qint64 bytesTotal);
+    void _onFWDUpdateDownloadFinished               (const QString& filePath);
+    void _onFWDUpdateDownloadError                  (const QString& error);
+    void _onFWDUpdateInstallReady                   (const QString& filePath);
 
 private:
     QObject*    _rootQmlObject          ();
@@ -207,6 +217,7 @@ private:
     int                 _buildVersion           = 0;
     GPSRTKFactGroup*    _gpsRtkFactGroup        = nullptr;
     QGCToolbox*         _toolbox                = nullptr;
+    FWDUpdateManager*   _updateManager          = nullptr;
     QQuickWindow*       _mainRootWindow         = nullptr;
     bool                _bluetoothAvailable     = false;
     QTranslator         _qgcTranslatorSourceCode;           ///< translations for source code C++/Qml

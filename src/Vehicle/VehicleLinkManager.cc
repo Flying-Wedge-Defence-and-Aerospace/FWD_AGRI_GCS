@@ -204,6 +204,9 @@ void VehicleLinkManager::_addLink(LinkInterface* link)
         if (_rgLinkInfo.count() == 1) {
             _commLostCheckTimer.start();
         }
+
+        // Restore GCS-side signing on all channels 100ms after link established (grace=2s)
+        QTimer::singleShot(100, _vehicle, &Vehicle::sendSetupSigning);
     }
 }
 

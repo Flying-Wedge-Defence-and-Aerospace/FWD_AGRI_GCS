@@ -29,6 +29,8 @@
 #include "LinkManager.h"
 
 #include <QTcpSocket>
+#include <QSettings>
+#include "MAVLinkSigning.h"
 
 QGC_LOGGING_CATEGORY(APMFirmwarePluginLog, "APMFirmwarePluginLog")
 
@@ -1125,6 +1127,19 @@ uint8_t APMFirmwarePlugin::_reencodeMavlinkChannel()
     static uint8_t channel{LinkManager::invalidMavlinkChannel()};
     if (LinkManager::invalidMavlinkChannel() == channel) {
         channel = qgcApp()->toolbox()->linkManager()->allocateMavlinkChannel();
+
+        QSettings settings;
+        settings.beginGroup("MAVLink");
+        const QString signingKeyHex = settings.value("MAVLink2SigningKey").toString();
+        settings.endGroup();
+        if (!signingKeyHex.isEmpty()) {
+            const QByteArray key = QByteArray::fromHex(signingKeyHex.toLatin1());
+            if (key.size() == 32) {
+                MAVLinkSigning::initSigning(static_cast<mavlink_channel_t>(channel), key);
+                MAVLinkSigning::enableEnforcement(static_cast<mavlink_channel_t>(channel), true);
+                qDebug() << "MAVLink signing initialized on APM re-encode channel" << channel;
+            }
+        }
     }
     _channelMutex.unlock();
     return channel;

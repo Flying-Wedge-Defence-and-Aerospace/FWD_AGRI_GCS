@@ -240,6 +240,50 @@ ApplicationWindow {
         }
     }
 
+
+    // FWD Auto-Update: called from QGCApplication when update available
+
+    function showFWDUpdateDialog(version, changelog) {
+
+        console.log("FWD Update available:", version, changelog);
+
+        if (!fwdUpdateDialog.visible) {
+
+            fwdUpdateDialog.updateVersion = version
+
+            fwdUpdateDialog.changelog = changelog
+
+            fwdUpdateDialog.downloading = false
+
+            fwdUpdateDialog.downloadProgress = 0
+
+            fwdUpdateDialog.statusMessage = ""
+
+            fwdUpdateDialog.visible = true
+
+        }
+
+    }
+
+    // C++ callback wrappers - forward to fwdUpdateDialog
+    function updateFWDDownloadProgress(received, total) {
+        if (fwdUpdateDialog.visible) {
+            fwdUpdateDialog.updateProgress(received, total)
+        }
+    }
+
+    function fwdDownloadComplete(filePath) {
+        if (fwdUpdateDialog.visible) {
+            fwdUpdateDialog.downloadComplete(filePath)
+        }
+    }
+
+    function fwdDownloadFailed(error) {
+        if (fwdUpdateDialog.visible) {
+            fwdUpdateDialog.downloadFailed(error)
+        }
+    }
+
     /// Saves main window position and size
     MainWindowSavedState {
         window: mainWindow
@@ -702,4 +746,194 @@ ApplicationWindow {
             }
         }
     }
-}
+
+    // FWD Auto-Update Dialog
+Popup {
+            id: fwdUpdateDialog
+            property string updateVersion: ""
+            property string changelog: ""
+            property real   downloadProgress: 0
+            property bool   downloading: false
+            property string statusMessage: ""
+
+            parent: Overlay.overlay
+            anchors.centerIn: parent
+            width:  Math.min(ScreenTools.defaultFontPixelWidth * 60, parent.width * 0.8)
+            height: mainColumn.height + padding * 2
+            padding: ScreenTools.defaultFontPixelHeight
+            modal: true
+            focus: true
+            closePolicy: Popup.NoAutoClose
+
+            background: Rectangle {
+                color: qgcPal.window
+                border.color: qgcPal.text
+                border.width: 1
+                radius: ScreenTools.defaultFontPixelHeight / 2
+            }
+
+            ColumnLayout {
+                id: mainColumn
+                width: parent.width - fwdUpdateDialog.padding * 2
+                spacing: ScreenTools.defaultFontPixelHeight
+
+                // Title
+                RowLayout {
+                    Layout.fillWidth: true
+
+                    QGCLabel {
+                        text: qsTr("Update Available")
+                        font.pointSize: ScreenTools.largeFontPointSize
+                        font.bold: true
+                        color: qgcPal.text
+                        Layout.fillWidth: true
+                    }
+
+                    QGCLabel {
+                        text: fwdUpdateDialog.updateVersion
+                        font.pointSize: ScreenTools.mediumFontPointSize
+                        color: qgcPal.colorGreen
+                    }
+                }
+
+                // Separator
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 1
+                    color: qgcPal.text
+                    opacity: 0.3
+                }
+
+                // Changelog
+                QGCLabel {
+                    text: qsTr("What's new:")
+                    font.bold: true
+                    color: qgcPal.text
+                }
+
+                Flickable {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: ScreenTools.defaultFontPixelHeight * 12
+                    clip: true
+                    contentHeight: changelogText.height
+
+                    QGCLabel {
+                        id: changelogText
+                        width: parent.width
+                        text: (fwdUpdateDialog.changelog.length === 0) ? qsTr("No changelog available.") : fwdUpdateDialog.changelog
+                        wrapMode: Text.WordWrap
+                        color: qgcPal.text
+                    }
+                }
+
+                // Progress bar (shown during download)
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    visible: fwdUpdateDialog.downloading
+                    spacing: ScreenTools.defaultFontPixelHeight / 2
+
+                    QGCLabel {
+                        text: qsTr("Downloading update...")
+                        color: qgcPal.text
+                    }
+
+                    ProgressBar {
+                        id: progressBar
+                        Layout.fillWidth: true
+                        from: 0
+                        to: 100
+                        value: fwdUpdateDialog.downloadProgress
+
+                        background: Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: ScreenTools.defaultFontPixelHeight
+                            color: qgcPal.windowShade
+                            radius: height / 2
+                        }
+
+                        contentItem: Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: ScreenTools.defaultFontPixelHeight
+                            radius: height / 2
+                            color: qgcPal.colorGreen
+
+                            width: progressBar.visualPosition * parent.width
+                        }
+                    }
+
+                    QGCLabel {
+                        text: Math.round(fwdUpdateDialog.downloadProgress) + "%"
+                        color: qgcPal.text
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+                }
+
+                // Status message
+                QGCLabel {
+                    Layout.fillWidth: true
+                    visible: fwdUpdateDialog.statusMessage.length > 0
+                    text: fwdUpdateDialog.statusMessage
+                    color: qgcPal.colorRed
+                    wrapMode: Text.WordWrap
+                }
+
+                // Buttons
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: ScreenTools.defaultFontPixelHeight
+
+                    QGCButton {
+                        text: fwdUpdateDialog.downloading ? qsTr("Cancel") : qsTr("Later")
+                        Layout.fillWidth: true
+                        onClicked: {
+                            fwdUpdateDialog.visible = false
+                        }
+                    }
+
+                    QGCButton {
+                        text: qsTr("Update Now")
+                        primary: true
+                        Layout.fillWidth: true
+                        visible: !fwdUpdateDialog.downloading
+                        onClicked: {
+                            fwdUpdateDialog.downloading = true
+                            fwdUpdateDialog.downloadProgress = 0
+                            fwdUpdateDialog.statusMessage = ""
+                            // Call C++ download method
+                            fwdUpdateManager.downloadUpdate()
+                        }
+                    }
+
+                    QGCButton {
+                        text: qsTr("Restart Now")
+                        primary: true
+                        Layout.fillWidth: true
+                        visible: fwdUpdateDialog.statusMessage === "download_complete"
+                        onClicked: {
+                            // Call C++ install method
+                            fwdUpdateManager.installUpdate()
+                        }
+                    }
+                }
+            }
+
+            // Called from C++ when download progress updates
+            function updateProgress(received, total) {
+                if (total > 0) {
+                    fwdUpdateDialog.downloadProgress = (received / total) * 100
+                }
+            }
+
+            // Called from C++ when download is complete
+            function downloadComplete(filePath) {
+                fwdUpdateDialog.downloading = false
+                fwdUpdateDialog.statusMessage = "download_complete"
+            }
+
+            // Called from C++ when download fails
+            function downloadFailed(error) {
+                fwdUpdateDialog.downloading = false
+                fwdUpdateDialog.statusMessage = qsTr("Download failed: ") + error
+            }
+        }
+    }

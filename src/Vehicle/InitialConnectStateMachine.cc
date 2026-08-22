@@ -134,6 +134,15 @@ void InitialConnectStateMachine::_autopilotVersionRequestMessageHandler(void* re
         vehicle->_firmwareBoardProductId = autopilotVersion.product_id;
         emit vehicle->vehicleUIDChanged();
 
+        {
+            // Extract boardUid from uid2[0:12]
+            QByteArray uid2bytes(reinterpret_cast<const char*>(autopilotVersion.uid2), 12);
+            vehicle->_boardUid = QString::fromLatin1(uid2bytes.toHex().toUpper());
+            emit vehicle->boardUidChanged(vehicle->_boardUid);
+            qCDebug(InitialConnectStateMachineLog) << "boardUid:" << vehicle->_boardUid;
+            vehicle->_checkLicense();
+        }
+
         if (autopilotVersion.flight_sw_version != 0) {
             int majorVersion, minorVersion, patchVersion;
             FIRMWARE_VERSION_TYPE versionType;

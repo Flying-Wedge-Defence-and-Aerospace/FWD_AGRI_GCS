@@ -1,9 +1,10 @@
-add_custom_target(UiPreferencesQml
+	add_custom_target(UiPreferencesQml
 	SOURCES
 		BluetoothSettings.qml
 		DebugWindow.qml
 		GeneralSettings.qml
 		HelpSettings.qml
+		LicensePage.qml
 		LinkSettings.qml
 		LogReplaySettings.qml
 		MavlinkSettings.qml
@@ -12,4 +13,4 @@ add_custom_target(UiPreferencesQml
 		SerialSettings.qml
 		TcpSettings.qml
 		UdpSettings.qml
-)
+	)

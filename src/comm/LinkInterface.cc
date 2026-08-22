@@ -9,7 +9,9 @@
 
 #include "LinkInterface.h"
 #include "LinkManager.h"
+#include "MAVLinkSigning.h"
 #include "QGCApplication.h"
+#include <QSettings>
 
 QGC_LOGGING_CATEGORY(LinkInterfaceLog, "LinkInterfaceLog")
 
@@ -82,6 +84,16 @@ void LinkInterface::_freeMavlinkChannel()
 
 void LinkInterface::writeBytesThreadSafe(const char *bytes, int length)
 {
+    // Runtime tracing: detect outgoing HEARTBEAT messages with non-standard compid
+    if (length >= 7) {
+        const uint8_t* buf = (const uint8_t*)bytes;
+        if (buf[0] == 0xFD && buf[2] == 0 && buf[5] == 0) {
+            // MAVLink 2 HEARTBEAT (msgid 0) on channel
+            if (buf[6] != 1) {
+                qDebug() << "LinkInterface: Sending HEARTBEAT with non-standard compid" << buf[6];
+            }
+        }
+    }
     emit _invokeWriteBytes(QByteArray(bytes, length));
 }
 

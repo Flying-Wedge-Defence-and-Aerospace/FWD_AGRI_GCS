@@ -16,6 +16,10 @@
 #include <QTime>
 #include <QQueue>
 #include <QSharedPointer>
+#include <QSet>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
 #include "FactGroup.h"
 #include "QGCMAVLink.h"
@@ -76,6 +80,7 @@ class RequestMessageTest;
 class LinkInterface;
 class LinkManager;
 class InitialConnectStateMachine;
+class FWDLicenseManager;
 class Autotune;
 class RemoteIDManager;
 class GimbalController;
@@ -278,6 +283,8 @@ public:
     Q_PROPERTY(VehicleObjectAvoidance*  objectAvoidance     READ objectAvoidance    CONSTANT)
     Q_PROPERTY(Autotune*                autotune            READ autotune           CONSTANT)
     Q_PROPERTY(RemoteIDManager*         remoteIDManager     READ remoteIDManager    CONSTANT)
+    Q_PROPERTY(QString                  droneID             READ droneID            NOTIFY droneIDChanged)
+    Q_PROPERTY(QString                  boardUid            READ boardUid           NOTIFY boardUidChanged)
 
     // FactGroup object model properties
 
@@ -425,6 +432,14 @@ public:
 
     /// Clear Messages
     Q_INVOKABLE void clearMessages();
+
+    Q_INVOKABLE void sendSetupSigning();
+    Q_INVOKABLE void sendSetupSigningWithPassphrase(const QString& passphrase);
+    Q_INVOKABLE void sendSetupSigningWithKey(const QString& keyHex);
+    Q_INVOKABLE void enableSigningWithKey(const QString& keyHex);
+    Q_INVOKABLE void sendDisableSigning();
+    Q_INVOKABLE QString signingStatus();
+    Q_INVOKABLE void activateAndConnectLicense(const QString& licenseString);
 
     Q_INVOKABLE void sendPlan(QString planFile);
 
@@ -750,6 +765,8 @@ public:
     VehicleObjectAvoidance*         objectAvoidance     () { return _objectAvoidance; }
     Autotune*                       autotune            () const { return _autotune; }
     RemoteIDManager*                remoteIDManager     () { return _remoteIDManager; }
+    QString                         droneID             () { return _receivedDroneID; }
+    QString                         boardUid            () { return _boardUid; }
 
     static constexpr int cMaxRcChannels = 18;
 
@@ -970,6 +987,11 @@ signals:
     void toolIndicatorsChanged          ();
     void modeIndicatorsChanged          ();
     void textMessageReceived            (int uasid, int componentid, int severity, QString text, QString description);
+    void droneIDChanged                 (QString droneID);
+    void boardUidChanged                (QString boardUid);
+    void licenseRequired                (QString boardUid);
+    void licenseActivated               (QString boardUid);
+    void licenseError                   (QString errorMessage);
     void calibrationEventReceived       (int uasid, int componentid, int severity, QSharedPointer<events::parser::ParsedEvent> event);
     void checkListStateChanged          ();
     void messagesReceivedChanged        ();
@@ -1084,6 +1106,7 @@ private slots:
 
 private:
     void _loadJoystickSettings          ();
+    void _sendSetupSigningOnLinks       (const QByteArray& key);
     void _activeVehicleChanged          (Vehicle* newActiveVehicle);
     void _captureJoystick               ();
     void _handlePing                    (LinkInterface* link, mavlink_message_t& message);
@@ -1139,6 +1162,7 @@ private:
     void _flightTimerStop               ();
     void _chunkedStatusTextTimeout      (void);
     void _chunkedStatusTextCompleted    (uint8_t compId);
+    void _checkLicense                  ();
     void _setMessageInterval            (int messageId, int rate);
     EventHandler& _eventHandler         (uint8_t compid);
     bool setFlightModeCustom            (const QString& flightMode, uint8_t* base_mode, uint32_t* custom_mode);
@@ -1219,6 +1243,12 @@ private:
     QTimer              _prearmErrorTimer;
     static const int    _prearmErrorTimeoutMSecs = 35 * 1000;   ///< Take away prearm error after 35 seconds
 
+    // DroneID authorization
+    QSet<QString>       _trustedDroneIDs;
+    QSet<QString>       _knownDroneIDs;
+    QString             _receivedDroneID;
+    QTimer              _droneIDTimeoutTimer;
+
     bool                _initialPlanRequestComplete = false;
 
     LinkManager*                    _linkManager                    = nullptr;
@@ -1290,6 +1320,7 @@ private:
 
     QString _gitHash;
     quint64 _uid = 0;
+    QString _boardUid;
 
     uint64_t    _mavlinkSentCount       = 0;
     uint64_t    _mavlinkReceivedCount   = 0;

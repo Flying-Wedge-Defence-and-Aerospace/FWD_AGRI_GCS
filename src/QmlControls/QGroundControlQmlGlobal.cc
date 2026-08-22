@@ -9,6 +9,7 @@
 
 #include "QGroundControlQmlGlobal.h"
 #include "LinkManager.h"
+#include "MAVLinkSigning.h"
 
 #include <QSettings>
 #include <QLineF>
@@ -170,6 +171,75 @@ void QGroundControlQmlGlobal::startAPMArduRoverMockLink(bool sendStatusText)
 #else
     Q_UNUSED(sendStatusText);
 #endif
+}
+
+void QGroundControlQmlGlobal::startMavlinkConnections(void)
+{
+    _toolbox->linkManager()->setConnectionsAllowed();
+    _toolbox->linkManager()->startAutoConnectedLinks();
+}
+
+void QGroundControlQmlGlobal::sendSetupSigningToAutopilot(const QString& keyHex)
+{
+    const QByteArray key = QByteArray::fromHex(keyHex.toLatin1());
+    if (key.size() != 32) {
+        qWarning() << "sendSetupSigningToAutopilot: Invalid key length" << key.size() << "expected 32 bytes (64 hex chars)";
+        return;
+    }
+
+    qDebug() << "sendSetupSigningToAutopilot: sending SETUP_SIGNING unsigned on all links";
+
+    const uint8_t sysId = static_cast<uint8_t>(_toolbox->mavlinkProtocol()->getSystemId());
+    const uint8_t compId = static_cast<uint8_t>(_toolbox->mavlinkProtocol()->getComponentId());
+    const mavlink_system_t target = { 0, 0 };
+
+    // 1. Send SETUP_SIGNING unsigned on all active links
+    const QList<SharedLinkInterfacePtr> sharedLinks = _toolbox->linkManager()->links();
+    for (const auto& sharedLink : sharedLinks) {
+        if (!sharedLink->isConnected()) continue;
+
+        const mavlink_channel_t channel = static_cast<mavlink_channel_t>(sharedLink->mavlinkChannel());
+
+        // Temporarily disable signing so message goes unsigned
+        mavlink_status_t* status = mavlink_get_channel_status(channel);
+        if (status) {
+            status->signing = nullptr;
+            status->flags &= ~MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+        }
+
+        mavlink_setup_signing_t setup_signing;
+        MAVLinkSigning::createSetupSigning(channel, target, key, setup_signing);
+        mavlink_message_t msg;
+        mavlink_msg_setup_signing_encode_chan(sysId, compId, channel, &msg, &setup_signing);
+        uint8_t buf[MAVLINK_MAX_PACKET_LEN];
+        const int len = mavlink_msg_to_send_buffer(buf, &msg);
+        sharedLink->writeBytesThreadSafe(reinterpret_cast<const char*>(buf), len);
+
+        qDebug() << "sendSetupSigningToAutopilot: sent SETUP_SIGNING on ch" << channel;
+    }
+
+    // 2. Save key to QSettings
+    {
+        QSettings settings;
+        settings.beginGroup("MAVLink");
+        settings.setValue("MAVLink2SigningKey", keyHex);
+        settings.endGroup();
+    }
+
+    // 3. Re-init signing + enforcement on all channels with the real key
+    for (uint8_t i = 0; i < MAVLINK_COMM_NUM_BUFFERS; i++) {
+        const mavlink_channel_t channel = static_cast<mavlink_channel_t>(i);
+        MAVLinkSigning::initSigning(channel, key);
+    }
+
+    // 4. Enable enforcement on link channels
+    for (const auto& sharedLink : sharedLinks) {
+        if (!sharedLink->isConnected()) continue;
+        const mavlink_channel_t channel = static_cast<mavlink_channel_t>(sharedLink->mavlinkChannel());
+        MAVLinkSigning::enableEnforcement(channel, true);
+    }
+
+    qDebug() << "sendSetupSigningToAutopilot: done";
 }
 
 void QGroundControlQmlGlobal::stopOneMockLink(void)

@@ -49,6 +49,7 @@ public:
     // Methods
 
     Q_INVOKABLE Vehicle* getVehicleById(int vehicleId);
+    void                ignoreVehicleId(int vehicleId);
 
     UAS* activeUas(void) { return _activeVehicle ? _activeVehicle->uas() : nullptr; }
 

@@ -184,8 +184,14 @@
     <qresource prefix="/opengl">
         <file>resources/opengl/buglist.json</file>
     </qresource>
+    <qresource prefix="/trusted_drones">
+        <file alias="trusted_drones.json">trusted_drones.json</file>
+    </qresource>
     <qresource prefix="/gimbal">
         <file alias="payload.svg">resources/gimbal/payload.svg</file>
+    </qresource>
+    <qresource prefix="/FWDUpdate">
+        <file>src/FWDUpdateManager/FWDUpdateDialog.qml</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

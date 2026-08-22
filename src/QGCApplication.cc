@@ -100,6 +100,7 @@
 #include "ToolStripAction.h"
 #include "ToolStripActionList.h"
 #include "QGCMAVLink.h"
+#include "MAVLinkSigning.h"
 #include "VehicleLinkManager.h"
 #include "Autotune.h"
 #include "RemoteIDManager.h"
@@ -369,7 +370,18 @@ QGCApplication::QGCApplication(int &argc, char* argv[], bool unitTesting)
    }
 #endif /* __mobile__ */
 
-    _checkForNewVersion();
+    // _checkForNewVersion();  // Disabled: using FWDUpdateManager instead
+
+    // Initialize FWD Auto-Update Manager
+    _updateManager = new FWDUpdateManager(this);
+    connect(_updateManager, &FWDUpdateManager::updateAvailable, this, &QGCApplication::_onFWDUpdateAvailable);
+    connect(_updateManager, &FWDUpdateManager::downloadProgressChanged, this, &QGCApplication::_onFWDUpdateDownloadProgress);
+    connect(_updateManager, &FWDUpdateManager::downloadFinished, this, &QGCApplication::_onFWDUpdateDownloadFinished);
+    connect(_updateManager, &FWDUpdateManager::downloadError, this, &QGCApplication::_onFWDUpdateDownloadError);
+    connect(_updateManager, &FWDUpdateManager::installReady, this, &QGCApplication::_onFWDUpdateInstallReady);
+
+    // Check for updates after a short delay (don't block startup)
+    QTimer::singleShot(3000, _updateManager, &FWDUpdateManager::checkForUpdates);
 }
 
 void QGCApplication::_exitWithError(QString errorMessage)
@@ -549,6 +561,9 @@ void QGCApplication::_initCommon()
     if(QFontDatabase::addApplicationFont(":/fonts/opensans-demibold") < 0) {
         qWarning() << "Could not load /fonts/opensans-demibold font";
     }
+
+    // Init MAVLink signing enforcement on all channels — blocks unsigned traffic by default
+    MAVLinkSigning::initEnforcementForAll();
 }
 
 bool QGCApplication::_initForNormalAppBoot()
@@ -557,6 +572,9 @@ bool QGCApplication::_initForNormalAppBoot()
 
     _qmlAppEngine = toolbox()->corePlugin()->createQmlApplicationEngine(this);
     toolbox()->corePlugin()->createRootWindow(_qmlAppEngine);
+
+    // Expose FWD Update Manager to QML
+    _qmlAppEngine->rootContext()->setContextProperty("fwdUpdateManager", _updateManager);
 
     // Image provider for PX4 Flow
     QQuickImageProvider* pImgProvider = dynamic_cast<QQuickImageProvider*>(qgcApp()->toolbox()->imageProvider());
@@ -590,8 +608,8 @@ bool QGCApplication::_initForNormalAppBoot()
                     "Your saved settings have been reset to defaults.")).arg(applicationName()));
     }
 
-    // Connect links with flag AutoconnectLink
-    toolbox()->linkManager()->startAutoConnectedLinks();
+    // Don't auto-connect yet — deferred until after login
+    toolbox()->linkManager()->setConnectionsSuspended("Awaiting login");
 
     if (getQGCMapEngine()->wasCacheReset()) {
         showAppMessage(tr("The Offline Map Cache database has been upgraded. "
@@ -1017,6 +1035,64 @@ bool QGCApplication::compressEvent(QEvent*event, QObject* receiver, QPostEventLi
     }
 
     return false;
+}
+
+void QGCApplication::_onFWDUpdateAvailable(const QString& version, const QString& changelog)
+{
+    qDebug() << "FWDUpdate: Update available:" << version;
+
+    if (_rootQmlObject()) {
+        QMetaObject::invokeMethod(_rootQmlObject(), "showFWDUpdateDialog",
+            Q_ARG(QVariant, version), Q_ARG(QVariant, changelog));
+    }
+}
+
+void QGCApplication::_onFWDUpdateDownloadProgress(qint64 bytesReceived, qint64 bytesTotal)
+{
+    if (_rootQmlObject()) {
+        QMetaObject::invokeMethod(_rootQmlObject(), "updateFWDDownloadProgress",
+            Q_ARG(QVariant, bytesReceived), Q_ARG(QVariant, bytesTotal));
+    }
+}
+
+void QGCApplication::_onFWDUpdateDownloadFinished(const QString& filePath)
+{
+    qDebug() << "FWDUpdate: Download complete:" << filePath;
+
+    if (_rootQmlObject()) {
+        QMetaObject::invokeMethod(_rootQmlObject(), "fwdDownloadComplete",
+            Q_ARG(QVariant, filePath));
+    }
+}
+
+void QGCApplication::_onFWDUpdateDownloadError(const QString& error)
+{
+    qWarning() << "FWDUpdate: Download error:" << error;
+
+    if (_rootQmlObject()) {
+        QMetaObject::invokeMethod(_rootQmlObject(), "fwdDownloadFailed",
+            Q_ARG(QVariant, error));
+    }
+}
+
+void QGCApplication::_onFWDUpdateInstallReady(const QString& filePath)
+{
+    qDebug() << "FWDUpdate: Installing update:" << filePath;
+    _updateManager->installUpdate();
+}
+
+void QGCApplication::fwdStartDownload()
+{
+    if (_updateManager) {
+        _updateManager->downloadUpdate();
+    }
+}
+
+void QGCApplication::fwdInstallUpdate()
+{
+    if (_updateManager) {
+        _updateManager->installUpdate();
+    }
 }
 
 bool QGCApplication::event(QEvent *e)

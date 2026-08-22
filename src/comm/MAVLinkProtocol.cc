@@ -80,6 +80,11 @@ void MAVLinkProtocol::setVersion(unsigned version)
     for (int i = 0; i < sharedLinks.length(); i++) {
         mavlink_status_t* mavlinkStatus = mavlink_get_channel_status(sharedLinks[i].get()->mavlinkChannel());
 
+        // Do not downgrade a signing-enabled channel to MAVLink 1 — signing requires MAVLink 2
+        if (version < 200 && mavlinkStatus && mavlinkStatus->signing) {
+            continue;
+        }
+
         // Set flags for version
         if (version < 200) {
             mavlinkStatus->flags |= MAVLINK_STATUS_FLAG_OUT_MAVLINK1;

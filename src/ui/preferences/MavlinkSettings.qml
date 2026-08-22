@@ -587,6 +587,7 @@ Rectangle {
                 }
             }
             Rectangle {
+                clip:           true
                 height:         mavStatusColumn.height + (ScreenTools.defaultFontPixelHeight * 2)
                 width:          ScreenTools.defaultFontPixelWidth * 75
                 color:          "transparent"
@@ -599,86 +600,112 @@ Rectangle {
                     width:      gcsColumn.width
                     spacing:    _columnSpacing
                     anchors.centerIn: parent
-                    //-----------------------------------------------------------------
                     Row {
                         spacing:    ScreenTools.defaultFontPixelWidth
-                        anchors.horizontalCenter: parent.horizontalCenter
                         QGCLabel {
                             width:              _labelWidth
-                            text:               qsTr("Total messages sent (computed):")
-                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.baseline:   signingPassphraseField.baseline
+                            text:               qsTr("Passphrase:")
                         }
-                        QGCLabel {
-                            width:              _valueWidth
-                            text:               globals.activeVehicle ? globals.activeVehicle.mavlinkSentCount : qsTr("Not Connected")
+                        QGCTextField {
+                            id:                     signingPassphraseField
+                            width:                  _valueWidth
+                            echoMode:               TextInput.Password
                             anchors.verticalCenter: parent.verticalCenter
                         }
                     }
-
-                    Rectangle {
-                        height: 1
-                        Layout.fillWidth: true
-                        color: "gray"
-                        anchors.horizontalCenter: parent.horizontalCenter
-                    }
-
-                    //-----------------------------------------------------------------
                     Row {
                         spacing:    ScreenTools.defaultFontPixelWidth
-                        anchors.horizontalCenter: parent.horizontalCenter
                         QGCLabel {
                             width:              _labelWidth
-                            text:               qsTr("Total messages received:")
-                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.baseline:   signingKeyField.baseline
+                            text:               qsTr("Hex Key (64 hex chars):")
                         }
-                        QGCLabel {
-                            width:              _valueWidth
-                            text:               globals.activeVehicle ? globals.activeVehicle.mavlinkReceivedCount : qsTr("Not Connected")
+                        QGCTextField {
+                            id:                     signingKeyField
+                            width:                  _valueWidth
+                            inputMethodHints:       Qt.ImhNoAutoUppercase
                             anchors.verticalCenter: parent.verticalCenter
                         }
                     }
-
-                    Rectangle {
-                        height: 1
-                        Layout.fillWidth: true
-                        color: "gray"
-                    }
-
                     //-----------------------------------------------------------------
-                    Row {
+                    Flow {
+                        width:      parent.width
                         spacing:    ScreenTools.defaultFontPixelWidth
                         anchors.horizontalCenter: parent.horizontalCenter
-                        QGCLabel {
-                            width:              _labelWidth
-                            text:               qsTr("Total message loss:")
-                            anchors.verticalCenter: parent.verticalCenter
+                        QGCButton {
+                            text:               qsTr("Set from Passphrase")
+                            enabled:            _activeVehicle && signingPassphraseField.text.length > 0
+                            onClicked: {
+                                _activeVehicle.sendSetupSigningWithPassphrase(signingPassphraseField.text)
+                                signingPassphraseField.text = ""
+                                signingStatusText.text = qsTr("Sent passphrase key to vehicle")
+                                signingStatusTimer.restart()
+                            }
                         }
-                        QGCLabel {
-                            width:              _valueWidth
-                            text:               globals.activeVehicle ? globals.activeVehicle.mavlinkLossCount : qsTr("Not Connected")
-                            anchors.verticalCenter: parent.verticalCenter
+                        QGCButton {
+                            text:               qsTr("Send Key to Autopilot")
+                            enabled:            signingKeyField.text.length >= 64
+                            onClicked: {
+                                QGroundControl.sendSetupSigningToAutopilot(signingKeyField.text)
+                                signingKeyField.text = ""
+                                signingStatusText.text = qsTr("Sent key to autopilot via SETUP_SIGNING")
+                                signingStatusTimer.restart()
+                            }
+                        }
+                        QGCButton {
+                            text:               qsTr("Enable Signing / Verify Key")
+                            enabled:            _activeVehicle && signingKeyField.text.length >= 64
+                            onClicked: {
+                                _activeVehicle.enableSigningWithKey(signingKeyField.text)
+                                signingKeyField.text = ""
+                                signingStatusText.text = qsTr("Enabled signing + enforcement (no SETUP_SIGNING sent)")
+                                signingStatusTimer.restart()
+                            }
+                        }
+                        QGCButton {
+                            text:               qsTr("Disable")
+                            enabled:            _activeVehicle
+                            onClicked: {
+                                _activeVehicle.sendDisableSigning()
+                                signingStatusText.text = qsTr("Sent disable-signing to vehicle")
+                                signingStatusTimer.restart()
+                            }
+                        }
+                        QGCButton {
+                            text:               qsTr("License Keys")
+                            onClicked: {
+                                mainWindow.showTool(qsTr("License Keys"), "LicensePage.qml", "/res/FWD_only_logo")
+                            }
                         }
                     }
-
-                    Rectangle {
-                        height: 1
-                        Layout.fillWidth: true
-                        color: "gray"
+                    QGCLabel {
+                        text:               qsTr("Current Status:")
+                        font.bold:          true
+                        width:              _labelWidth
                     }
-
-                    //-----------------------------------------------------------------
-                    Row {
-                        spacing:    ScreenTools.defaultFontPixelWidth
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        QGCLabel {
-                            width:              _labelWidth
-                            text:               qsTr("Loss rate:")
-                            anchors.verticalCenter: parent.verticalCenter
+                    TextArea {
+                        id:                 signingStatusText
+                        readOnly:           true
+                        text:               qsTr("Press 'Set from Passphrase' or 'Set from Hex Key' to configure signing...")
+                        width:              mavStatusColumn.width
+                        height:             ScreenTools.defaultFontPixelHeight * 12
+                        frameVisible:       true
+                        style: TextAreaStyle {
+                            textColor:          qgcPal.textFieldText
+                            backgroundColor:    qgcPal.textField
                         }
-                        QGCLabel {
-                            width:              _valueWidth
-                            text:               globals.activeVehicle ? globals.activeVehicle.mavlinkLossPercent.toFixed(0) + '%' : qsTr("Not Connected")
-                            anchors.verticalCenter: parent.verticalCenter
+                    }
+                    Timer {
+                        id:                 signingStatusTimer
+                        interval:           2000
+                        running:            Qt.application.active
+                        repeat:             true
+                        triggeredOnStart:   true
+                        onTriggered: {
+                            if (_activeVehicle) {
+                                signingStatusText.text = _activeVehicle.signingStatus()
+                            }
                         }
                     }
                 }

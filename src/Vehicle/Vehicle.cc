@@ -11,6 +11,7 @@
 #include <QDateTime>
 #include <QLocale>
 #include <QQuaternion>
+#include <QFile>
 
 #include <Eigen/Eigen>
 
@@ -29,6 +30,10 @@
 #include "FlightPathSegment.h"
 #include "QGCApplication.h"
 #include "QGCImageProvider.h"
+#include "MAVLinkSigning.h"
+#include "FWDLicenseManager.h"
+#include <QSettings>
+#include <QCryptographicHash>
 #include "MissionCommandTree.h"
 #include "SettingsManager.h"
 #include "QGCQGeoCoordinate.h"
@@ -224,6 +229,53 @@ Vehicle::Vehicle(LinkInterface*             link,
     connect(&_prearmErrorTimer, &QTimer::timeout, this, &Vehicle::_prearmErrorTimeout);
     _prearmErrorTimer.setInterval(_prearmErrorTimeoutMSecs);
     _prearmErrorTimer.setSingleShot(true);
+
+    // Load trusted drone IDs (manual whitelist)
+    {
+        QFile file(":/trusted_drones/trusted_drones.json");
+        if (file.open(QIODevice::ReadOnly)) {
+            QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+            for (const auto& uuid : doc.object()["trusted_drones"].toArray()) {
+                _trustedDroneIDs.insert(uuid.toString());
+            }
+            file.close();
+            qDebug() << "DRONEID: loaded" << _trustedDroneIDs.size() << "trusted UUID(s) from trusted_drones.json";
+        } else {
+            qDebug() << "DRONEID: trusted_drones.json not found in Qt resources";
+        }
+    }
+
+    // Load known drone IDs (auto-learned database)
+    {
+        QFile file(qgcApp()->applicationDirPath() + "/known_drones.json");
+        if (file.open(QIODevice::ReadOnly)) {
+            QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+            for (const auto& uuid : doc.object()["known_drones"].toArray()) {
+                _knownDroneIDs.insert(uuid.toString());
+            }
+            file.close();
+            qDebug() << "DRONEID: loaded" << _knownDroneIDs.size() << "known UUID(s) from known_drones.json";
+        } else {
+            qDebug() << "DRONEID: known_drones.json not found at" << qgcApp()->applicationDirPath();
+        }
+    }
+
+    // DroneID authorization — enforce if any IDs are known
+    // Use a generous timeout (90s) to account for LoginPage overlay delaying user interaction
+    connect(&_droneIDTimeoutTimer, &QTimer::timeout, this, [this]() {
+        qDebug() << "DRONEID: TIMEOUT — no identity received within 90s, disconnecting";
+        qCDebug(VehicleLog) << "DRONEID timeout — no identity received within 90s, disconnecting";
+        qgcApp()->toolbox()->multiVehicleManager()->ignoreVehicleId(_id);
+        vehicleLinkManager()->closeVehicle();
+    });
+    _droneIDTimeoutTimer.setSingleShot(true);
+    _droneIDTimeoutTimer.setInterval(90000);
+    if (!_trustedDroneIDs.isEmpty() || !_knownDroneIDs.isEmpty()) {
+        qDebug() << "DRONEID: enforcement active — 90s timeout started";
+        _droneIDTimeoutTimer.start();
+    } else {
+        qDebug() << "DRONEID: no whitelist found — all drones allowed";
+    }
 
     // Send MAV_CMD ack timer
     _mavCommandResponseCheckTimer.setSingleShot(false);
@@ -936,6 +988,25 @@ void Vehicle::_chunkedStatusTextCompleted(uint8_t compId)
     }
 
     _chunkedStatusTextInfoMap.remove(compId);
+
+    // Check for DRONEID authorization
+    if (messageText.startsWith("DRONEID:")) {
+        _droneIDTimeoutTimer.stop();
+        _receivedDroneID = messageText.mid(8).trimmed();
+        qDebug() << "DRONEID: received —" << _receivedDroneID;
+        emit droneIDChanged(_receivedDroneID);
+
+        if (_trustedDroneIDs.contains(_receivedDroneID) || _knownDroneIDs.contains(_receivedDroneID)) {
+            qDebug() << "DRONEID: authorised —" << _receivedDroneID;
+            qCDebug(VehicleLog) << "Authorised drone:" << _receivedDroneID;
+            return;
+        }
+
+        qDebug() << "DRONEID: REJECTED —" << _receivedDroneID << "not in any whitelist";
+        qgcApp()->toolbox()->multiVehicleManager()->ignoreVehicleId(_id);
+        vehicleLinkManager()->closeVehicle();
+        return;
+    }
 
     // PX4 backwards compatibility: messages sent out ending with a tab are also sent as event
     if (messageText.endsWith('\t') && px4Firmware()) {
@@ -4459,6 +4530,33 @@ void Vehicle::sendParamMapRC(const QString& paramName, double scale, double cent
     sendMessageOnLinkThreadSafe(sharedLink.get(), message);
 }
 
+void Vehicle::_sendSetupSigningOnLinks(const QByteArray& key)
+{
+    const uint8_t sysId = static_cast<uint8_t>(_mavlink->getSystemId());
+    const uint8_t compId = static_cast<uint8_t>(_mavlink->getComponentId());
+    const mavlink_system_t target = { static_cast<uint8_t>(_id), static_cast<uint8_t>(_defaultComponentId) };
+
+    for (const auto& linkInfo: _vehicleLinkManager->_rgLinkInfo) {
+        SharedLinkInterfacePtr sharedLink = linkInfo.link;
+        if (!sharedLink->isConnected()) continue;
+
+        const mavlink_channel_t channel = static_cast<mavlink_channel_t>(sharedLink->mavlinkChannel());
+
+        // Temporarily disable signing so SETUP_SIGNING goes unsigned
+        mavlink_status_t* status = mavlink_get_channel_status(channel);
+        if (status) {
+            status->signing = nullptr;
+            status->flags &= ~MAVLINK_STATUS_FLAG_OUT_MAVLINK1;
+        }
+
+        qDebug() << "_sendSetupSigningOnLinks: sending SETUP_SIGNING unsigned on ch" << channel;
+        mavlink_setup_signing_t setup_signing;
+        MAVLinkSigning::createSetupSigning(channel, target, key, setup_signing);
+        mavlink_message_t msg;
+        mavlink_msg_setup_signing_encode_chan(sysId, compId, channel, &msg, &setup_signing);
+        sendMessageOnLinkThreadSafe(sharedLink.get(), msg);
+    }
+}
 
 void Vehicle::clearAllParamMapRC(void)
 {
@@ -4483,6 +4581,307 @@ void Vehicle::clearAllParamMapRC(void)
                                            i,                                                   // tuning id
                                            0, 0, 0, 0);                                         // unused
         sendMessageOnLinkThreadSafe(sharedLink.get(), message);
+    }
+}
+
+void Vehicle::sendSetupSigning()
+{
+    QByteArray key;
+    quint64 timestamp = FWDLicenseManager::currentTimestampFromClock();
+
+    if (!_boardUid.isEmpty()) {
+        FWDLicenseManager* lm = _toolbox->licenseManager();
+        if (lm) {
+            key = lm->lookup(_boardUid);
+            if (!key.isEmpty()) {
+                timestamp = lm->getNextSigningTimestamp(_boardUid);
+            }
+        }
+    }
+
+    // Fallback to old global key path if no per-drone key found
+    if (key.isEmpty()) {
+        QSettings settings;
+        settings.beginGroup("MAVLink");
+        const QString signingKeyHex = settings.value("MAVLink2SigningKey").toString();
+        settings.endGroup();
+
+        if (signingKeyHex.isEmpty()) {
+            qCWarning(VehicleLog) << "No MAVLink signing key configured for vehicle" << _id;
+            return;
+        }
+
+        key = QByteArray::fromHex(signingKeyHex.toLatin1());
+    }
+
+    if (key.size() != 32) {
+        qCWarning(VehicleLog) << "Invalid MAVLink signing key length" << key.size() << "expected 32 bytes";
+        return;
+    }
+
+    qDebug() << "sendSetupSigning: enabling signing, vehicle" << _id;
+
+    // Do NOT send SETUP_SIGNING — this is for restoring GCS-side signing on reconnect.
+    // Do NOT enable enforcement — the Cube may not have the key on a fresh connect.
+
+    for (uint8_t i = 0; i < MAVLINK_COMM_NUM_BUFFERS; i++) {
+        const mavlink_channel_t channel = static_cast<mavlink_channel_t>(i);
+        MAVLinkSigning::initSigning(channel, key);
+        MAVLinkSigning::setSigningTimestamp(channel, timestamp);
+    }
+}
+
+void Vehicle::sendSetupSigningWithPassphrase(const QString& passphrase)
+{
+    if (passphrase.isEmpty()) {
+        qCWarning(VehicleLog) << "Empty passphrase";
+        return;
+    }
+
+    const QByteArray key = QCryptographicHash::hash(passphrase.toUtf8(), QCryptographicHash::Sha256);
+
+    qDebug() << "sendSetupSigningWithPassphrase: SHA-256 hashed, vehicle" << _id;
+
+    {
+        QSettings settings;
+        settings.beginGroup("MAVLink");
+        settings.setValue("MAVLink2SigningKey", QString::fromLatin1(key.toHex()));
+        settings.endGroup();
+    }
+
+    _sendSetupSigningOnLinks(key);
+
+    for (uint8_t i = 0; i < MAVLINK_COMM_NUM_BUFFERS; i++) {
+        MAVLinkSigning::initSigning(static_cast<mavlink_channel_t>(i), key);
+    }
+
+    for (const auto& linkInfo: _vehicleLinkManager->_rgLinkInfo) {
+        SharedLinkInterfacePtr sharedLink = linkInfo.link;
+        if (!sharedLink->isConnected()) continue;
+        const mavlink_channel_t channel = static_cast<mavlink_channel_t>(sharedLink->mavlinkChannel());
+        MAVLinkSigning::enableEnforcement(channel, true);
+    }
+}
+
+void Vehicle::sendSetupSigningWithKey(const QString& keyHex)
+{
+    const QByteArray key = QByteArray::fromHex(keyHex.toLatin1());
+    if (key.size() != 32) {
+        qCWarning(VehicleLog) << "Invalid key length" << key.size() << "expected 32 bytes (64 hex chars)";
+        return;
+    }
+
+    qDebug() << "sendSetupSigningWithKey: vehicle" << _id << "key" << keyHex;
+
+    {
+        QSettings settings;
+        settings.beginGroup("MAVLink");
+        settings.setValue("MAVLink2SigningKey", keyHex);
+        settings.endGroup();
+    }
+
+    _sendSetupSigningOnLinks(key);
+
+    for (uint8_t i = 0; i < MAVLINK_COMM_NUM_BUFFERS; i++) {
+        MAVLinkSigning::initSigning(static_cast<mavlink_channel_t>(i), key);
+    }
+
+    for (const auto& linkInfo: _vehicleLinkManager->_rgLinkInfo) {
+        SharedLinkInterfacePtr sharedLink = linkInfo.link;
+        if (!sharedLink->isConnected()) continue;
+        const mavlink_channel_t channel = static_cast<mavlink_channel_t>(sharedLink->mavlinkChannel());
+        MAVLinkSigning::enableEnforcement(channel, true);
+    }
+}
+
+void Vehicle::enableSigningWithKey(const QString& keyHex)
+{
+    const QByteArray key = QByteArray::fromHex(keyHex.toLatin1());
+    if (key.size() != 32) {
+        qCWarning(VehicleLog) << "enableSigningWithKey: Invalid key length" << key.size() << "expected 32 bytes (64 hex chars)";
+        return;
+    }
+
+    qDebug() << "enableSigningWithKey: enabling signing locally (NO SETUP_SIGNING sent), vehicle" << _id;
+
+    // Get persisted or clock-based MAVLink signing timestamp
+    quint64 timestamp = 0;
+    if (!_boardUid.isEmpty()) {
+        FWDLicenseManager* lm = _toolbox->licenseManager();
+        if (lm) {
+            timestamp = lm->getNextSigningTimestamp(_boardUid);
+        }
+    }
+    if (timestamp == 0) {
+        timestamp = FWDLicenseManager::currentTimestampFromClock();
+    }
+
+    for (uint8_t i = 0; i < MAVLINK_COMM_NUM_BUFFERS; i++) {
+        const mavlink_channel_t channel = static_cast<mavlink_channel_t>(i);
+        MAVLinkSigning::initSigning(channel, key);
+        MAVLinkSigning::setSigningTimestamp(channel, timestamp);
+    }
+
+    for (const auto& linkInfo: _vehicleLinkManager->_rgLinkInfo) {
+        SharedLinkInterfacePtr sharedLink = linkInfo.link;
+        if (!sharedLink->isConnected()) continue;
+        const mavlink_channel_t channel = static_cast<mavlink_channel_t>(sharedLink->mavlinkChannel());
+        MAVLinkSigning::enableEnforcement(channel, true, false);
+    }
+}
+
+void Vehicle::sendDisableSigning()
+{
+    qDebug() << "sendDisableSigning: Disabling enforcement on link channels";
+    for (const auto& linkInfo: _vehicleLinkManager->_rgLinkInfo) {
+        SharedLinkInterfacePtr sharedLink = linkInfo.link;
+        if (!sharedLink->isConnected()) {
+            continue;
+        }
+        const mavlink_channel_t channel = static_cast<mavlink_channel_t>(sharedLink->mavlinkChannel());
+        MAVLinkSigning::enableEnforcement(channel, false);
+    }
+
+    qDebug() << "sendDisableSigning: Disabling signing on all channels";
+    for (uint8_t i = 0; i < MAVLINK_COMM_NUM_BUFFERS; i++) {
+        MAVLinkSigning::initSigning(static_cast<mavlink_channel_t>(i), QByteArray());
+    }
+
+    for (const auto& linkInfo: _vehicleLinkManager->_rgLinkInfo) {
+        SharedLinkInterfacePtr sharedLink = linkInfo.link;
+        if (!sharedLink->isConnected()) {
+            continue;
+        }
+        const mavlink_channel_t channel = static_cast<mavlink_channel_t>(sharedLink->mavlinkChannel());
+        const mavlink_system_t target = { static_cast<uint8_t>(_id), static_cast<uint8_t>(_defaultComponentId) };
+        mavlink_setup_signing_t setup_signing;
+        MAVLinkSigning::createDisableSigning(target, setup_signing);
+        mavlink_message_t msg;
+        mavlink_msg_setup_signing_encode_chan(static_cast<uint8_t>(_mavlink->getSystemId()), static_cast<uint8_t>(_mavlink->getComponentId()), channel, &msg, &setup_signing);
+        sendMessageOnLinkThreadSafe(sharedLink.get(), msg);
+    }
+
+    {
+        QSettings settings;
+        settings.beginGroup("MAVLink");
+        settings.remove("MAVLink2SigningKey");
+        settings.endGroup();
+    }
+}
+
+QString Vehicle::signingStatus()
+{
+    QString result;
+
+    if (!_boardUid.isEmpty()) {
+        FWDLicenseManager* lm = _toolbox->licenseManager();
+        if (lm) {
+            const QByteArray perDroneKey = lm->lookup(_boardUid);
+            const quint64 ts = lm->loadTimestamp(_boardUid);
+            if (!perDroneKey.isEmpty()) {
+                result += QStringLiteral("Per-drone key (%1): %2...\n")
+                    .arg(_boardUid)
+                    .arg(QString::fromLatin1(perDroneKey.toHex().left(16)));
+                result += QStringLiteral("Stored timestamp: %1\n").arg(ts);
+            } else {
+                result += QStringLiteral("No per-drone key for %1.\n").arg(_boardUid);
+            }
+        }
+    }
+
+    QSettings settings;
+    settings.beginGroup("MAVLink");
+    const QString storedKey = settings.value("MAVLink2SigningKey").toString();
+    settings.endGroup();
+
+    if (!storedKey.isEmpty()) {
+        result += QStringLiteral("Fallback global key: %1...\n").arg(storedKey.left(16));
+    }
+
+    result += QStringLiteral("\nAll MAVLink channels:\n");
+    for (uint8_t i = 0; i < MAVLINK_COMM_NUM_BUFFERS; i++) {
+        const mavlink_channel_t channel = static_cast<mavlink_channel_t>(i);
+        const bool enabled = MAVLinkSigning::isSigningEnabled(channel);
+        result += QStringLiteral("  ch%1: %2\n")
+            .arg(static_cast<int>(i))
+            .arg(enabled ? QStringLiteral("ENABLED") : QStringLiteral("DISABLED"));
+    }
+
+    result += QStringLiteral("\nPer-link signing:\n");
+    for (const auto& linkInfo: _vehicleLinkManager->_rgLinkInfo) {
+        SharedLinkInterfacePtr sharedLink = linkInfo.link;
+        if (!sharedLink->isConnected()) {
+            continue;
+        }
+        const mavlink_channel_t channel = static_cast<mavlink_channel_t>(sharedLink->mavlinkChannel());
+        const bool enabled = MAVLinkSigning::isSigningEnabled(channel);
+        const bool enforcing = MAVLinkSigning::isEnforcementActive(channel);
+        const QString linkName = sharedLink->linkConfiguration() ? sharedLink->linkConfiguration()->name() : QStringLiteral("unknown");
+        result += QStringLiteral("  Link ch%1 (%2): signing %3, enforcement %4\n")
+            .arg(static_cast<int>(channel))
+            .arg(linkName, enabled ? QStringLiteral("ENABLED") : QStringLiteral("DISABLED"), enforcing ? QStringLiteral("ON") : QStringLiteral("OFF"));
+    }
+
+    if (result.isEmpty()) {
+        result = QStringLiteral("No active links");
+    }
+
+    return result;
+}
+
+void Vehicle::_checkLicense()
+{
+    if (_boardUid.isEmpty()) {
+        qCDebug(VehicleLog) << "_checkLicense: boardUid empty, deferring";
+        return;
+    }
+
+    FWDLicenseManager* lm = _toolbox->licenseManager();
+    if (!lm) return;
+
+    const QByteArray key = lm->lookup(_boardUid);
+    if (!key.isEmpty()) {
+        qDebug() << "License: found license for boardUid" << _boardUid << "— enabling signing";
+        enableSigningWithKey(QString::fromLatin1(key.toHex()));
+        return;
+    }
+
+    qDebug() << "License: NO license for boardUid" << _boardUid << "— disconnecting";
+    emit licenseRequired(_boardUid);
+    qgcApp()->toolbox()->multiVehicleManager()->ignoreVehicleId(_id);
+    vehicleLinkManager()->closeVehicle();
+}
+
+void Vehicle::activateAndConnectLicense(const QString& licenseString)
+{
+    FWDLicenseManager* lm = _toolbox->licenseManager();
+    if (!lm) return;
+
+    const QString licenseBoardUid = lm->boardUidFromLicense(licenseString);
+    if (licenseBoardUid.isEmpty()) {
+        qCWarning(VehicleLog) << "activateAndConnectLicense: could not decrypt license";
+        emit licenseError(tr("Invalid license key — decryption failed"));
+        return;
+    }
+
+    if (licenseBoardUid != _boardUid) {
+        qCWarning(VehicleLog) << "activateAndConnectLicense: license boardUid" << licenseBoardUid
+                              << "!= vehicle boardUid" << _boardUid;
+        emit licenseError(tr("License key does not match this drone (UID: %1)").arg(_boardUid));
+        return;
+    }
+
+    if (!lm->activate(licenseString)) {
+        qCWarning(VehicleLog) << "activateAndConnectLicense: activation failed for licenseString";
+        emit licenseError(tr("License activation failed"));
+        return;
+    }
+
+    const QByteArray key = lm->lookup(_boardUid);
+    if (!key.isEmpty()) {
+        enableSigningWithKey(QString::fromLatin1(key.toHex()));
+        qDebug() << "License: activated & signing enabled for boardUid" << _boardUid;
+        emit licenseActivated(_boardUid);
     }
 }
 

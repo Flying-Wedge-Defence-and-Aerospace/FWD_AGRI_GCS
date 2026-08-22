@@ -180,6 +180,14 @@ Rectangle {
 
         Item { Layout.fillHeight: true }
 
+        QGCLabel {
+            text:               qsTr("Version: ") + QGroundControl.qgcVersion
+            color:              qgcPal.text
+            opacity:            0.5
+            font.pointSize:     ScreenTools.smallFontPointSize
+            Layout.alignment:   Qt.AlignHCenter
+        }
+
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: profileLayout.height + ScreenTools.defaultFontPixelHeight / 2

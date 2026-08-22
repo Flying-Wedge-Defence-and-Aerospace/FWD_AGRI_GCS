@@ -46,7 +46,7 @@ Rectangle {
 
     function dropMessageIndicatorTool() {
         if (currentToolbar === flyViewToolbar) {
-            indicatorLoader.item.dropMessageIndicatorTool();
+            messageIndicatorLoader1.item.dropMessageIndicatorTool();
         }
     }
 
@@ -172,27 +172,27 @@ Rectangle {
             visible:                QGroundControl.multiVehicleManager.vehicles.count >= 2
         }
 
-        Rectangle {
-            Layout.preferredHeight: parent.height * 0.8
-            Layout.alignment: Qt.AlignVCenter
-            width: ScreenTools.isMobile ? ScreenTools.defaultFontPixelWidth * 0.1 : ScreenTools.defaultFontPixelWidth * 0.2
-        }
+        // Rectangle {
+        //     Layout.preferredHeight: parent.height * 0.8
+        //     Layout.alignment: Qt.AlignVCenter
+        //     width: ScreenTools.isMobile ? ScreenTools.defaultFontPixelWidth * 0.1 : ScreenTools.defaultFontPixelWidth * 0.2
+        // }
 
-        QGCColoredImage {
-            id:                     linkButton
-            Layout.fillHeight:      true
-            Layout.alignment:       Qt.AlignHCenter | Qt.AlignVCenter
-            Layout.preferredWidth:  ScreenTools.defaultFontPixelWidth * 4
-            source:                 "/res/con_icon"
-            color:                  "white"
-            fillMode:               Image.PreserveAspectFit
+        // QGCColoredImage {
+        //     id:                     linkButton
+        //     Layout.fillHeight:      true
+        //     Layout.alignment:       Qt.AlignHCenter | Qt.AlignVCenter
+        //     Layout.preferredWidth:  ScreenTools.defaultFontPixelWidth * 4
+        //     source:                 "/res/con_icon"
+        //     color:                  "white"
+        //     fillMode:               Image.PreserveAspectFit
 
-            QGCMouseArea {
-                id: linkButtonMouseArea
-                anchors.fill: parent
-                onClicked: mainWindow.showCommLinksSettings()
-            }
-        }
+        //     QGCMouseArea {
+        //         id: linkButtonMouseArea
+        //         anchors.fill: parent
+        //         onClicked: mainWindow.showCommLinksSettings()
+        //     }
+        // }
 
         Rectangle {
             Layout.preferredHeight: parent.height * 0.8

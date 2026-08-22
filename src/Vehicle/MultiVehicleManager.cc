@@ -19,6 +19,8 @@
 #include "QGCOptions.h"
 #include "LinkManager.h"
 
+#include <QDebug>
+
 #if defined (__ios__) || defined(__android__)
 #include "MobileScreenMgr.h"
 #endif
@@ -396,5 +398,13 @@ void MultiVehicleManager::_sendGCSHeartbeat(void)
             int len = mavlink_msg_to_send_buffer(buffer, &message);
             link->writeBytesThreadSafe((const char*)buffer, len);
         }
+    }
+}
+
+void MultiVehicleManager::ignoreVehicleId(int vehicleId)
+{
+    qDebug() << "MultiVehicleManager: ignoring sysid" << vehicleId;
+    if (!_ignoreVehicleIds.contains(vehicleId)) {
+        _ignoreVehicleIds.append(vehicleId);
     }
 }

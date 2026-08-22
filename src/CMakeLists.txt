@@ -136,6 +136,7 @@ add_subdirectory(Geo)
 add_subdirectory(Gimbal)
 add_subdirectory(GPS)
 add_subdirectory(Joystick)
+add_subdirectory(License)
 if (${QGC_GST_MICROHARD_ENABLED})
   add_subdirectory(Microhard)
 endif ()
@@ -180,6 +181,7 @@ target_link_libraries(qgc
 		Gimbal
 		gps
 		Joystick
+		License
 		MissionManager
 		PositionManager
 		QmlControls

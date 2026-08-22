@@ -38,6 +38,7 @@ class MicrohardManager;
 
 class QGCToolbox;
 class LinkManager;
+class FWDLicenseManager;
 
 class QGroundControlQmlGlobal : public QGCTool
 {
@@ -66,6 +67,7 @@ public:
     Q_PROPERTY(MAVLinkLogManager*   mavlinkLogManager       READ    mavlinkLogManager       CONSTANT)
     Q_PROPERTY(SettingsManager*     settingsManager         READ    settingsManager         CONSTANT)
     Q_PROPERTY(ADSBVehicleManager*  adsbVehicleManager      READ    adsbVehicleManager      CONSTANT)
+    Q_PROPERTY(FWDLicenseManager*   licenseManager          READ    licenseManager          CONSTANT)
     Q_PROPERTY(QGCCorePlugin*       corePlugin              READ    corePlugin              CONSTANT)
     Q_PROPERTY(MissionCommandTree*  missionCommandTree      READ    missionCommandTree      CONSTANT)
     Q_PROPERTY(FactGroup*           gpsRtk                  READ    gpsRtkFactGroup         CONSTANT)
@@ -131,6 +133,8 @@ public:
     Q_INVOKABLE void    startAPMArduSubMockLink     (bool sendStatusText);
     Q_INVOKABLE void    startAPMArduRoverMockLink   (bool sendStatusText);
     Q_INVOKABLE void    stopOneMockLink             (void);
+    Q_INVOKABLE void    startMavlinkConnections     (void);
+    Q_INVOKABLE void    sendSetupSigningToAutopilot (const QString& keyHex);
 
     /// Returns the list of available logging category names.
     Q_INVOKABLE QStringList loggingCategories(void) const { return QGCLoggingCategoryRegister::instance()->registeredCategories(); }
@@ -163,6 +167,7 @@ public:
     SettingsManager*        settingsManager     ()  { return _settingsManager; }
     FactGroup*              gpsRtkFactGroup     ()  { return _gpsRtkFactGroup; }
     ADSBVehicleManager*     adsbVehicleManager  ()  { return _adsbVehicleManager; }
+    FWDLicenseManager*      licenseManager      ()  { return _toolbox->licenseManager(); }
     QmlUnitsConversion*     unitsConversion     ()  { return &_unitsConversion; }
 #if defined(QGC_ENABLE_PAIRING)
     bool                    supportsPairing     ()  { return true; }

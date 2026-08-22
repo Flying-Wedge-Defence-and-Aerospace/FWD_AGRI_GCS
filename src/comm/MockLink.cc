@@ -11,6 +11,7 @@
 #include "QGCLoggingCategory.h"
 #include "QGCApplication.h"
 #include "LinkManager.h"
+#include "MAVLinkSigning.h"
 
 #ifdef UNITTEST_BUILD
 #include "UnitTest.h"
@@ -18,6 +19,7 @@
 
 #include <QDebug>
 #include <QFile>
+#include <QSettings>
 #include <QMutexLocker>
 #include <QTimer>
 
@@ -161,6 +163,21 @@ bool MockLink::_allocateMavlinkChannel()
         return false;
     }
     qCDebug(MockLinkLog) << "_allocateMavlinkChannel" << _mavlinkAuxChannel;
+
+    QSettings settings;
+    settings.beginGroup("MAVLink");
+    const QString signingKeyHex = settings.value("MAVLink2SigningKey").toString();
+    settings.endGroup();
+    if (!signingKeyHex.isEmpty()) {
+        const QByteArray key = QByteArray::fromHex(signingKeyHex.toLatin1());
+        if (key.size() == 32) {
+            MAVLinkSigning::initSigning(static_cast<mavlink_channel_t>(_mavlinkAuxChannel), key);
+            qCDebug(MockLinkLog) << "MAVLink signing initialized on aux channel" << _mavlinkAuxChannel;
+        } else {
+            qCWarning(MockLinkLog) << "Invalid MAVLink signing key length" << key.size() << "expected 32 bytes";
+        }
+    }
+
     return true;
 }
 

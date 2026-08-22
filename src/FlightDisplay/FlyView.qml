@@ -338,6 +338,64 @@ Item {
        anchors.topMargin: 75
     }
 
+    Rectangle {
+        id: signingIndicator
+        width: 25
+        height: 25
+        radius: 12
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: _toolsMargin
+        //anchors.centerIn: parent
+        visible: _activeVehicle
+        color: {
+            if (!_activeVehicle) return "grey"
+            var status = _activeVehicle.signingStatus()
+            if (status.indexOf("ENABLED") !== -1 && status.indexOf("ON") !== -1) return "green"
+            if (status.indexOf("key") !== -1 && status.indexOf("No key") === -1) return "orange"
+            return "grey"
+        }
+        border.color: "white"
+        border.width: 1
+
+        QGCLabel {
+            id: signingIndicatorTooltip
+            anchors.centerIn: parent
+            text: ""
+            font.pointSize: 8
+            color: "white"
+            visible: parent.containsMouse
+        }
+
+        Timer {
+            id: signingRefreshTimer
+            interval: 3000
+            running: _activeVehicle !== undefined
+            repeat: true
+            onTriggered: {
+                // Force property re-evaluation by reassigning
+                signingIndicator.color = signingIndicator.color
+            }
+        }
+
+        MouseArea {
+            id: signingIndicatorMouseArea
+            anchors.fill: parent
+            hoverEnabled: true
+            onEntered: {
+                if (_activeVehicle) {
+                    signingIndicatorTooltip.text = _activeVehicle.signingStatus().substring(0, 100)
+                }
+            }
+            onExited: {
+                signingIndicatorTooltip.text = ""
+            }
+            onClicked: {
+                mainWindow.showTool(qsTr("License Keys"), "LicensePage.qml", "/res/FWD_only_logo")
+            }
+        }
+    }
+
     TelemetryValuesBar {
         id: telemetryPanel
         anchors.bottom: parent.bottom

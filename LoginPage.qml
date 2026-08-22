@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import QtGraphicalEffects 1.15
+import QtQuick.LocalStorage 2.0
 
 import QGroundControl                       1.0
 import QGroundControl.ScreenTools 1.0
@@ -11,6 +12,28 @@ Rectangle {
     property int currentPage: 0
     signal loginSuccess()
     signal registerSuccess()
+
+    function _checkLicense(enteredLicense) {
+        var db = LocalStorage.openDatabaseSync("FWDGCS_LicenseDB", "1.0", "License Database", 100000)
+        db.transaction(function(tx) {
+            tx.executeSql('CREATE TABLE IF NOT EXISTS license(key TEXT PRIMARY KEY, value TEXT)')
+        })
+        var stored = ""
+        db.transaction(function(tx) {
+            var rs = tx.executeSql('SELECT value FROM license WHERE key = "license_key"')
+            if (rs.rows.length > 0) {
+                stored = rs.rows.item(0).value
+            }
+        })
+        if (stored === "") {
+            db.transaction(function(tx) {
+                tx.executeSql('INSERT INTO license(key, value) VALUES("license_key", ?)', [enteredLicense])
+            })
+            console.log("License saved for first time:", enteredLicense)
+            return true
+        }
+        return stored === enteredLicense
+    }
 
 
     anchors.fill: parent
@@ -133,14 +156,14 @@ Rectangle {
                 Layout.alignment: Qt.AlignHCenter
             }
 
-            TextField {
-                id: usernameField
-                placeholderText: "👤 Username"
-                Layout.fillWidth: true
-                font.pixelSize: 16
-                background: Rectangle { color: "#ecf0f1"; radius: 8 }
-                padding: 10
-            }
+            // TextField {
+            //     id: usernameField
+            //     placeholderText: "👤 Username"
+            //     Layout.fillWidth: true
+            //     font.pixelSize: 16
+            //     background: Rectangle { color: "#ecf0f1"; radius: 8 }
+            //     padding: 10
+            // }
 
             TextField {
                 id: emailField
@@ -189,6 +212,44 @@ Rectangle {
                 }
             }
 
+            // Rectangle {
+            //     Layout.fillWidth: true
+            //     height: emailField.height
+            //     color: "#ecf0f1"
+            //     radius: 8
+
+            //     TextField {
+            //         id: licenseField
+            //         anchors.fill: parent
+            //         anchors.rightMargin: 40
+            //         placeholderText: "🔑 License"
+            //         echoMode: TextInput.Password
+            //         font.pixelSize: 16
+            //         background: null
+            //         padding: 10
+            //     }
+
+            //     Image {
+            //         id: eyeIcon_license
+            //         source: licenseField.echoMode === TextInput.Password ? "/res/eye.png" : "/res/eye_off.png"
+            //         width: 24
+            //         height: 24
+            //         anchors.right: parent.right
+            //         anchors.verticalCenter: parent.verticalCenter
+            //         anchors.margins: 8
+            //         fillMode: Image.PreserveAspectFit
+            //         MouseArea {
+            //             anchors.fill: parent
+            //             onClicked: {
+            //                 licenseField.echoMode =
+            //                     licenseField.echoMode === TextInput.Password ? TextInput.Normal : TextInput.Password
+            //                 eyeIcon_license.source =
+            //                     licenseField.echoMode === TextInput.Password ? "/res/eye.png" : "/res/eye_off.png"
+            //             }
+            //         }
+            //     }
+            // }
+
             Button {
                 id: loginButton
                 text: "Log In"
@@ -208,58 +269,18 @@ Rectangle {
                 }
 
                 onClicked: {
-
-                    // var xhr = new XMLHttpRequest()
-                    // // xhr.open("POST", "http://192.168.1.33:8000/login")
-                    // xhr.open("POST", "https://140c7f5227dd.ngrok-free.app/login")
-                    // xhr.setRequestHeader("Content-Type", "application/json")
-                    // xhr.onreadystatechange = function() {
-                    //     if (xhr.readyState === XMLHttpRequest.DONE) {
-                    //         console.log("Login Response:", xhr.responseText)
-
-                    //         if (xhr.status === 200) {
-                    //             try {
-                    //                 var response = JSON.parse(xhr.responseText)
-                    //                 if (response.access_token) {
-                    //                     loginSuccess()
-                    //                     console.log("Login successful. Token:", response.access_token)
-                    //                 } else {
-                    //                     console.log("Login failed:", xhr.responseText)
-                    //                     errorDialog.open()
-                    //                 }
-                    //             } catch (e) {
-                    //                 console.log("Failed to parse JSON response")
-                    //             }
-                    //         } else {
-                    //             console.log("HTTP error: " + xhr.status)
-                    //             try {
-                    //                 var errResponse = JSON.parse(xhr.responseText)
-                    //                 console.log("Error message:", errResponse.detail || "Unknown error")
-                    //             } catch (e) {
-                    //                 console.log("Could not parse error message")
-                    //             }
-                    //             errorDialog.open()
-                    //         }
-                    //     }
+                    // if (licenseField.text === "") {
+                    //     licenseErrorText.text = "License field cannot be empty"
+                    //     licenseErrorDialog.open()
+                    //     return
                     // }
 
-                    // var payload = {
-                    //     username: usernameField.text,
-                    //     email: emailField.text,
-                    //     password: passwordField.text
-                    // }
-
-                    // xhr.send(JSON.stringify(payload))
-
-                    if(usernameField.text === "" && passwordField.text === "")
-                    {
-                        mainWindow.loggedInUser = usernameField.text
+                    // if (_checkLicense(licenseField.text)) {
                         loginSuccess()
-                    }
-                    else
-                    {
-                        errorDialog.open()
-                    }
+                    // } else {
+                    //     licenseErrorText.text = "Invalid license key"
+                    //     licenseErrorDialog.open()
+                    // }
                 }
             }
 
@@ -458,6 +479,20 @@ Rectangle {
                     onClicked: currentPage = 0
                 }
             }
+        }
+    }
+
+    Dialog {
+        id: licenseErrorDialog
+        title: "License Error"
+        standardButtons: Dialog.Ok
+        anchors.centerIn: parent
+        modal: true
+
+        Label {
+            id: licenseErrorText
+            color: "#cc0000"
+            font.pixelSize: 14
         }
     }
 }

@@ -26,6 +26,8 @@ add_library(comm
 	MavlinkMessagesTimer.h
 	MAVLinkProtocol.cc
 	MAVLinkProtocol.h
+	MAVLinkSigning.cc
+	MAVLinkSigning.h
 	QGCMAVLink.cc
 	QGCMAVLink.h
 	QGCSerialPortInfo.cc

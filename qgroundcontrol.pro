@@ -227,6 +227,24 @@ contains (DEFINES, QGC_DISABLE_UVC) {
 
 LinuxBuild {
     CONFIG += link_pkgconfig
+    PKGCONFIG += openssl
+    LIBS += -lssl -lcrypto
+}
+
+AndroidBuild {
+    INCLUDEPATH += $$SOURCE_DIR/libs/OpenSSL/android_openssl/static/include
+    equals(ANDROID_TARGET_ARCH, armeabi-v7a) {
+        LIBS += -L$$SOURCE_DIR/libs/OpenSSL/android_openssl/static/lib/arm -lcrypto -lssl
+    }
+    equals(ANDROID_TARGET_ARCH, arm64-v8a) {
+        LIBS += -L$$SOURCE_DIR/libs/OpenSSL/android_openssl/static/lib/arm64 -lcrypto -lssl
+    }
+    equals(ANDROID_TARGET_ARCH, x86) {
+        LIBS += -L$$SOURCE_DIR/libs/OpenSSL/android_openssl/static/lib/x86 -lcrypto -lssl
+    }
+    equals(ANDROID_TARGET_ARCH, x86_64) {
+        LIBS += -L$$SOURCE_DIR/libs/OpenSSL/android_openssl/static/lib/x86_64 -lcrypto -lssl
+    }
 }
 
 # Qt configuration
@@ -417,6 +435,7 @@ INCLUDEPATH += \
     src/Vehicle \
     src/Audio \
     src/comm \
+    src/License \
     src/input \
     src/lib/qmapcontrol \
     src/uas \
@@ -466,6 +485,20 @@ contains (DEFINES, QGC_ENABLE_PAIRING) {
     SOURCES += \
         src/PairingManager/aes.cpp
 }
+
+#
+# FWD Auto-Update Manager
+#
+
+HEADERS += \
+    src/FWDUpdateManager/FWDUpdateConfig.h \
+    src/FWDUpdateManager/FWDUpdateManager.h
+
+SOURCES += \
+    src/FWDUpdateManager/FWDUpdateManager.cc
+
+DISTFILES += \
+    src/FWDUpdateManager/FWDUpdateDialog.qml
 
 #
 # Unit Test specific configuration goes here (requires full debug build with all plugins)
@@ -764,6 +797,10 @@ HEADERS += \
     src/comm/LinkManager.h \
     src/comm/LogReplayLink.h \
     src/comm/MAVLinkProtocol.h \
+    src/comm/MAVLinkSigning.h \
+    src/License/FWDLicenseManager.h \
+    src/License/FWDCertVerifier.h \
+    src/License/LicenseMasterKeys.h \
     src/comm/QGCMAVLink.h \
     src/comm/TCPLink.h \
     src/comm/UDPLink.h \
@@ -1025,6 +1062,9 @@ SOURCES += \
     src/comm/LinkManager.cc \
     src/comm/LogReplayLink.cc \
     src/comm/MAVLinkProtocol.cc \
+    src/comm/MAVLinkSigning.cc \
+    src/License/FWDLicenseManager.cc \
+    src/License/FWDCertVerifier.cc \
     src/comm/QGCMAVLink.cc \
     src/comm/TCPLink.cc \
     src/comm/UDPLink.cc \
