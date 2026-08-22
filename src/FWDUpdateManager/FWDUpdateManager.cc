@@ -311,28 +311,61 @@ void FWDUpdateManager::installUpdate()
     QApplication::quit();
 
 #elif defined(Q_OS_ANDROID)
-    // Open APK with system installer
-    QAndroidJniObject intent("android/content/Intent", "(Ljava/lang/String;)V",
-        QAndroidJniObject::getStaticObjectField("android/content/Intent", "ACTION_VIEW",
-            "Ljava/lang/String;"));
-    QAndroidJniObject fileUri = QAndroidJniObject::callStaticObjectMethod(
-        "android/net/Uri", "parse",
-        "(Ljava/lang/String;)Landroid/net/Uri;",
-        QAndroidJniObject::fromString("file://" + _downloadedFilePath).object());
-    intent.callObjectMethod("setDataAndType",
-        "(Landroid/net/Uri;Ljava/lang/String;)Landroid/content/Intent;",
-        fileUri.object(),
-        QAndroidJniObject::fromString("application/vnd.android.package-archive").object());
-    intent.callObjectMethod("addFlags",
-        "(I)Landroid/content/Intent;",
-        0x00000001); // FLAG_GRANT_READ_URI_PERMISSION
+    // Copy APK to app cache dir (accessible via FileProvider)
+    QString cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    QString destApk = cacheDir + "/FWDUpdate.apk";
+    QFile::remove(destApk);
+
+    if (!QFile::copy(_downloadedFilePath, destApk)) {
+        QMessageBox::critical(nullptr, tr("Update Failed"),
+            tr("Failed to copy APK to app cache:\n%1").arg(destApk));
+        return;
+    }
+
+    // Get context and FileProvider
     QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod(
         "org/qtproject/qt5/android/bindings/QtActivity",
         "activity",
         "()Landroid/app/Activity;");
+
+    QAndroidJniObject packageName = activity.callObjectMethod("getPackageName", "()Ljava/lang/String;");
+    QAndroidJniObject authority = QAndroidJniObject::fromString(
+        "com.fwd.agri.gcs.fileprovider");
+    QAndroidJniObject filePath = QAndroidJniObject::fromString(destApk);
+    QAndroidJniObject javaFile("java/io/File", "(Ljava/lang/String;)V", filePath.object());
+
+    // Get content:// URI from FileProvider
+    QAndroidJniObject contentUri = QAndroidJniObject::callStaticObjectMethod(
+        "android/support/v4/content/FileProvider",
+        "getUriForFile",
+        "(Landroid/content/Context;Ljava/lang/String;Ljava/io/File;)Landroid/net/Uri;",
+        activity.object(),
+        authority.object(),
+        javaFile.object());
+
+    if (!contentUri.isValid()) {
+        QMessageBox::critical(nullptr, tr("Update Failed"),
+            tr("Failed to get content URI from FileProvider"));
+        return;
+    }
+
+    // Create install intent
+    QAndroidJniObject intent("android/content/Intent", "(Ljava/lang/String;)V",
+        QAndroidJniObject::getStaticObjectField("android/content/Intent", "ACTION_VIEW",
+            "Ljava/lang/String;"));
+    intent.callObjectMethod("setDataAndType",
+        "(Landroid/net/Uri;Ljava/lang/String;)Landroid/content/Intent;",
+        contentUri.object(),
+        QAndroidJniObject::fromString("application/vnd.android.package-archive").object());
+    intent.callObjectMethod("addFlags",
+        "(I)Landroid/content/Intent;",
+        0x00000003); // FLAG_GRANT_READ_URI_PERMISSION | FLAG_ACTIVITY_NEW_TASK
+
     activity.callObjectMethod("startActivity",
         "(Landroid/content/Intent;)V",
         intent.object());
+
+    QApplication::quit();
 
 #elif defined(Q_OS_IOS)
     // iOS cannot install directly - open App Store or web page

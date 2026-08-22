@@ -209,22 +209,58 @@ echo -e "${YELLOW}Uploading AppImage to GitHub Release...${NC}"
 # Get upload URL from release
 UPLOAD_URL=$(echo "$RELEASE_BODY" | python3 -c "import sys,json; print(json.load(sys.stdin)['upload_url'].replace('{?name,label}',''))" 2>/dev/null)
 
-FILE_SIZE=$(stat -c%s "$OUTPUT_DIR/$APPIMAGE_NAME")
-UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" \
-    -X POST \
-    -H "Authorization: token $PAT_TOKEN" \
-    -H "Content-Type: application/octet-stream" \
-    -H "Content-Length: $FILE_SIZE" \
-    "$UPLOAD_URL?name=$APPIMAGE_NAME" \
-    --data-binary @"$OUTPUT_DIR/$APPIMAGE_NAME")
+upload_asset() {
+    local FILE_PATH="$1"
+    local ASSET_NAME="$2"
+    local FILE_SIZE
+    local UPLOAD_RESPONSE
+    local UPLOAD_HTTP_CODE
 
-UPLOAD_HTTP_CODE=$(echo "$UPLOAD_RESPONSE" | tail -1)
+    FILE_SIZE=$(stat -c%s "$FILE_PATH")
+    UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" \
+        -X POST \
+        -H "Authorization: token $PAT_TOKEN" \
+        -H "Content-Type: application/octet-stream" \
+        -H "Content-Length: $FILE_SIZE" \
+        "$UPLOAD_URL?name=$ASSET_NAME" \
+        --data-binary @"$FILE_PATH")
 
-if [ "$UPLOAD_HTTP_CODE" != "201" ]; then
-    echo -e "${RED}Error: Failed to upload AppImage (HTTP $UPLOAD_HTTP_CODE)${NC}"
-    echo -e "${YELLOW}Release was created but upload failed. Upload manually from GitHub.${NC}"
+    UPLOAD_HTTP_CODE=$(echo "$UPLOAD_RESPONSE" | tail -1)
+
+    if [ "$UPLOAD_HTTP_CODE" != "201" ]; then
+        echo -e "${RED}Error: Failed to upload $ASSET_NAME (HTTP $UPLOAD_HTTP_CODE)${NC}"
+        return 1
+    else
+        echo -e "${GREEN}$ASSET_NAME uploaded successfully${NC}"
+        return 0
+    fi
+}
+
+upload_asset "$OUTPUT_DIR/$APPIMAGE_NAME" "$APPIMAGE_NAME"
+
+# Upload APK if it exists
+APK_NAME="FWDAgriGCS-${NEW_VERSION}.apk"
+# Check common Android build output locations
+APK_SOURCE=""
+for CANDIDATE in \
+    "$REPO_DIR/build-android/release/outputs/apk/release/release.apk" \
+    "$REPO_DIR/build-android/FWDAgriGCS.apk" \
+    "$REPO_DIR/build-android/output/FWDAgriGCS.apk" \
+    "$OUTPUT_DIR/$APK_NAME"; do
+    if [ -f "$CANDIDATE" ]; then
+        APK_SOURCE="$CANDIDATE"
+        break
+    fi
+done
+
+if [ -n "$APK_SOURCE" ]; then
+    echo -e "${YELLOW}Uploading APK to GitHub Release...${NC}"
+    cp "$APK_SOURCE" "$OUTPUT_DIR/$APK_NAME"
+    upload_asset "$OUTPUT_DIR/$APK_NAME" "$APK_NAME"
 else
-    echo -e "${GREEN}AppImage uploaded successfully${NC}"
+    echo -e "${YELLOW}No APK found. Skipping APK upload.${NC}"
+    echo -e "${YELLOW}To include APK, build with Android kit first, then place it at:${NC}"
+    echo -e "  $REPO_DIR/build-android/release/outputs/apk/release/release.apk"
 fi
 
 echo ""
@@ -233,6 +269,7 @@ echo -e "${GREEN}  Release $NEW_VERSION complete!${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
 echo -e "  AppImage: $OUTPUT_DIR/$APPIMAGE_NAME"
+echo -e "  APK:      ${APK_SOURCE:-Not built}"
 echo -e "  GitHub:   https://github.com/$GITHUB_OWNER/$GITHUB_REPO/releases/tag/$NEW_VERSION"
 echo ""
 echo -e "  Users running older versions will auto-update."
