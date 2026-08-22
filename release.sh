@@ -18,12 +18,13 @@ NC='\033[0m'
 
 # ---- Usage ----
 usage() {
-    echo "Usage: $0 <patch|minor|major>"
+    echo "Usage: $0 <patch|minor|major|vX.Y.Z>"
     echo ""
     echo "Examples:"
     echo "  $0 patch    # v1.0.2 -> v1.0.3"
     echo "  $0 minor    # v1.0.2 -> v1.1.0"
     echo "  $0 major    # v1.0.2 -> v2.0.0"
+    echo "  $0 v1.0.3   # set exact version (recreate release if deleted)"
     exit 1
 }
 
@@ -33,14 +34,9 @@ if [ $# -ne 1 ]; then
 fi
 
 BUMP_TYPE=$1
-if [[ "$BUMP_TYPE" != "patch" && "$BUMP_TYPE" != "minor" && "$BUMP_TYPE" != "major" ]]; then
-    echo -e "${RED}Error: Invalid bump type '$BUMP_TYPE'${NC}"
-    usage
-fi
-
-cd "$REPO_DIR"
 
 # ---- Check for uncommitted changes ----
+cd "$REPO_DIR"
 if ! git diff --quiet HEAD 2>/dev/null; then
     echo -e "${RED}Error: You have uncommitted changes. Commit or stash them first.${NC}"
     exit 1
@@ -49,32 +45,61 @@ fi
 # ---- Get current version from last git tag ----
 CURRENT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
 if [ -z "$CURRENT_TAG" ]; then
-    # No tags yet, read from QGCCommon.pri
     CURRENT_TAG=$(grep 'APP_VERSION_STR' "$PRI_FILE" | head -1 | sed 's/.*"\(.*\)".*/\1/')
 fi
-
 if [ -z "$CURRENT_TAG" ]; then
     CURRENT_TAG="v0.0.0"
 fi
 
 echo -e "${YELLOW}Current version: $CURRENT_TAG${NC}"
 
-# ---- Parse version ----
-VERSION=${CURRENT_TAG#v}
-IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
-MAJOR=${MAJOR:-0}
-MINOR=${MINOR:-0}
-PATCH=${PATCH:-0}
+# ---- Determine new version ----
+if [[ "$BUMP_TYPE" == v* ]]; then
+    # Exact version provided (e.g., v1.0.3)
+    if [[ ! "$BUMP_TYPE" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        echo -e "${RED}Error: Invalid version format '$BUMP_TYPE' (expected v1.2.3)${NC}"
+        exit 1
+    fi
+    NEW_VERSION="$BUMP_TYPE"
+else
+    # Auto-bump
+    if [[ "$BUMP_TYPE" != "patch" && "$BUMP_TYPE" != "minor" && "$BUMP_TYPE" != "major" ]]; then
+        echo -e "${RED}Error: Invalid argument '$BUMP_TYPE'${NC}"
+        usage
+    fi
+    VERSION=${CURRENT_TAG#v}
+    IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+    MAJOR=${MAJOR:-0}; MINOR=${MINOR:-0}; PATCH=${PATCH:-0}
+    case "$BUMP_TYPE" in
+        major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+        minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+        patch) PATCH=$((PATCH + 1)) ;;
+    esac
+    NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+fi
 
-# ---- Bump version ----
-case "$BUMP_TYPE" in
-    major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
-    minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
-    patch) PATCH=$((PATCH + 1)) ;;
-esac
-
-NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
 echo -e "${GREEN}New version: $NEW_VERSION${NC}"
+
+# ---- Check if GitHub release already exists ----
+PAT_TOKEN=$(grep 'FWD_UPDATE_GITHUB_TOKEN' "$REPO_DIR/src/FWDUpdateManager/FWDUpdateConfig.h" | sed 's/.*"\(.*\)".*/\1/')
+if [ -z "$PAT_TOKEN" ]; then
+    echo -e "${RED}Error: Could not read GitHub token from FWDUpdateConfig.h${NC}"
+    exit 1
+fi
+
+EXISTING_RELEASE=$(curl -s -H "Authorization: token $PAT_TOKEN" -H "Accept: application/vnd.github.v3+json" \
+    "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/releases/tags/$NEW_VERSION" 2>/dev/null)
+EXISTING_HTTP=$(echo "$EXISTING_RELEASE" | python3 -c "import sys,json; d=json.load(sys.stdin); print('ok')" 2>/dev/null || echo "notfound")
+
+if [ "$EXISTING_HTTP" != "notfound" ]; then
+    echo -e "${YELLOW}GitHub release $NEW_VERSION already exists. Deleting and recreating...${NC}"
+    RELEASE_ID=$(echo "$EXISTING_RELEASE" | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])" 2>/dev/null)
+    if [ -n "$RELEASE_ID" ]; then
+        curl -s -X DELETE -H "Authorization: token $PAT_TOKEN" \
+            "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/releases/$RELEASE_ID" > /dev/null
+        echo -e "${GREEN}Deleted old release.${NC}"
+    fi
+fi
 
 # ---- Update QGCCommon.pri ----
 echo "Updating version in QGCCommon.pri..."
@@ -132,20 +157,18 @@ echo -e "${GREEN}AppImage: $OUTPUT_DIR/$APPIMAGE_NAME${NC}"
 echo -e "${YELLOW}Creating git commit and tag $NEW_VERSION...${NC}"
 cd "$REPO_DIR"
 git add QGCCommon.pri
-git commit -m "Release $NEW_VERSION"
-git tag -a "$NEW_VERSION" -m "Version ${MAJOR}.${MINOR}.${PATCH}"
+git commit -m "Release $NEW_VERSION" --allow-empty
+
+# Create tag only if it doesn't exist
+if ! git rev-parse "$NEW_VERSION" >/dev/null 2>&1; then
+    git tag -a "$NEW_VERSION" -m "Version ${NEW_VERSION#v}"
+else
+    echo -e "${YELLOW}Tag $NEW_VERSION already exists, skipping tag creation.${NC}"
+fi
 git push origin "$BRANCH" --tags
 
 # ---- Create GitHub Release + upload AppImage ----
 echo -e "${YELLOW}Creating GitHub Release...${NC}"
-
-# Read PAT token from FWDUpdateConfig.h
-PAT_TOKEN=$(grep 'FWD_UPDATE_GITHUB_TOKEN' "$REPO_DIR/src/FWDUpdateManager/FWDUpdateConfig.h" | sed 's/.*"\(.*\)".*/\1/')
-
-if [ -z "$PAT_TOKEN" ]; then
-    echo -e "${RED}Error: Could not read GitHub token from FWDUpdateConfig.h${NC}"
-    exit 1
-fi
 
 # Create release
 RELEASE_RESPONSE=$(curl -s -w "\n%{http_code}" \
