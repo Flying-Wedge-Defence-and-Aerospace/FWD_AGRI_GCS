@@ -11,7 +11,7 @@ BRANCH="Stable_V2"
 PRI_FILE="$REPO_DIR/QGCCommon.pri"
 GITHUB_OWNER="Flying-Wedge-Defence-AI"
 GITHUB_REPO="FWDAgriGCS"
-PYTHON=$(command -v python3 2>/dev/null || command -v $PYTHON 2>/dev/null || echo "$PYTHON")
+PYTHON=$(command -v python3 2>/dev/null || echo "/usr/bin/python3")
 
 # ---- Colors ----
 RED='\033[0;31m'
