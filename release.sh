@@ -233,13 +233,16 @@ with open('$ANDROID_BUILD_DIR/android-FWD_AGRI_GCS-deployment-settings.json', 'w
         --input "$ANDROID_BUILD_DIR/android-FWD_AGRI_GCS-deployment-settings.json" \
         --output "$ANDROID_BUILD_DIR/android-build" \
         --apk "$ANDROID_BUILD_DIR/android-build/FWD_AGRI_GCS.apk" \
-        --android-platform android-29
+        --android-platform android-29 \
+        --release
 
     APK_OUTPUT=""
     for CANDIDATE in \
         "$ANDROID_BUILD_DIR/android-build/build/outputs/apk/release/android-build-release-signed.apk" \
+        "$ANDROID_BUILD_DIR/android-build/build/outputs/apk/release/android-build-release-unsigned.apk" \
         "$ANDROID_BUILD_DIR/android-build/build/outputs/apk/release/FWD_AGRI_GCS_V2.apk" \
-        "$ANDROID_BUILD_DIR/android-build/build/outputs/apk/release/android-build-release-unsigned.apk"; do
+        "$ANDROID_BUILD_DIR/android-build/build/outputs/apk/debug/android-build-debug.apk" \
+        "$OUTPUT_DIR/$APK_NAME"; do
         if [ -f "$CANDIDATE" ]; then
             APK_OUTPUT="$CANDIDATE"
             break
