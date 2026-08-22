@@ -226,7 +226,14 @@ with open('$ANDROID_BUILD_DIR/android-FWD_AGRI_GCS-deployment-settings.json', 'w
 "
 
     make -j$(nproc)
-    make apk
+
+    # Run install + androiddeployqt directly with correct platform (make apk defaults to android-35 which is incompatible)
+    make -f "$ANDROID_BUILD_DIR/Makefile" INSTALL_ROOT="$ANDROID_BUILD_DIR/android-build" install
+    "$ANDROID_QT_DIR/bin/androiddeployqt" \
+        --input "$ANDROID_BUILD_DIR/android-FWD_AGRI_GCS-deployment-settings.json" \
+        --output "$ANDROID_BUILD_DIR/android-build" \
+        --apk "$ANDROID_BUILD_DIR/android-build/FWD_AGRI_GCS.apk" \
+        --android-platform android-29
 
     APK_OUTPUT=""
     for CANDIDATE in \
