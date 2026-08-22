@@ -223,7 +223,7 @@ import re, sys
 new_version = '$NEW_VERSION'
 m = re.match(r'v?(\d+)\.(\d+)\.(\d+)', new_version)
 major, minor, patch = int(m.group(1)), int(m.group(2)), int(m.group(3))
-version_code = 66 * 100000000 + major * 10000000 + minor * 1000000 + patch * 10000 + 0
+version_code = 66 * 10000000 + major * 1000000 + minor * 100000 + patch * 1000 + 0
 with open('$ANDROID_MANIFEST_SRC', 'r') as f:
     content = f.read()
 content = re.sub(r'android:versionName=\"[^\"]*\"', f'android:versionName=\"$NEW_VERSION\"', content)
