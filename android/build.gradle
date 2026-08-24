@@ -18,7 +18,7 @@ apply plugin: 'com.android.application'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
-    compileOnly fileTree(dir: '/home/fwd/Qt/5.15.2/android/jar', include: ['QtAndroid.jar'])
+    compileOnly fileTree(dir: qt5AndroidDir + '/jar', include: ['QtAndroid.jar'])
     implementation 'androidx.core:core:1.6.0'
 }
 android {
@@ -42,7 +42,7 @@ android {
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
-            java.srcDirs = ['/home/fwd/Qt/5.15.2/android/src', 'src', 'java']
+            java.srcDirs = [qt5AndroidDir + '/src', 'src', 'java']
             java.excludes = ['android/java/src/org/qtproject/qt5/android/QtActivityDelegate.java',
                  'android/java/src/org/qtproject/qt5/android/QtNative.java',
                  'android/java/src/org/qtproject/qt5/android/QtLayout.java',
