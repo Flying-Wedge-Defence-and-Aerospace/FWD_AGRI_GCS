@@ -127,6 +127,7 @@ jobs:
           host: linux
           target: android
           arch: 'android'
+          modules: 'qtcharts'
 
       - name: Setup Java
         uses: actions/setup-java@v4
