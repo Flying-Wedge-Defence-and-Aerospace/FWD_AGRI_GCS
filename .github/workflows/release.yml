@@ -88,6 +88,13 @@ jobs:
           cp FWD_AGRI_GCS AppDir/
           cp -L /lib/x86_64-linux-gnu/libcrypto.so.1.1 AppDir/Qt/libs/ 2>/dev/null || true
           cp -L /lib/x86_64-linux-gnu/libssl.so.1.1 AppDir/Qt/libs/ 2>/dev/null || true
+          cp resources/icons/qgroundcontrol.png AppDir/fwdagrigcs.png 2>/dev/null || touch AppDir/fwdagrigcs.png
+          echo "[Desktop Entry]" > AppDir/fwdagrigcs.desktop
+          echo "Type=Application" >> AppDir/fwdagrigcs.desktop
+          echo "Name=FWD AGRI GCS" >> AppDir/fwdagrigcs.desktop
+          echo "Exec=FWD_AGRI_GCS" >> AppDir/fwdagrigcs.desktop
+          echo "Icon=fwdagrigcs" >> AppDir/fwdagrigcs.desktop
+          echo "Categories=Utility;" >> AppDir/fwdagrigcs.desktop
 
       - name: Download appimagetool
         run: |
