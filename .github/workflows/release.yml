@@ -26,7 +26,6 @@ jobs:
           host: linux
           target: desktop
           arch: ${{ env.QT_ARCH }}
-          modules: 'qtsvg'
 
       - name: Install dependencies
         run: |
@@ -117,7 +116,6 @@ jobs:
           host: linux
           target: android
           arch: 'android_arm64_v8a'
-          modules: 'qtsvg'
 
       - name: Setup Java
         uses: actions/setup-java@v4
