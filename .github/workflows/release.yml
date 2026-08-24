@@ -86,12 +86,19 @@ jobs:
           cd build/Desktop_Qt_5_15_2_GCC_64bit-Release/staging
           mkdir -p AppDir
           cp -rL Qt AppDir/
-          cp -L AppRun AppDir/
           cp -L FWD_AGRI_GCS AppDir/
           cp -L qgroundcontrol.desktop AppDir/
           cp -L qgroundcontrol.png AppDir/
           cp -L qgroundcontrol-start.sh AppDir/
           cp -L qt.conf AppDir/
+          cat > AppDir/AppRun << 'APPRUN'
+          #!/bin/bash
+          HERE="$(dirname "$(readlink -f "$0")")"
+          export LD_LIBRARY_PATH="$HERE/Qt/libs:$LD_LIBRARY_PATH"
+          export QT_PLUGIN_PATH="$HERE/Qt/plugins"
+          export QML2_IMPORT_PATH="$HERE/Qt/qml"
+          exec "$HERE/FWD_AGRI_GCS" "$@"
+          APPRUN
           chmod +x AppDir/AppRun
           chmod +x AppDir/qgroundcontrol-start.sh
 

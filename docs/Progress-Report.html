@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FWDAgriGCS Auto-Update & CI/CD — Progress Report</title>
+<style>
+  @page { size: A4; margin: 20mm; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #222; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; font-size: 13px; }
+  h1 { text-align: center; color: #1a5276; border-bottom: 3px solid #1a5276; padding-bottom: 10px; font-size: 22px; }
+  h2 { color: #1a5276; border-bottom: 2px solid #aed6f1; padding-bottom: 5px; margin-top: 30px; font-size: 17px; }
+  h3 { color: #2e86c1; margin-top: 20px; font-size: 14px; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; }
+  th, td { border: 1px solid #bbb; padding: 6px 10px; text-align: left; }
+  th { background-color: #1a5276; color: white; }
+  tr:nth-child(even) { background-color: #f2f8fd; }
+  .status-done { color: #27ae60; font-weight: bold; }
+  .status-pending { color: #e67e22; font-weight: bold; }
+  .status-blocked { color: #e74c3c; font-weight: bold; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; color: white; }
+  .badge-done { background: #27ae60; }
+  .badge-pending { background: #e67e22; }
+  .badge-blocked { background: #e74c3c; }
+  .info-box { background: #eaf2f8; border-left: 4px solid #2e86c1; padding: 10px 15px; margin: 10px 0; border-radius: 3px; }
+  .warn-box { background: #fef9e7; border-left: 4px solid #e67e22; padding: 10px 15px; margin: 10px 0; border-radius: 3px; }
+  .footer { text-align: center; color: #888; font-size: 11px; margin-top: 40px; border-top: 1px solid #ddd; padding-top: 10px; }
+  code { background: #f4f4f4; padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+  ul { padding-left: 20px; }
+  li { margin-bottom: 4px; }
+  .meta { text-align: center; color: #666; font-size: 12px; margin-bottom: 30px; }
+</style>
+</head>
+<body>
+
+<h1>FWDAgriGCS<br>Auto-Update Feature &amp; CI/CD Pipeline</h1>
+<p class="meta">Progress Report &mdash; August 2026<br>Flying Wedge Defence AI Pvt. Ltd.</p>
+
+<!-- ============================================================ -->
+<h2>1. Project Overview</h2>
+
+<p><strong>FWDAgriGCS</strong> is a custom fork of QGroundControl, developed as a ground control station for Flying Wedge Defence AI's agricultural drone fleet. The application runs on both <strong>Linux (AppImage)</strong> and <strong>Android (APK)</strong> platforms.</p>
+
+<div class="info-box">
+  <strong>Objective:</strong> Implement an in-app auto-update system that checks GitHub Releases on startup, shows an update dialog with changelog, and downloads &amp; installs updates automatically on both platforms. Additionally, set up a GitHub Actions CI/CD pipeline to automatically build and release Linux AppImage and Android APK when a version tag is pushed.
+</div>
+
+<table>
+  <tr><th>Detail</th><th>Value</th></tr>
+  <tr><td>Git Repository</td><td>Flying-Wedge-Defence-AI/FWDAgriGCS (Private)</td></tr>
+  <tr><td>Branch</td><td>Stable_V2</td></tr>
+  <tr><td>Qt Version</td><td>5.15.2</td></tr>
+  <tr><td>Build System</td><td>qmake (.pro files), Shadow Build</td></tr>
+  <tr><td>Android Package</td><td>com.fwd.agri.gcs</td></tr>
+  <tr><td>Target Android Architecture</td><td>arm64-v8a only</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2>2. Auto-Update Feature &mdash; Completed</h2>
+
+<p>The auto-update system was fully implemented and tested end-to-end. The app successfully updated from v1.0.9 to v1.0.10 on a physical Android device.</p>
+
+<h3>2.1 Files Created</h3>
+<table>
+  <tr><th>File</th><th>Purpose</th></tr>
+  <tr><td><code>src/FWDUpdateManager/FWDUpdateConfig.h</code></td><td>GitHub API constants, PAT token, version info</td></tr>
+  <tr><td><code>src/FWDUpdateManager/FWDUpdateManager.h</code></td><td>Update manager class definition (Q_PROPERTY exposed to QML)</td></tr>
+  <tr><td><code>src/FWDUpdateManager/FWDUpdateManager.cc</code></td><td>Core logic: check for updates via GitHub API, download assets, install APK (Android) / locate installer (Linux)</td></tr>
+  <tr><td><code>android/res/xml/file_paths.xml</code></td><td>FileProvider path configuration for APK installation</td></tr>
+</table>
+
+<h3>2.2 Files Modified</h3>
+<table>
+  <tr><th>File</th><th>Change</th></tr>
+  <tr><td><code>src/ui/MainRootWindow.qml</code></td><td>Inline FWDUpdateDialog Popup with progress bar, changelog display, update/skip buttons. Dialog height capped at 85% screen to prevent overflow.</td></tr>
+  <tr><td><code>src/ui/SettingsDrawer.qml</code></td><td>Version display label showing current app version</td></tr>
+  <tr><td><code>src/QGCApplication.h / .cc</code></td><td>Init update manager, connect signals/slots, expose as QML context property <code>fwdUpdateManager</code></td></tr>
+  <tr><td><code>android/AndroidManifest.xml</code></td><td>FileProvider declaration, REQUEST_INSTALL_PACKAGES permission</td></tr>
+  <tr><td><code>QGCCommon.pri</code></td><td><code>APP_VERSION_STR</code> define, <code>ANDROID_VERSION_CODE</code> formula</td></tr>
+  <tr><td><code>release.sh</code></td><td>Full release automation script with <code>--linux-only</code>/<code>--android-only</code> flags, APK signing, AndroidManifest.xml version patching</td></tr>
+</table>
+
+<h3>2.3 Bugs Found &amp; Fixed</h3>
+<table>
+  <tr><th>Bug</th><th>Cause</th><th>Fix</th></tr>
+  <tr><td>Android build crash (NoSuchMethodError)</td><td>Wrong JNI activity class reference</td><td>Use <code>org.qtproject.qt5.android.QtNative</code> instead of <code>QtActivity</code></td></tr>
+  <tr><td>Preprocessor #elif mismatch</td><td>Qt defines both Q_OS_LINUX and Q_OS_ANDROID; wrong order</td><td>Check Q_OS_ANDROID before Q_OS_LINUX in all #if/#elif chains</td></tr>
+  <tr><td>Version code always same</td><td>Missing version calculation</td><td>Formula: <code>66*10000000 + major*1000000 + minor*100000 + patch*1000</code></td></tr>
+  <tr><td>Download fails on retry (405 error)</td><td>GitHub API returns different response on re-download</td><td>Add retry handler for <code>ProtocolInvalidOperationError</code> with fresh request</td></tr>
+  <tr><td>Update dialog overflow</td><td>Flickable inside dialog caused infinite height</td><td>Cap dialog at <code>parent.height * 0.85</code>, changelog uses <code>Layout.fillHeight</code></td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2>3. CI/CD Pipeline &mdash; Completed</h2>
+
+<p>A GitHub Actions workflow was created to automatically build both Linux AppImage and Android APK, create a GitHub Release, and upload binaries when a version tag is pushed.</p>
+
+<h3>3.1 Workflow Architecture</h3>
+<table>
+  <tr><th>Job</th><th>Runner</th><th>Purpose</th></tr>
+  <tr><td>linux-build</td><td>ubuntu-22.04</td><td>Build Qt desktop, create AppImage</td></tr>
+  <tr><td>android-build</td><td>ubuntu-22.04</td><td>Build Qt Android, create &amp; sign APK</td></tr>
+  <tr><td>release</td><td>ubuntu-22.04</td><td>Download artifacts, create GitHub Release with binaries</td></tr>
+</table>
+
+<h3>3.2 What the Pipeline Does</h3>
+<ol>
+  <li>On <code>git push</code> with a <code>v*</code> tag, triggers the workflow</li>
+  <li><strong>Linux job:</strong> Installs Qt 5.15.2 + dependencies &rarr; qmake &rarr; make &rarr; Creates AppDir with full Qt directory &rarr; Builds AppImage with appimagetool</li>
+  <li><strong>Android job:</strong> Installs Qt 5.15.2 Android + JDK 17 (SDK) + JDK 11 (Gradle) + Android NDK &rarr; qmake &rarr; make &rarr; androiddeployqt &rarr; Injects AndroidX properties &rarr; Runs gradle assembleRelease &rarr; Signs APK with debug keystore</li>
+  <li><strong>Release job:</strong> Downloads both artifacts &rarr; Creates GitHub Release tagged with the version &rarr; Attaches AppImage and APK</li>
+</ol>
+
+<h3>3.3 Key Technical Decisions</h3>
+<table>
+  <tr><th>Decision</th><th>Reason</th></tr>
+  <tr><td>JDK 17 for SDK tools, JDK 11 for Gradle</td><td>Android SDK cmdline-tools 16.0 requires JDK 17, but Gradle 5.6.4 requires JDK 11</td></tr>
+  <tr><td>aqtinstall arch = "android" not "android_arm64_v8a"</td><td>Qt 5.15.2 aqtinstall naming convention</td></tr>
+  <tr><td>aqtinstall module = "qtcharts" not "charts"</td><td>Qt Charts module name in aqtinstall</td></tr>
+  <tr><td>OpenSSL 3.0 pragma in FWDCertVerifier.cc</td><td>Ubuntu 22.04 runner uses OpenSSL 3.0 which deprecates EC_KEY APIs</td></tr>
+  <tr><td>androiddeployqt with continue-on-error + manual gradle</td><td>androiddeployqt overwrites gradle.properties, removing AndroidX flag</td></tr>
+  <tr><td>Soft-sign APK with debug keystore</td><td>APK must be signed to install on Android; debug keystore is sufficient for testing</td></tr>
+</table>
+
+<h3>3.4 Files Created/Modified for CI/CD</h3>
+<table>
+  <tr><th>File</th><th>Purpose</th></tr>
+  <tr><td><code>.github/workflows/release.yml</code></td><td>GitHub Actions workflow (3 jobs: linux-build, android-build, release)</td></tr>
+  <tr><td><code>android/build.gradle</code></td><td>Fixed hardcoded Qt paths to use <code>qt5AndroidDir</code> variable, added AndroidX core dependency</td></tr>
+  <tr><td><code>src/License/FWDCertVerifier.cc</code></td><td>Added <code>#pragma GCC diagnostic ignored "-Wdeprecated-declarations"</code> for OpenSSL 3.0 CI compatibility</td></tr>
+  <tr><td><code>android/gradle.properties</code></td><td>AndroidX properties, build tools version, SDK versions</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2>4. Documentation</h2>
+
+<table>
+  <tr><th>File</th><th>Format</th><th>Lines</th><th>Content</th></tr>
+  <tr><td><code>docs/Auto-Update-Implementation.md</code></td><td>Markdown</td><td>411</td><td>Comprehensive technical documentation: overview, architecture, all files, platform-specific details, release script usage, bug fixes, testing notes</td></tr>
+  <tr><td><code>docs/Auto-Update-Implementation.html</code></td><td>HTML</td><td>140</td><td>Printable HTML version for browser viewing and PDF generation</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2>5. Known Issues &amp; Pending Fixes</h2>
+
+<div class="warn-box">
+  <strong>Status at time of report:</strong> The CI pipeline has been iteratively debugged through 19 test tags (v1.0.11-test through v1.0.11-test19). Linux AppImage and Android APK builds have been individually advanced to near-completion. A couple of issues remain before both builds pass cleanly.
+</div>
+
+<h3>5.1 AppImage &mdash; AppRun File Not Generated by Build</h3>
+<p><span class="status-pending">PENDING</span></p>
+<table>
+  <tr><th>Detail</th><th>Description</th></tr>
+  <tr><td>Problem</td><td>The <code>AppRun</code> file in the staging directory is a manually created artifact. It is NOT generated by <code>make</code> or qmake. On a fresh CI runner it does not exist, causing <code>cp: cannot stat 'AppRun'</code>.</td></tr>
+  <tr><td>Planned Fix</td><td>Generate <code>AppRun</code> inline in the workflow using a heredoc, while still copying the full Qt directory and supporting files from staging.</td></tr>
+  <tr><td>Status</td><td>Fix identified, awaiting implementation in next CI test.</td></tr>
+</table>
+
+<h3>5.2 AppImage &mdash; OpenSSL Library Bundling</h3>
+<p><span class="status-done">FIXED IN TEST17</span></p>
+<table>
+  <tr><th>Detail</th><th>Description</th></tr>
+  <tr><td>Problem</td><td>Binary links against <code>libcrypto.so.3</code> (OpenSSL 3.0 on Ubuntu 22.04 runner), but it was not included in the AppImage.</td></tr>
+  <tr><td>Fix</td><td>Copy the full <code>Qt/</code> directory from staging (which contains all bundled libs) instead of individually copying system OpenSSL.</td></tr>
+</table>
+
+<h3>5.3 AppImage &mdash; Missing Qt Plugins &amp; QML</h3>
+<p><span class="status-done">FIXED IN TEST18</span></p>
+<table>
+  <tr><th>Detail</th><th>Description</th></tr>
+  <tr><td>Problem</td><td>Earlier workflow only copied <code>Qt/libs/</code> but not <code>Qt/plugins/</code> or <code>Qt/qml/</code>, causing runtime failures.</td></tr>
+  <tr><td>Fix</td><td>Copy entire <code>Qt/</code> directory: <code>cp -rL Qt AppDir/</code></td></tr>
+</table>
+
+<h3>5.4 Android &mdash; Gradle AndroidX Error</h3>
+<p><span class="status-pending">PENDING</span></p>
+<table>
+  <tr><th>Detail</th><th>Description</th></tr>
+  <tr><td>Problem</td><td><code>androiddeployqt</code> generates its own <code>gradle.properties</code> from Qt's template, overwriting any pre-existing file. The template lacks <code>android.useAndroidX=true</code>. Our approach of injecting after androiddeployqt (with <code>continue-on-error: true</code>) then running gradle manually was implemented but may still fail because the generated <code>gradle.properties</code> also lacks other required properties like <code>qt5AndroidDir</code>.</td></tr>
+  <tr><td>Planned Fix</td><td>Instead of overwriting <code>gradle.properties</code>, append only the AndroidX properties to the file that androiddeployqt generates. This preserves Qt-generated properties (<code>qt5AndroidDir</code>, <code>androidCompileSdkVersion</code>, etc.) while adding AndroidX support.</td></tr>
+  <tr><td>Status</td><td>Fix pushed in commit <code>107fa22</code> (test19) — appends instead of overwrites. Awaiting test result.</td></tr>
+</table>
+
+<h3>5.5 Android &mdash; JDK Version Split</h3>
+<p><span class="status-done">FIXED IN TEST14</span></p>
+<table>
+  <tr><th>Detail</th><th>Description</th></tr>
+  <tr><td>Problem</td><td>Android SDK cmdline-tools 16.0 requires JDK 17, but Gradle 5.6.4 requires JDK 11.</td></tr>
+  <tr><td>Fix</td><td>Install JDK 17 for SDK setup, then switch to JDK 11 for gradle build steps.</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2>6. Release Versions &amp; Test Tags</h2>
+
+<h3>6.1 Production Releases (GitHub)</h3>
+<table>
+  <tr><th>Tag</th><th>Status</th></tr>
+  <tr><td>v1.0.5 through v1.0.10</td><td>Released manually via <code>release.sh</code></td></tr>
+</table>
+
+<h3>6.2 CI Test Tags</h3>
+<table>
+  <tr><th>Tag</th><th>Focus Area</th><th>Key Result</th></tr>
+  <tr><td>v1.0.11-test through test8</td><td>Initial CI pipeline</td><td>Build infrastructure setup</td></tr>
+  <tr><td>v1.0.11-test9</td><td>Linux AppImage</td><td>AppImage created but missing AppRun &amp; libs</td></tr>
+  <tr><td>v1.0.11-test10/test11</td><td>Android build</td><td>JDK 17/Gradle incompatibility</td></tr>
+  <tr><td>v1.0.11-test12/test13</td><td>Android arch fix</td><td>Changed arch from "android_arm64_v8a" to "android"</td></tr>
+  <tr><td>v1.0.11-test14</td><td>AppRun + JDK split</td><td>AppImage still missing OpenSSL, Android still needs AndroidX</td></tr>
+  <tr><td>v1.0.11-test15</td><td>OpenSSL3 + AndroidX</td><td>AppImage bundled wrong OpenSSL, Android gradle.properties overwritten</td></tr>
+  <tr><td>v1.0.11-test16</td><td>appimagetool ARCH</td><td>Fixed ARCH=x86_64, missing Qt libs</td></tr>
+  <tr><td>v1.0.11-test17</td><td>Full Qt libs + build-tools</td><td>AppImage has Qt libs, Android still fails</td></tr>
+  <tr><td>v1.0.11-test18</td><td>Full staging copy + gradle inject</td><td>AppRun not found (not in staging), Android properties incomplete</td></tr>
+  <tr><td>v1.0.11-test19</td><td>Append gradle.properties</td><td>Awaiting result</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2>7. Pending Tasks to Complete</h2>
+
+<table>
+  <tr><th>#</th><th>Task</th><th>Priority</th><th>Status</th></tr>
+  <tr><td>1</td><td>Fix AppDir creation: generate AppRun inline, copy full staging contents</td><td>High</td><td><span class="badge badge-pending">In Progress</span></td></tr>
+  <tr><td>2</td><td>Verify AppImage runs on Ubuntu without errors</td><td>High</td><td><span class="badge badge-pending">Pending</span></td></tr>
+  <tr><td>3</td><td>Verify Android APK builds and installs on device</td><td>High</td><td><span class="badge badge-pending">Pending</span></td></tr>
+  <tr><td>4</td><td>Verify GitHub Release is created with both binaries</td><td>High</td><td><span class="badge badge-pending">Pending</span></td></tr>
+  <tr><td>5</td><td>Clean up test tags (v1.0.11-test through test19)</td><td>Low</td><td><span class="badge badge-pending">Pending</span></td></tr>
+  <tr><td>6</td><td>Add Qt download caching to speed up CI (optional)</td><td>Low</td><td><span class="badge badge-pending">Planned</span></td></tr>
+  <tr><td>7</td><td>Final production release tag (v1.0.11 or v1.1.0)</td><td>Medium</td><td><span class="badge badge-pending">Pending</span></td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2>8. All Files Changed/Created Summary</h2>
+
+<table>
+  <tr><th>File</th><th>Action</th><th>Purpose</th></tr>
+  <tr><td><code>src/FWDUpdateManager/FWDUpdateConfig.h</code></td><td>Created</td><td>GitHub API constants &amp; PAT token</td></tr>
+  <tr><td><code>src/FWDUpdateManager/FWDUpdateManager.h</code></td><td>Created</td><td>Update manager class definition</td></tr>
+  <tr><td><code>src/FWDUpdateManager/FWDUpdateManager.cc</code></td><td>Created</td><td>Core update logic: check, download, install</td></tr>
+  <tr><td><code>android/res/xml/file_paths.xml</code></td><td>Created</td><td>FileProvider paths for APK installation</td></tr>
+  <tr><td><code>.github/workflows/release.yml</code></td><td>Created</td><td>GitHub Actions CI/CD workflow</td></tr>
+  <tr><td><code>docs/Auto-Update-Implementation.md</code></td><td>Created</td><td>Technical documentation (411 lines)</td></tr>
+  <tr><td><code>docs/Auto-Update-Implementation.html</code></td><td>Created</td><td>Printable HTML documentation</td></tr>
+  <tr><td><code>docs/Progress-Report.html</code></td><td>Created</td><td>This progress report</td></tr>
+  <tr><td><code>src/ui/MainRootWindow.qml</code></td><td>Modified</td><td>Inline FWDUpdateDialog with progress &amp; changelog</td></tr>
+  <tr><td><code>src/ui/SettingsDrawer.qml</code></td><td>Modified</td><td>Version display label</td></tr>
+  <tr><td><code>src/QGCApplication.h / .cc</code></td><td>Modified</td><td>Update manager init, context property</td></tr>
+  <tr><td><code>android/AndroidManifest.xml</code></td><td>Modified</td><td>FileProvider, install permissions</td></tr>
+  <tr><td><code>android/build.gradle</code></td><td>Modified</td><td>Fixed hardcoded Qt paths, added AndroidX core</td></tr>
+  <tr><td><code>android/gradle.properties</code></td><td>Modified</td><td>AndroidX properties, build config</td></tr>
+  <tr><td><code>QGCCommon.pri</code></td><td>Modified</td><td>Version string, Android version code formula</td></tr>
+  <tr><td><code>src/License/FWDCertVerifier.cc</code></td><td>Modified</td><td>OpenSSL 3.0 deprecation pragma for CI</td></tr>
+  <tr><td><code>release.sh</code></td><td>Modified</td><td>Release automation with signing &amp; platform flags</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2>9. GitHub Secrets Configured</h2>
+
+<table>
+  <tr><th>Secret Name</th><th>Content</th><th>Purpose</th></tr>
+  <tr><td><code>APK_KEYSTORE_BASE64</code></td><td>Base64-encoded debug keystore</td><td>APK signing in CI</td></tr>
+</table>
+
+<div class="footer">
+  FWDAgriGCS Progress Report &mdash; Generated August 24, 2026 &mdash; Flying Wedge Defence AI Pvt. Ltd.
+</div>
+
+</body>
+</html>
