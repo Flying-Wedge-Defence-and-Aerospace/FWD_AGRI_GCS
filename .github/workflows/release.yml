@@ -26,6 +26,7 @@ jobs:
           host: linux
           target: desktop
           arch: ${{ env.QT_ARCH }}
+          modules: 'charts'
 
       - name: Install dependencies
         run: |
