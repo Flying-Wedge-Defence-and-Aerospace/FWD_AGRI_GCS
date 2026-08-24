@@ -126,7 +126,7 @@ jobs:
           version: ${{ env.QT_VERSION }}
           host: linux
           target: android
-          arch: 'android_arm64_v8a'
+          arch: 'android'
 
       - name: Setup Java
         uses: actions/setup-java@v4
