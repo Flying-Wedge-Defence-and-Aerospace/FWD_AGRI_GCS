@@ -185,16 +185,8 @@ jobs:
       - name: Inject gradle.properties and build APK
         run: |
           cd build/Android_Qt_5_15_2_Clang_Multi_Abi-Release/android-build
-          cat > gradle.properties << 'EOF'
-          org.gradle.jvmargs=-Xmx2048m
-          android.bundle.enableUncompressedNativeLibs=false
-          android.useAndroidX=true
-          android.enableJetifier=false
-          androidBuildToolsVersion=29.0.3
-          androidCompileSdkVersion=29
-          qtMinSdkVersion=21
-          qtTargetSdkVersion=28
-          EOF
+          echo "android.useAndroidX=true" >> gradle.properties
+          echo "android.enableJetifier=false" >> gradle.properties
           chmod +x gradlew
           ./gradlew assembleRelease
 
