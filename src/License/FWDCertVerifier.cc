@@ -8,6 +8,9 @@
 #include <openssl/pem.h>
 #include <openssl/err.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 FWDCertVerifier::FWDCertVerifier(QObject* parent)
     : QObject(parent)
 {
@@ -82,3 +85,5 @@ FWDCertVerifier::Result FWDCertVerifier::verify(const QByteArray& certBinary, co
     qDebug() << "FWDCertVerifier: Certificate verified for" << expectedBoardUid;
     return Verified;
 }
+
+#pragma GCC diagnostic pop
