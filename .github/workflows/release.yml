@@ -84,21 +84,16 @@ jobs:
       - name: Create AppDir
         run: |
           cd build/Desktop_Qt_5_15_2_GCC_64bit-Release/staging
-          mkdir -p AppDir/Qt/libs
-          cp FWD_AGRI_GCS AppDir/
-          cp -L Qt/libs/* AppDir/Qt/libs/
-          cp resources/icons/qgroundcontrol.png AppDir/fwdagrigcs.png 2>/dev/null || touch AppDir/fwdagrigcs.png
-          echo "[Desktop Entry]" > AppDir/fwdagrigcs.desktop
-          echo "Type=Application" >> AppDir/fwdagrigcs.desktop
-          echo "Name=FWD AGRI GCS" >> AppDir/fwdagrigcs.desktop
-          echo "Exec=FWD_AGRI_GCS" >> AppDir/fwdagrigcs.desktop
-          echo "Icon=fwdagrigcs" >> AppDir/fwdagrigcs.desktop
-          echo "Categories=Utility;" >> AppDir/fwdagrigcs.desktop
-          echo '#!/bin/bash' > AppDir/AppRun
-          echo 'DIR="$(dirname "$(readlink -f "$0")")"' >> AppDir/AppRun
-          echo 'export LD_LIBRARY_PATH="$DIR/Qt/libs:$LD_LIBRARY_PATH"' >> AppDir/AppRun
-          echo 'exec "$DIR/FWD_AGRI_GCS" "$@"' >> AppDir/AppRun
+          mkdir -p AppDir
+          cp -rL Qt AppDir/
+          cp -L AppRun AppDir/
+          cp -L FWD_AGRI_GCS AppDir/
+          cp -L qgroundcontrol.desktop AppDir/
+          cp -L qgroundcontrol.png AppDir/
+          cp -L qgroundcontrol-start.sh AppDir/
+          cp -L qt.conf AppDir/
           chmod +x AppDir/AppRun
+          chmod +x AppDir/qgroundcontrol-start.sh
 
       - name: Download appimagetool
         run: |
@@ -177,16 +172,31 @@ jobs:
           make INSTALL_ROOT=$(pwd)/android-build install
 
       - name: Run androiddeployqt
+        continue-on-error: true
         run: |
-          VERSION=${GITHUB_REF#refs/tags/}
           cd build/Android_Qt_5_15_2_Clang_Multi_Abi-Release
           find . -name "*.json" -path "*deployment*" | head -1 | xargs -I {} \
             androiddeployqt \
               --input {} \
               --output $(pwd)/android-build \
-              --apk $(pwd)/android-build/FWD_AGRI_GCS.apk \
               --android-platform ${{ env.ANDROID_PLATFORM }} \
               --release
+
+      - name: Inject gradle.properties and build APK
+        run: |
+          cd build/Android_Qt_5_15_2_Clang_Multi_Abi-Release/android-build
+          cat > gradle.properties << 'EOF'
+          org.gradle.jvmargs=-Xmx2048m
+          android.bundle.enableUncompressedNativeLibs=false
+          android.useAndroidX=true
+          android.enableJetifier=false
+          androidBuildToolsVersion=29.0.3
+          androidCompileSdkVersion=29
+          qtMinSdkVersion=21
+          qtTargetSdkVersion=28
+          EOF
+          chmod +x gradlew
+          ./gradlew assembleRelease
 
       - name: Decode keystore
         if: env.APK_KEYSTORE_BASE64 != ''
@@ -197,14 +207,14 @@ jobs:
         if: env.APK_KEYSTORE_BASE64 != ''
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
-          cd build/Android_Qt_5_15_2_Clang_Multi_Abi-Release
-          find . -name "*.apk" -path "*/release/*" | head -1 | xargs -I {} \
-            java -jar $ANDROID_HOME/build-tools/${{ env.ANDROID_BUILD_TOOLS }}/lib/apksigner.jar sign \
-              --ks /tmp/debug.keystore \
-              --ks-pass pass:android \
-              --key-pass pass:android \
-              --out "FWDAgriGCS-${VERSION}-arm64-v8a.apk" \
-              {}
+          cd build/Android_Qt_5_15_2_Clang_Multi_Abi-Release/android-build
+          APK=$(find . -name "*.apk" -path "*/release/*" | head -1)
+          java -jar $ANDROID_HOME/build-tools/${{ env.ANDROID_BUILD_TOOLS }}/lib/apksigner.jar sign \
+            --ks /tmp/debug.keystore \
+            --ks-pass pass:android \
+            --key-pass pass:android \
+            --out "../../FWDAgriGCS-${VERSION}-arm64-v8a.apk" \
+            "$APK"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
