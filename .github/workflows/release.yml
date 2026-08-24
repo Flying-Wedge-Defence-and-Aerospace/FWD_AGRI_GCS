@@ -9,7 +9,7 @@ env:
   QT_VERSION: '5.15.2'
   QT_ARCH: 'gcc_64'
   ANDROID_NDK_VERSION: '21.3.6528147'
-  ANDROID_BUILD_TOOLS: '28.0.3'
+  ANDROID_BUILD_TOOLS: '29.0.3'
   ANDROID_PLATFORM: 'android-29'
 
 jobs:
@@ -86,10 +86,7 @@ jobs:
           cd build/Desktop_Qt_5_15_2_GCC_64bit-Release/staging
           mkdir -p AppDir/Qt/libs
           cp FWD_AGRI_GCS AppDir/
-          cp -L /lib/x86_64-linux-gnu/libcrypto.so.3 AppDir/Qt/libs/ 2>/dev/null || true
-          cp -L /lib/x86_64-linux-gnu/libssl.so.3 AppDir/Qt/libs/ 2>/dev/null || true
-          cp -L /lib/x86_64-linux-gnu/libcrypto.so.1.1 AppDir/Qt/libs/ 2>/dev/null || true
-          cp -L /lib/x86_64-linux-gnu/libssl.so.1.1 AppDir/Qt/libs/ 2>/dev/null || true
+          cp -L Qt/libs/* AppDir/Qt/libs/
           cp resources/icons/qgroundcontrol.png AppDir/fwdagrigcs.png 2>/dev/null || touch AppDir/fwdagrigcs.png
           echo "[Desktop Entry]" > AppDir/fwdagrigcs.desktop
           echo "Type=Application" >> AppDir/fwdagrigcs.desktop
@@ -179,12 +176,6 @@ jobs:
         run: |
           make INSTALL_ROOT=$(pwd)/android-build install
 
-      - name: Create gradle.properties for AndroidX
-        run: |
-          mkdir -p build/Android_Qt_5_15_2_Clang_Multi_Abi-Release/android-build
-          echo "android.useAndroidX=true" > build/Android_Qt_5_15_2_Clang_Multi_Abi-Release/android-build/gradle.properties
-          echo "android.enableJetifier=false" >> build/Android_Qt_5_15_2_Clang_Multi_Abi-Release/android-build/gradle.properties
-
       - name: Run androiddeployqt
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
@@ -234,6 +225,7 @@ jobs:
 
       - name: Download Android artifact
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: android-apk
 

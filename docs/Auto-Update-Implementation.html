@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FWDAgriGCS - Auto-Update System Implementation</title>
+<style>
+@page{size:A4;margin:18mm 15mm}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;font-size:10pt;line-height:1.4;color:#222;padding:25px 40px}
+h1{font-size:16pt;text-align:center;margin-bottom:2px;color:#1a1a1a}
+.sub{text-align:center;font-size:9pt;color:#555;margin-bottom:14px;border-bottom:2px solid #2a7d2e;padding-bottom:8px}
+h2{font-size:11pt;color:#2a7d2e;border-bottom:1px solid #ccc;padding-bottom:2px;margin:12px 0 5px 0}
+h3{font-size:10pt;color:#333;margin:6px 0 3px 0}
+p,li{font-size:10pt;margin-bottom:2px}
+ul,ol{margin-left:18px;margin-bottom:5px}
+table{width:100%;border-collapse:collapse;margin:4px 0 8px 0;font-size:9pt}
+th,td{border:1px solid #999;padding:3px 6px;text-align:left}
+th{background:#2a7d2e;color:#fff;font-weight:600}
+tr:nth-child(even){background:#f4f4f4}
+.col{display:flex;gap:16px}
+.col>div{flex:1}
+.flow{font-family:monospace;font-size:8.5pt;background:#f7f7f7;border:1px solid #ccc;padding:6px 8px;margin:5px 0;white-space:pre;line-height:1.3}
+.note{font-size:9pt;color:#666;font-style:italic;margin:2px 0 6px 0}
+</style>
+</head>
+<body>
+
+<h1>FWDAgriGCS &mdash; In-App Auto-Update System</h1>
+<div class="sub">
+  Project: FWDAgriGCS (Custom QGroundControl) &nbsp;|&nbsp; Repository: Flying-Wedge-Defence-AI/FWDAgriGCS &nbsp;|&nbsp; Branch: Stable_V2<br>
+  Platforms: Linux (AppImage), Android (APK) &nbsp;|&nbsp; Qt 5.15.2 &nbsp;|&nbsp; Date: August 2026
+</div>
+
+<h2>1. Overview</h2>
+<p>An in-app auto-update system was implemented for FWDAgriGCS that automatically checks for new releases on GitHub when the application starts. If a newer version is found, a dialog shows the version number and changelog. The user can download and install the update directly within the app without visiting any external website. <strong>Linux</strong> replaces the AppImage binary in-place and relaunches. <strong>Android</strong> downloads the APK and hands off to the system package installer via FileProvider. A release automation script (<code>release.sh</code>) handles version bumping, building, signing, and uploading to GitHub in a single command.</p>
+
+<h2>2. System Flow</h2>
+<div class="flow">App Startup &rarr; QTimer(3s delay) &rarr; checkForUpdates()
+  &rarr; GitHub Releases API (/repos/.../releases/latest)
+  &rarr; Parse JSON response &rarr; Compare semantic versions
+  &rarr; If newer: find platform asset (.apk / .AppImage)
+  &rarr; emit updateAvailable() signal &rarr; QML Update Dialog shown
+  &rarr; User taps "Update Now" &rarr; downloadUpdate()
+  &rarr; GitHub Asset API (with PAT auth + octet-stream header)
+  &rarr; Save to temp directory &rarr; User taps "Restart Now"
+  &rarr; installUpdate()
+     [Linux] replace binary + chmod +x + relaunch
+     [Android] FileProvider content:// URI + Intent &rarr; System Installer</div>
+
+<h2>3. Files Created &amp; Modified</h2>
+<div class="col">
+<div>
+<h3>New Files</h3>
+<table>
+<tr><th>File</th><th>Purpose</th></tr>
+<tr><td>FWDUpdateConfig.h</td><td>GitHub API config, PAT token</td></tr>
+<tr><td>FWDUpdateManager.h</td><td>C++ class header</td></tr>
+<tr><td>FWDUpdateManager.cc</td><td>Core logic: check, download, install</td></tr>
+<tr><td>FWDUpdateDialog.qml</td><td>QML dialog component</td></tr>
+<tr><td>file_paths.xml</td><td>FileProvider paths config</td></tr>
+<tr><td>release.sh</td><td>Release automation script</td></tr>
+</table>
+</div>
+<div>
+<h3>Modified Files</h3>
+<table>
+<tr><th>File</th><th>Changes</th></tr>
+<tr><td>QGCApplication.h/.cc</td><td>Init manager, signals, context property</td></tr>
+<tr><td>MainRootWindow.qml</td><td>Inline update Popup UI</td></tr>
+<tr><td>SettingsDrawer.qml</td><td>Version display label</td></tr>
+<tr><td>AndroidManifest.xml</td><td>FileProvider + permissions</td></tr>
+<tr><td>build.gradle</td><td>AndroidX core dependency</td></tr>
+<tr><td>qgroundcontrol.pro</td><td>Added source/header files</td></tr>
+<tr><td>QGCCommon.pri</td><td>APP_VERSION_STR define</td></tr>
+</table>
+</div>
+</div>
+
+<h2>4. Platform-Specific Implementation</h2>
+<div class="col">
+<div>
+<h3>Linux (AppImage)</h3>
+<ol>
+<li>Get real binary path via <code>$APPIMAGE</code> env var</li>
+<li>Delete current binary: <code>QFile::remove()</code></li>
+<li>Copy downloaded update: <code>QFile::copy()</code></li>
+<li>Set executable permission: <code>chmod +x</code></li>
+<li>Relaunch: <code>QProcess::startDetached()</code></li>
+<li>Quit: <code>QApplication::quit()</code></li>
+</ol>
+<p class="note">OpenSSL 1.1 libs bundled in AppDir for HTTPS connectivity.</p>
+</div>
+<div>
+<h3>Android (APK)</h3>
+<ol>
+<li>Copy APK to app cache directory</li>
+<li>Get Activity via JNI: <code>QtNative.activity()</code></li>
+<li>Get content:// URI: <code>FileProvider.getUriForFile()</code></li>
+<li>Create ACTION_VIEW Intent with URI + APK MIME type</li>
+<li>Launch system package installer via <code>startActivity()</code></li>
+<li>Quit: <code>QApplication::quit()</code></li>
+</ol>
+<p class="note">AndroidX FileProvider required for Android 7+ content URIs.</p>
+</div>
+</div>
+
+<h2>5. Release Automation (release.sh)</h2>
+<p><strong>Usage:</strong> <code>./release.sh &lt;patch|minor|major|vX.Y.Z&gt; [--linux-only|--android-only]</code></p>
+<p><strong>Steps:</strong> Check clean git state &rarr; Update APP_VERSION_STR in QGCCommon.pri &rarr; Patch AndroidManifest.xml versionName/versionCode &rarr; Build via qmake &rarr; Sign APK with debug keystore (apksigner) &rarr; Git commit + tag + push &rarr; Create GitHub release + upload assets.</p>
+<p><strong>versionCode formula:</strong> <code>66 * 10000000 + major * 1000000 + minor * 100000 + patch * 1000</code> (prefix 66 = arm64-v8a)</p>
+
+<h2>6. Key Bugs Resolved</h2>
+<table>
+<tr><th>Bug</th><th>Root Cause</th><th>Fix</th></tr>
+<tr><td>Android got .AppImage instead of .apk</td><td>Qt defines both Q_OS_LINUX and Q_OS_ANDROID; Linux was checked first</td><td>Reordered preprocessor: Q_OS_ANDROID before Q_OS_LINUX</td></tr>
+<tr><td>JNI crash: NoSuchMethodError</td><td>Used wrong JNI class QtActivity</td><td>Changed to org.qtproject.qt5.android.QtNative</td></tr>
+<tr><td>APK version stuck at old version</td><td>androiddeployqt regenerated manifest from source</td><td>Patch source AndroidManifest.xml before build, restore after</td></tr>
+<tr><td>versionCode exceeded int limit</td><td>Wrong multiplier (100000000 vs 10000000)</td><td>Fixed multiplier to 10000000</td></tr>
+<tr><td>Private repo asset download 404</td><td>browser_download_url requires auth</td><td>Use API url field + Accept: octet-stream header</td></tr>
+<tr><td>Dialog overflow on small screens</td><td>Unconstrained popup height</td><td>Capped at 85% screen height, scrollable changelog</td></tr>
+</table>
+
+<h2>7. Test Results</h2>
+<table>
+<tr><th>Test Case</th><th>Platform</th><th>Result</th></tr>
+<tr><td>Update detection (newer version)</td><td>Both</td><td>PASS</td></tr>
+<tr><td>Update detection (same version)</td><td>Both</td><td>PASS</td></tr>
+<tr><td>Platform asset matching (.apk)</td><td>Android</td><td>PASS</td></tr>
+<tr><td>Platform asset matching (.AppImage)</td><td>Linux</td><td>PASS</td></tr>
+<tr><td>Download with progress bar</td><td>Both</td><td>PASS</td></tr>
+<tr><td>Download error + auto-retry</td><td>Android</td><td>PASS</td></tr>
+<tr><td>FileProvider content:// URI</td><td>Android</td><td>PASS</td></tr>
+<tr><td>System installer launch</td><td>Android</td><td>PASS</td></tr>
+<tr><td>APK install (same signing key)</td><td>Android</td><td>PASS</td></tr>
+<tr><td>Dialog fits small screens</td><td>Both</td><td>PASS</td></tr>
+<tr><td>Version display in Settings</td><td>Both</td><td>PASS</td></tr>
+<tr><td>release.sh end-to-end</td><td>Both</td><td>PASS</td></tr>
+</table>
+
+</body>
+</html>
