@@ -95,6 +95,7 @@ jobs:
           echo "Exec=FWD_AGRI_GCS" >> AppDir/fwdagrigcs.desktop
           echo "Icon=fwdagrigcs" >> AppDir/fwdagrigcs.desktop
           echo "Categories=Utility;" >> AppDir/fwdagrigcs.desktop
+          ln -s FWD_AGRI_GCS AppDir/AppRun
 
       - name: Download appimagetool
         run: |
@@ -129,7 +130,7 @@ jobs:
           arch: 'android'
           modules: 'qtcharts'
 
-      - name: Setup Java
+      - name: Setup Java 17 (for SDK tools)
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -146,6 +147,12 @@ jobs:
       - name: Install build tools
         run: |
           sdkmanager "build-tools;${{ env.ANDROID_BUILD_TOOLS }}"
+
+      - name: Setup Java 11 (for Gradle build)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
 
       - name: Create build directory
         run: |
