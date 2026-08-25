@@ -14,8 +14,18 @@ env:
 
 jobs:
   linux-build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
+    container: ubuntu:20.04
     steps:
+      - name: Fix apt sources for Ubuntu 20.04
+        run: |
+          sed -i 's|http://archive.ubuntu.com|http://old-releases.ubuntu.com|g' /etc/apt/sources.list
+          sed -i 's|http://security.ubuntu.com|http://old-releases.ubuntu.com|g' /etc/apt/sources.list
+
+      - name: Install git
+        run: |
+          apt-get update
+          apt-get install -y git
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -30,8 +40,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
+          apt-get update
+          apt-get install -y \
             libunwind-dev \
             libgstreamer1.0-dev \
             libgstreamer-plugins-base1.0-dev \
@@ -68,7 +78,9 @@ jobs:
             libudev-dev \
             libdrm-dev \
             libgbm-dev \
-            libsdl2-dev
+            libsdl2-dev \
+            wget \
+            file
 
       - name: Create build directory
         run: |
@@ -108,7 +120,7 @@ jobs:
 
       - name: Download appimagetool
         run: |
-          sudo apt-get install -y libfuse2
+          apt-get install -y libfuse2
           wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /tmp/appimagetool
           chmod +x /tmp/appimagetool
 
