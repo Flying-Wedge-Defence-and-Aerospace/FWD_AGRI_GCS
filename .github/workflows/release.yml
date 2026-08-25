@@ -127,7 +127,7 @@ jobs:
         run: |
           cd build/Desktop_Qt_5_15_2_GCC_64bit-Release/staging
           VERSION=${GITHUB_REF#refs/tags/}
-          ARCH=x86_64 /tmp/appimagetool AppDir "FWDAgriGCS-${VERSION}-x86_64.AppImage"
+          APPIMAGE_EXTRACT_AND_RUN=1 ARCH=x86_64 /tmp/appimagetool AppDir "FWDAgriGCS-${VERSION}-x86_64.AppImage"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
