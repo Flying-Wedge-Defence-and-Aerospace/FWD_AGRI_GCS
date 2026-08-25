@@ -67,7 +67,7 @@ jobs:
             libgbm-dev \
             libsdl2-dev \
             gstreamer1.0-gl \
-            gstreamer1.0-plugins-bad \
+            gstreamer1.0-qt5 \
             patchelf \
             wget \
             file \
@@ -109,13 +109,15 @@ jobs:
           cp -L qgroundcontrol-start.sh AppDir/
           cp -L qt.conf AppDir/
           mkdir -p AppDir/gstreamer-1.0
-          GST_QML_PLUGIN=$(find /usr/lib -name "libgstqmlgl.so" 2>/dev/null | head -1)
-          if [ -n "$GST_QML_PLUGIN" ]; then
-            cp -L "$GST_QML_PLUGIN" AppDir/gstreamer-1.0/
-            echo "Bundled GStreamer QML plugin: $GST_QML_PLUGIN"
-          else
-            echo "WARNING: libgstqmlgl.so not found, video may not work"
-          fi
+          for PLUGIN in libgstqmlgl.so libgstgl.so; do
+            PLUGIN_PATH=$(find /usr/lib -name "$PLUGIN" 2>/dev/null | head -1)
+            if [ -n "$PLUGIN_PATH" ]; then
+              cp -L "$PLUGIN_PATH" AppDir/gstreamer-1.0/
+              echo "Bundled: $PLUGIN_PATH"
+            else
+              echo "WARNING: $PLUGIN not found"
+            fi
+          done
           cat > AppDir/AppRun << 'APPRUN'
           #!/bin/bash
           HERE="$(dirname "$(readlink -f "$0")")"
@@ -237,12 +239,13 @@ jobs:
           APK=$(find . -name "*.apk" -path "*/release/*" | head -1)
           echo "Found APK: $APK"
           ls -la "$APK"
-          $ANDROID_HOME/build-tools/${{ env.ANDROID_BUILD_TOOLS }}/apksigner sign \
-            --ks /tmp/debug.keystore \
-            --ks-pass pass:android \
-            --key-pass pass:android \
-            --out "../../FWDAgriGCS-${VERSION}-arm64-v8a.apk" \
-            "$APK"
+          cp "$APK" "../../FWDAgriGCS-${VERSION}-arm64-v8a.apk"
+          jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 \
+            -keystore /tmp/debug.keystore \
+            -storepass android \
+            -keypass android \
+            "../../FWDAgriGCS-${VERSION}-arm64-v8a.apk" \
+            alias_name
           echo "Signed APK:"
           ls -la "../../FWDAgriGCS-${VERSION}-arm64-v8a.apk"
 
