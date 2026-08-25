@@ -110,12 +110,13 @@ jobs:
           cp -L qt.conf AppDir/
           mkdir -p AppDir/gstreamer-1.0
           for PLUGIN in libgstqmlgl.so libgstgl.so; do
-            PLUGIN_PATH=$(find /usr/lib -name "$PLUGIN" 2>/dev/null | head -1)
+            PLUGIN_PATH=$(find /usr/lib/x86_64-linux-gnu/gstreamer-1.0 /usr/lib/gstreamer-1.0 /usr/lib -name "$PLUGIN" 2>/dev/null | head -1)
             if [ -n "$PLUGIN_PATH" ]; then
               cp -L "$PLUGIN_PATH" AppDir/gstreamer-1.0/
               echo "Bundled: $PLUGIN_PATH"
             else
               echo "WARNING: $PLUGIN not found"
+              find /usr -name "$PLUGIN" 2>/dev/null | head -5
             fi
           done
           cat > AppDir/AppRun << 'APPRUN'
@@ -125,6 +126,7 @@ jobs:
           export QT_PLUGIN_PATH="$HERE/Qt/plugins"
           export QML2_IMPORT_PATH="$HERE/Qt/qml"
           export GST_PLUGIN_PATH="$HERE/gstreamer-1.0:${GST_PLUGIN_PATH:-/usr/lib/x86_64-linux-gnu/gstreamer-1.0}"
+          export GST_PLUGIN_SYSTEM_PATH_1_0="$HERE/gstreamer-1.0:/usr/lib/x86_64-linux-gnu/gstreamer-1.0"
           exec "$HERE/FWD_AGRI_GCS" "$@"
           APPRUN
           chmod +x AppDir/AppRun
@@ -218,13 +220,27 @@ jobs:
               --output $(pwd)/android-build \
               --android-platform ${{ env.ANDROID_PLATFORM }}
 
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
       - name: Inject AndroidX and build APK
         run: |
           cd build/Android_Qt_5_15_2_Clang_Multi_Abi-Release/android-build
           echo "android.useAndroidX=true" >> gradle.properties
           echo "android.enableJetifier=false" >> gradle.properties
           chmod +x gradlew
-          ./gradlew assembleRelease
+          for i in 1 2 3; do
+            ./gradlew assembleRelease --no-daemon -Dorg.gradle.internal.http.connectionTimeout=120000 -Dorg.gradle.internal.http.socketTimeout=120000 && break
+            echo "Gradle failed, retry $i/3..."
+            sleep $((i * 30))
+          done
 
       - name: Decode keystore
         if: env.APK_KEYSTORE_BASE64 != ''
