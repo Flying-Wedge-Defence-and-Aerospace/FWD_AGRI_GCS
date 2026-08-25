@@ -17,10 +17,10 @@ jobs:
     runs-on: ubuntu-22.04
     container: debian:bullseye
     steps:
-      - name: Install git
+      - name: Install git and sudo
         run: |
           apt-get update
-          apt-get install -y git
+          apt-get install -y git sudo
       - name: Checkout code
         uses: actions/checkout@v4
 
