@@ -66,6 +66,8 @@ jobs:
             libdrm-dev \
             libgbm-dev \
             libsdl2-dev \
+            gstreamer1.0-gl \
+            gstreamer1.0-plugins-bad \
             patchelf \
             wget \
             file \
@@ -106,12 +108,21 @@ jobs:
           cp -L qgroundcontrol.png AppDir/
           cp -L qgroundcontrol-start.sh AppDir/
           cp -L qt.conf AppDir/
+          mkdir -p AppDir/gstreamer-1.0
+          GST_QML_PLUGIN=$(find /usr/lib -name "libgstqmlgl.so" 2>/dev/null | head -1)
+          if [ -n "$GST_QML_PLUGIN" ]; then
+            cp -L "$GST_QML_PLUGIN" AppDir/gstreamer-1.0/
+            echo "Bundled GStreamer QML plugin: $GST_QML_PLUGIN"
+          else
+            echo "WARNING: libgstqmlgl.so not found, video may not work"
+          fi
           cat > AppDir/AppRun << 'APPRUN'
           #!/bin/bash
           HERE="$(dirname "$(readlink -f "$0")")"
           export LD_LIBRARY_PATH="$HERE/Qt/libs:$LD_LIBRARY_PATH"
           export QT_PLUGIN_PATH="$HERE/Qt/plugins"
           export QML2_IMPORT_PATH="$HERE/Qt/qml"
+          export GST_PLUGIN_PATH="$HERE/gstreamer-1.0:${GST_PLUGIN_PATH:-/usr/lib/x86_64-linux-gnu/gstreamer-1.0}"
           exec "$HERE/FWD_AGRI_GCS" "$@"
           APPRUN
           chmod +x AppDir/AppRun
@@ -224,12 +235,16 @@ jobs:
           VERSION=${GITHUB_REF#refs/tags/}
           cd build/Android_Qt_5_15_2_Clang_Multi_Abi-Release/android-build
           APK=$(find . -name "*.apk" -path "*/release/*" | head -1)
-          java -jar $ANDROID_HOME/build-tools/${{ env.ANDROID_BUILD_TOOLS }}/lib/apksigner.jar sign \
+          echo "Found APK: $APK"
+          ls -la "$APK"
+          $ANDROID_HOME/build-tools/${{ env.ANDROID_BUILD_TOOLS }}/apksigner sign \
             --ks /tmp/debug.keystore \
             --ks-pass pass:android \
             --key-pass pass:android \
             --out "../../FWDAgriGCS-${VERSION}-arm64-v8a.apk" \
             "$APK"
+          echo "Signed APK:"
+          ls -la "../../FWDAgriGCS-${VERSION}-arm64-v8a.apk"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
