@@ -67,7 +67,7 @@ jobs:
             libgbm-dev \
             libsdl2-dev \
             gstreamer1.0-gl \
-            gstreamer1.0-qt5 \
+            gstreamer1.0-plugins-good \
             patchelf \
             wget \
             file \
@@ -245,7 +245,7 @@ jobs:
             -storepass android \
             -keypass android \
             "../../FWDAgriGCS-${VERSION}-arm64-v8a.apk" \
-            alias_name
+            androiddebugkey
           echo "Signed APK:"
           ls -la "../../FWDAgriGCS-${VERSION}-arm64-v8a.apk"
 
