@@ -15,13 +15,8 @@ env:
 jobs:
   linux-build:
     runs-on: ubuntu-22.04
-    container: ubuntu:20.04
+    container: debian:bullseye
     steps:
-      - name: Fix apt sources for Ubuntu 20.04
-        run: |
-          sed -i 's|http://archive.ubuntu.com|http://old-releases.ubuntu.com|g' /etc/apt/sources.list
-          sed -i 's|http://security.ubuntu.com|http://old-releases.ubuntu.com|g' /etc/apt/sources.list
-
       - name: Install git
         run: |
           apt-get update
