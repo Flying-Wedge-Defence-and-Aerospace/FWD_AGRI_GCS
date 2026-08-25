@@ -86,6 +86,8 @@ jobs:
           cd build/Desktop_Qt_5_15_2_GCC_64bit-Release/staging
           mkdir -p AppDir
           cp -rL Qt AppDir/
+          cp -L /lib/x86_64-linux-gnu/libcrypto.so.3 AppDir/Qt/libs/ 2>/dev/null || true
+          cp -L /lib/x86_64-linux-gnu/libssl.so.3 AppDir/Qt/libs/ 2>/dev/null || true
           cp -L FWD_AGRI_GCS AppDir/
           cp -L qgroundcontrol.desktop AppDir/
           cp -L qgroundcontrol.png AppDir/
@@ -179,17 +181,15 @@ jobs:
           make INSTALL_ROOT=$(pwd)/android-build install
 
       - name: Run androiddeployqt
-        continue-on-error: true
         run: |
           cd build/Android_Qt_5_15_2_Clang_Multi_Abi-Release
           find . -name "*.json" -path "*deployment*" | head -1 | xargs -I {} \
             androiddeployqt \
               --input {} \
               --output $(pwd)/android-build \
-              --android-platform ${{ env.ANDROID_PLATFORM }} \
-              --release
+              --android-platform ${{ env.ANDROID_PLATFORM }}
 
-      - name: Inject gradle.properties and build APK
+      - name: Inject AndroidX and build APK
         run: |
           cd build/Android_Qt_5_15_2_Clang_Multi_Abi-Release/android-build
           echo "android.useAndroidX=true" >> gradle.properties
