@@ -15,12 +15,16 @@ env:
 jobs:
   linux-build:
     runs-on: ubuntu-22.04
-    container: debian:bullseye
+    container: ubuntu:20.04
     steps:
       - name: Install git and sudo
         run: |
           apt-get update
-          apt-get install -y --fix-missing git sudo
+          apt-get install -y --fix-missing git sudo software-properties-common
+
+      - name: Enable universe repository
+        run: |
+          add-apt-repository -y universe
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -34,6 +38,9 @@ jobs:
             libgstreamer-plugins-base1.0-dev \
             libgstreamer-plugins-bad1.0-dev \
             libgstreamer-gl1.0-0 \
+            gstreamer1.0-plugins-good \
+            gstreamer1.0-plugins-bad \
+            gstreamer1.0-qt5 \
             libssl-dev \
             libgl1-mesa-dev \
             libglu1-mesa-dev \
@@ -66,8 +73,6 @@ jobs:
             libdrm-dev \
             libgbm-dev \
             libsdl2-dev \
-            gstreamer1.0-gl \
-            gstreamer1.0-plugins-good \
             patchelf \
             wget \
             file \
@@ -109,26 +114,31 @@ jobs:
           cp -L qgroundcontrol-start.sh AppDir/
           cp -L qt.conf AppDir/
           mkdir -p AppDir/gstreamer-1.0
-          for PLUGIN in libgstqmlgl.so libgstgl.so; do
-            PLUGIN_PATH=$(find /usr/lib/x86_64-linux-gnu/gstreamer-1.0 /usr/lib/gstreamer-1.0 /usr/lib -name "$PLUGIN" 2>/dev/null | head -1)
-            if [ -n "$PLUGIN_PATH" ]; then
-              cp -L "$PLUGIN_PATH" AppDir/gstreamer-1.0/
-              echo "Bundled: $PLUGIN_PATH"
-            else
-              echo "WARNING: $PLUGIN not found"
-              find /usr -name "$PLUGIN" 2>/dev/null | head -5
+          GST_DIR=""
+          for DIR in /usr/lib/x86_64-linux-gnu/gstreamer-1.0 /usr/lib/gstreamer-1.0 /usr/lib/gstreamer-1.0; do
+            if [ -d "$DIR" ] && [ "$(ls -A $DIR 2>/dev/null)" ]; then
+              GST_DIR="$DIR"
+              break
             fi
           done
+          if [ -n "$GST_DIR" ]; then
+            cp -L "$GST_DIR"/*.so AppDir/gstreamer-1.0/ 2>/dev/null || true
+            echo "Bundled all GStreamer plugins from $GST_DIR"
+            echo "Bundled $(ls AppDir/gstreamer-1.0/*.so 2>/dev/null | wc -l) plugins"
+          else
+            echo "ERROR: No GStreamer plugin directory found"
+            find /usr -name "*.so" -path "*gstreamer*" 2>/dev/null | head -10
+          fi
           cat > AppDir/AppRun << 'APPRUN'
-          #!/bin/bash
-          HERE="$(dirname "$(readlink -f "$0")")"
-          export LD_LIBRARY_PATH="$HERE/Qt/libs:$LD_LIBRARY_PATH"
-          export QT_PLUGIN_PATH="$HERE/Qt/plugins"
-          export QML2_IMPORT_PATH="$HERE/Qt/qml"
-          export GST_PLUGIN_PATH="$HERE/gstreamer-1.0:${GST_PLUGIN_PATH:-/usr/lib/x86_64-linux-gnu/gstreamer-1.0}"
-          export GST_PLUGIN_SYSTEM_PATH_1_0="$HERE/gstreamer-1.0:/usr/lib/x86_64-linux-gnu/gstreamer-1.0"
-          exec "$HERE/FWD_AGRI_GCS" "$@"
-          APPRUN
+#!/bin/bash
+HERE="$(dirname "$(readlink -f "$0")")"
+export LD_LIBRARY_PATH="$HERE/Qt/libs:$LD_LIBRARY_PATH"
+export QT_PLUGIN_PATH="$HERE/Qt/plugins"
+export QML2_IMPORT_PATH="$HERE/Qt/qml"
+export GST_PLUGIN_PATH="$HERE/gstreamer-1.0"
+export GST_PLUGIN_SYSTEM_PATH_1_0="$HERE/gstreamer-1.0"
+exec "$HERE/FWD_AGRI_GCS" "$@"
+APPRUN
           chmod +x AppDir/AppRun
           chmod +x AppDir/qgroundcontrol-start.sh
 
@@ -246,23 +256,34 @@ jobs:
         if: env.APK_KEYSTORE_BASE64 != ''
         run: |
           echo "$APK_KEYSTORE_BASE64" | base64 -d > /tmp/debug.keystore
+          echo "Keystore created, verifying..."
+          keytool -list -keystore /tmp/debug.keystore -storepass android
 
       - name: Sign APK
         if: env.APK_KEYSTORE_BASE64 != ''
         run: |
+          set -ex
           VERSION=${GITHUB_REF#refs/tags/}
           cd build/Android_Qt_5_15_2_Clang_Multi_Abi-Release/android-build
           APK=$(find . -name "*.apk" -path "*/release/*" | head -1)
+          if [ -z "$APK" ]; then
+            echo "ERROR: No APK found in build outputs"
+            find . -name "*.apk" 2>/dev/null
+            exit 1
+          fi
           echo "Found APK: $APK"
           ls -la "$APK"
           cp "$APK" "../../FWDAgriGCS-${VERSION}-arm64-v8a.apk"
+          echo "Running jarsigner..."
           jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 \
             -keystore /tmp/debug.keystore \
             -storepass android \
             -keypass android \
             "../../FWDAgriGCS-${VERSION}-arm64-v8a.apk" \
             androiddebugkey
-          echo "Signed APK:"
+          echo "Verifying signed APK..."
+          jarsigner -verify -verbose "../../FWDAgriGCS-${VERSION}-arm64-v8a.apk"
+          echo "Final signed APK:"
           ls -la "../../FWDAgriGCS-${VERSION}-arm64-v8a.apk"
 
       - name: Upload artifact
