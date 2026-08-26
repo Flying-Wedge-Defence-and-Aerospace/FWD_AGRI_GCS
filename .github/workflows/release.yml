@@ -283,9 +283,10 @@ jobs:
             fi
             echo "Found APK: $APK"
             ls -la "$APK"
-            cp "$APK" "../../FWDAgriGCS-${VERSION}-arm64-v8a.apk"
+cp "$APK" "../../FWDAgriGCS-${VERSION}-arm64-v8a.apk"
             # Copy signed APK to the directory where artifact upload looks for it
-            cp "../../FWDAgriGCS-${VERSION}-arm64-v8a.apk" "build/Android_Qt_5_15_2_Clang_Multi_Abi-Release/FWDAgriGCS-${VERSION}-arm64-v8a.apk"
+            mkdir -p build/Android_Qt_5_15_2_Clang_Multi_Abi-Release
+            cp "../../FWDAgriGCS-${VERSION}-arm64-v8a.apk" build/Android_Qt_5_15_2_Clang_Multi_Abi-Release/FWDAgriGCS-${VERSION}-arm64-v8a.apk
             echo "Running jarsigner..."
             jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 \
               -keystore /tmp/debug.keystore \
