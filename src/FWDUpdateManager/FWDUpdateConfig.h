@@ -1,8 +1,8 @@
 #pragma once
 
 // GitHub repository configuration for auto-update
-#define FWD_UPDATE_GITHUB_OWNER  "Flying-Wedge-Defence-AI"
-#define FWD_UPDATE_GITHUB_REPO   "FWDAgriGCS"
+#define FWD_UPDATE_GITHUB_OWNER  "Flying-Wedge-Defence-and-Aerospace"
+#define FWD_UPDATE_GITHUB_REPO   "FWD_AGRI_GCS"
 
 // *** IMPORTANT: Replace with your actual Personal Access Token ***
 // Generate at: GitHub > Settings > Developer settings > Personal access tokens

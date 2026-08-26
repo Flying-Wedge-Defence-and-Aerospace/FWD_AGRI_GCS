@@ -299,7 +299,6 @@ jobs:
           name: android-apk
           path: |
             build/Android_Qt_5_15_2_Clang_Multi_Abi-Release/*.apk
-            build/Android_Qt_5_15_2_Clang_Multi_Abi-Release/android-build/build/outputs/apk/**/*.apk
 
   release:
     needs: [linux-build, android-build]
@@ -337,6 +336,6 @@ jobs:
             See commit history for changes.
           files: |
             *.AppImage
-            *.apk
+            FWDAgriGCS-*.apk
           draft: false
           prerelease: false
