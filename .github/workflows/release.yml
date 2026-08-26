@@ -11,6 +11,7 @@ env:
   ANDROID_NDK_VERSION: '21.3.6528147'
   ANDROID_BUILD_TOOLS: '29.0.3'
   ANDROID_PLATFORM: 'android-29'
+  APK_KEYSTORE_BASE64: ${{ secrets.APK_KEYSTORE_BASE64 }}
 
 jobs:
   linux-build:
@@ -164,8 +165,6 @@ jobs:
 
   android-build:
     runs-on: ubuntu-22.04
-    env:
-      APK_KEYSTORE_BASE64: ${{ secrets.APK_KEYSTORE_BASE64 }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
