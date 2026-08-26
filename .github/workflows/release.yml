@@ -129,16 +129,14 @@ jobs:
             echo "ERROR: No GStreamer plugin directory found"
             find /usr -name "*.so" -path "*gstreamer*" 2>/dev/null | head -10
           fi
-          cat > AppDir/AppRun << 'APPRUN'
-#!/bin/bash
-HERE="$(dirname "$(readlink -f "$0")")"
-export LD_LIBRARY_PATH="$HERE/Qt/libs:$LD_LIBRARY_PATH"
-export QT_PLUGIN_PATH="$HERE/Qt/plugins"
-export QML2_IMPORT_PATH="$HERE/Qt/qml"
-export GST_PLUGIN_PATH="$HERE/gstreamer-1.0"
-export GST_PLUGIN_SYSTEM_PATH_1_0="$HERE/gstreamer-1.0"
-exec "$HERE/FWD_AGRI_GCS" "$@"
-APPRUN
+          echo '#!/bin/bash' > AppDir/AppRun
+          echo 'HERE="$(dirname "$(readlink -f "$0")")"' >> AppDir/AppRun
+          echo 'export LD_LIBRARY_PATH="$HERE/Qt/libs:$LD_LIBRARY_PATH"' >> AppDir/AppRun
+          echo 'export QT_PLUGIN_PATH="$HERE/Qt/plugins"' >> AppDir/AppRun
+          echo 'export QML2_IMPORT_PATH="$HERE/Qt/qml"' >> AppDir/AppRun
+          echo 'export GST_PLUGIN_PATH="$HERE/gstreamer-1.0"' >> AppDir/AppRun
+          echo 'export GST_PLUGIN_SYSTEM_PATH_1_0="$HERE/gstreamer-1.0"' >> AppDir/AppRun
+          echo 'exec "$HERE/FWD_AGRI_GCS" "$@"' >> AppDir/AppRun
           chmod +x AppDir/AppRun
           chmod +x AppDir/qgroundcontrol-start.sh
 
