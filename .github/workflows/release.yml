@@ -16,9 +16,13 @@ jobs:
   linux-build:
     runs-on: ubuntu-22.04
     container: ubuntu:20.04
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      TZ: UTC
     steps:
       - name: Install git and sudo
         run: |
+          ln -fs /usr/share/zoneinfo/$TZ /etc/localtime
           apt-get update
           apt-get install -y --fix-missing git sudo software-properties-common
 
@@ -217,6 +221,12 @@ jobs:
         working-directory: build/Android_Qt_5_15_2_Clang_Multi_Abi-Release
         run: |
           make INSTALL_ROOT=$(pwd)/android-build install
+
+      - name: Pre-create android-build with AndroidX
+        run: |
+          mkdir -p build/Android_Qt_5_15_2_Clang_Multi_Abi-Release/android-build
+          echo "android.useAndroidX=true" > build/Android_Qt_5_15_2_Clang_Multi_Abi-Release/android-build/gradle.properties
+          echo "android.enableJetifier=false" >> build/Android_Qt_5_15_2_Clang_Multi_Abi-Release/android-build/gradle.properties
 
       - name: Run androiddeployqt
         continue-on-error: true
