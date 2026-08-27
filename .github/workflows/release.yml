@@ -235,6 +235,15 @@ jobs:
         run: |
           sdkmanager "build-tools;${{ env.ANDROID_BUILD_TOOLS }}"
 
+      - name: Download & extract Android GStreamer SDK
+        run: |
+          cd $GITHUB_WORKSPACE
+          curl -fL -o /tmp/gst.tgz \
+            "https://github.com/Flying-Wedge-Defence-and-Aerospace/FWD_AGRI_GCS/releases/download/gstreamer-sdk/gstreamer-android-arm64.tar.gz"
+          mkdir -p gstreamer-1.0-android-universal-1.18.6
+          tar -xzf /tmp/gst.tgz -C gstreamer-1.0-android-universal-1.18.6
+          ls gstreamer-1.0-android-universal-1.18.6/arm64/lib/gstreamer-1.0/libgstlibav.a && echo "GStreamer SDK OK" || exit 1
+
       - name: Setup Java 11 (for Gradle build)
         uses: actions/setup-java@v4
         with:
