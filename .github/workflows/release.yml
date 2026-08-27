@@ -145,6 +145,25 @@ jobs:
             echo "Bundled all GStreamer plugins from $GST_DIR"
             echo "Bundled $(ls AppDir/gstreamer-1.0/*.so 2>/dev/null | wc -l) plugins"
             ls AppDir/gstreamer-1.0/libgstlibav.so 2>/dev/null && echo "libav (H264 decoder) bundled OK" || echo "WARNING: libgstlibav.so NOT bundled"
+            for PLUGIN in AppDir/gstreamer-1.0/*.so; do
+              ldd "$PLUGIN" 2>/dev/null | while read -r line; do
+                case "$line" in
+                  *"=>"*"/"*) lib="${line#*=> }"; lib="${lib%% *}" ;;
+                  *) continue ;;
+                esac
+                if [ -f "$lib" ]; then
+                  cp -L -n "$lib" AppDir/Qt/libs/ 2>/dev/null || true
+                fi
+              done
+            done
+            ldd AppDir/FWD_AGRI_GCS 2>/dev/null | while read -r line; do
+              case "$line" in
+                *"libgstreamer"*|*"libgst"*)
+                  lib="${line#*=> }"; lib="${lib%% *}"
+                  [ -f "$lib" ] && cp -L -n "$lib" AppDir/Qt/libs/ 2>/dev/null || true ;;
+              esac
+            done
+            echo "Bundled GStreamer runtime libs: $(ls AppDir/Qt/libs/*.so* 2>/dev/null | wc -l)"
           else
             echo "ERROR: No GStreamer plugin directory found"
             find /usr -name "*.so" -path "*gstreamer*" 2>/dev/null | head -10
