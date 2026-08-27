@@ -50,7 +50,15 @@ jobs:
             libgstreamer-plugins-bad1.0-dev \
             libgstreamer-gl1.0-0 \
             gstreamer1.0-plugins-good \
+            gstreamer1.0-plugins-base \
             gstreamer1.0-plugins-bad \
+            gstreamer1.0-plugins-ugly \
+            gstreamer1.0-libav \
+            gstreamer1.0-gl \
+            gstreamer1.0-plugins-rtp \
+            gstreamer1.0-rtsp \
+            gstreamer1.0-x \
+            libgstreamer-plugins-good1.0-dev \
             gstreamer1.0-qt5 \
             libssl-dev \
             libgl1-mesa-dev \
@@ -136,6 +144,7 @@ jobs:
             cp -L "$GST_DIR"/*.so AppDir/gstreamer-1.0/ 2>/dev/null || true
             echo "Bundled all GStreamer plugins from $GST_DIR"
             echo "Bundled $(ls AppDir/gstreamer-1.0/*.so 2>/dev/null | wc -l) plugins"
+            ls AppDir/gstreamer-1.0/libgstlibav.so 2>/dev/null && echo "libav (H264 decoder) bundled OK" || echo "WARNING: libgstlibav.so NOT bundled"
           else
             echo "ERROR: No GStreamer plugin directory found"
             find /usr -name "*.so" -path "*gstreamer*" 2>/dev/null | head -10
