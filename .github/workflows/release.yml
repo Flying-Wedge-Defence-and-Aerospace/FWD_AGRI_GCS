@@ -12,6 +12,7 @@ env:
   ANDROID_BUILD_TOOLS: '29.0.3'
   ANDROID_PLATFORM: 'android-29'
   APK_KEYSTORE_BASE64: ${{ secrets.APK_KEYSTORE_BASE64 }}
+  PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
 
 jobs:
   linux-build:
@@ -33,6 +34,11 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Inject PAT token
+        run: |
+          echo '#pragma once' > src/FWDUpdateManager/FWDUpdateConfig_local.h
+          echo '#define FWD_UPDATE_GITHUB_TOKEN  "${{ env.PAT_TOKEN }}"' >> src/FWDUpdateManager/FWDUpdateConfig_local.h
 
       - name: Install dependencies
         run: |
@@ -168,6 +174,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Inject PAT token
+        run: |
+          echo '#pragma once' > src/FWDUpdateManager/FWDUpdateConfig_local.h
+          echo '#define FWD_UPDATE_GITHUB_TOKEN  "${{ env.PAT_TOKEN }}"' >> src/FWDUpdateManager/FWDUpdateConfig_local.h
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4

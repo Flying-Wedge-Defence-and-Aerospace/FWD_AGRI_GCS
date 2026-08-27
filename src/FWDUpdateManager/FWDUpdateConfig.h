@@ -5,7 +5,12 @@
 #define FWD_UPDATE_GITHUB_REPO   "FWD_AGRI_GCS"
 
 // PAT token loaded from local config (not committed to repo)
+// CI creates this file from secrets before build; locally use FWDUpdateConfig_local.h
+#if __has_include("FWDUpdateConfig_local.h")
 #include "FWDUpdateConfig_local.h"
+#else
+#define FWD_UPDATE_GITHUB_TOKEN  ""
+#endif
 
 // API URL (auto-constructed from owner/repo)
 #define FWD_UPDATE_API_URL       "https://api.github.com/repos/" FWD_UPDATE_GITHUB_OWNER "/" FWD_UPDATE_GITHUB_REPO "/releases/latest"
