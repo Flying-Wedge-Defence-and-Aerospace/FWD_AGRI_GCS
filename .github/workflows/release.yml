@@ -284,8 +284,6 @@ jobs:
             echo "Found APK: $APK"
             ls -la "$APK"
             cp "$APK" "../../FWDAgriGCS-${VERSION}-arm64-v8a.apk"
-            mkdir -p build/Android_Qt_5_15_2_Clang_Multi_Abi-Release
-            cp "../../FWDAgriGCS-${VERSION}-arm64-v8a.apk" build/Android_Qt_5_15_2_Clang_Multi_Abi-Release/FWDAgriGCS-${VERSION}-arm64-v8a.apk
             echo "Running jarsigner..."
             jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 \
               -keystore /tmp/debug.keystore \
@@ -306,7 +304,8 @@ jobs:
         with:
           name: android-apk
           path: |
-            build/Android_Qt_5_15_2_Clang_Multi_Abi-Release/*.apk
+            build/*.apk
+          if-no-files-found: warn
 
   release:
     needs: [linux-build, android-build]
