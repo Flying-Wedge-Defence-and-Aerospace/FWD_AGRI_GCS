@@ -4,9 +4,8 @@
 #define FWD_UPDATE_GITHUB_OWNER  "Flying-Wedge-Defence-and-Aerospace"
 #define FWD_UPDATE_GITHUB_REPO   "FWD_AGRI_GCS"
 
-// *** IMPORTANT: Replace with your actual Personal Access Token ***
-// Generate at: GitHub > Settings > Developer settings > Personal access tokens
-#define FWD_UPDATE_GITHUB_TOKEN  "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"
+// PAT token loaded from local config (not committed to repo)
+#include "FWDUpdateConfig_local.h"
 
 // API URL (auto-constructed from owner/repo)
 #define FWD_UPDATE_API_URL       "https://api.github.com/repos/" FWD_UPDATE_GITHUB_OWNER "/" FWD_UPDATE_GITHUB_REPO "/releases/latest"
