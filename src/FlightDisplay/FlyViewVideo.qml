@@ -83,9 +83,9 @@ Item {
     // clean fullscreen video view. Only shown while the video is in fullscreen.
     QGCButton {
         id:                 hideUiOverlayButton
-        anchors.top:        parent.top
-        anchors.left:       parent.left
-        anchors.margins:    ScreenTools.defaultFontPixelWidth * 0.5
+        anchors.horizontalCenter:    parent.horizontalCenter
+        anchors.verticalCenter:      parent.verticalCenter
+        anchors.verticalCenterOffset: ScreenTools.defaultFontPixelHeight * 3
         z:                  QGroundControl.zOrderTopMost
         visible:            QGroundControl.videoManager.fullScreen
         text:               hideUiOverVideo ? qsTr("Show UI") : qsTr("Hide UI")

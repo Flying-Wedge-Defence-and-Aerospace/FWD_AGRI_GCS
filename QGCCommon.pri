@@ -164,8 +164,8 @@ StableBuild {
 }
 
 # Set the QGC version from git
-APP_VERSION_STR = "v1.0.5"
-VERSION         = 1.0.5   # Marker to indicate out-of-tree build
+APP_VERSION_STR = "v1.0.6"
+VERSION         = 1.0.6   # Marker to indicate out-of-tree build
 MAC_VERSION     = 1.0
 MAC_BUILD       = 0
 
