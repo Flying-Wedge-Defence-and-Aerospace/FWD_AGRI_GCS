@@ -261,7 +261,7 @@ jobs:
       - name: Run qmake
         working-directory: build/Android_Qt_5_15_2_Clang_Multi_Abi-Release
         run: |
-          qmake ../../qgroundcontrol.pro -r CONFIG+=release ANDROID_ABIS=arm64-v8a
+          qmake ../../qgroundcontrol.pro -r CONFIG+=release ANDROID_ABIS=arm64-v8a ANDROID_TARGET_ARCH=arm64-v8a
 
       - name: Build
         working-directory: build/Android_Qt_5_15_2_Clang_Multi_Abi-Release
