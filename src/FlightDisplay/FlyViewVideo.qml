@@ -21,6 +21,10 @@ Item {
     property int    _track_rec_x:       0
     property int    _track_rec_y:       0
 
+    // When true, fly-view overlays (parameter panel, tool strip, HUD) are hidden
+    // for a clean fullscreen video view. Only toggleable while in fullscreen.
+    property bool   hideUiOverVideo:    false
+
     property Item pipState: videoPipState
 
     // QGCButton {
@@ -49,6 +53,20 @@ Item {
         onStateChanged: {
             if (pipState.state !== pipState.fullState) {
                 QGroundControl.videoManager.fullScreen = false
+                hideUiOverVideo = false
+            }
+        }
+    }
+
+    // Reset the "hide UI" toggle whenever leaving fullscreen, regardless of
+    // how it was triggered (PIP controls or double-click), so the fly-view
+    // overlays always come back.
+    QtObject {
+        id:                     fullScreenWatcher
+        property bool isFullScreen: QGroundControl.videoManager.fullScreen
+        onIsFullScreenChanged: {
+            if (!isFullScreen) {
+                hideUiOverVideo = false
             }
         }
     }
@@ -59,6 +77,19 @@ Item {
         running:      false
         repeat:       false
         onTriggered:  QGroundControl.videoManager.startVideo()
+    }
+
+    // Hide fly-view overlay widgets (parameter panel, tool strip, HUD) for a
+    // clean fullscreen video view. Only shown while the video is in fullscreen.
+    QGCButton {
+        id:                 hideUiOverlayButton
+        anchors.top:        parent.top
+        anchors.left:       parent.left
+        anchors.margins:    ScreenTools.defaultFontPixelWidth * 0.5
+        z:                  QGroundControl.zOrderTopMost
+        visible:            QGroundControl.videoManager.fullScreen
+        text:               hideUiOverVideo ? qsTr("Show UI") : qsTr("Hide UI")
+        onClicked:          hideUiOverVideo = !hideUiOverVideo
     }
 
     //-- Video Streaming

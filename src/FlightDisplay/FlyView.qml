@@ -271,7 +271,7 @@ Item {
         id:                         instrumentPanel
         width:                      _rightPanelWidth
         spacing:                    _toolsMargin
-        visible:                    _root.hudVisible && /*QGroundControl.corePlugin.options.flyView.showInstrumentPanel && */multiVehiclePanelSelector.showSingleVehiclePanel
+        visible:                    _root.hudVisible && /*QGroundControl.corePlugin.options.flyView.showInstrumentPanel && */multiVehiclePanelSelector.showSingleVehiclePanel && !videoControl.hideUiOverVideo
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.rightMargin: ScreenTools.isMobile ? -150 : 25
@@ -284,7 +284,7 @@ Item {
         anchors.top: toolStrip1.bottom
         anchors.margins: ScreenTools.defaultFontPixelWidth
         anchors.topMargin: ScreenTools.defaultFontPixelHeight
-        visible: !(ScreenTools.isMobile) && _root.telemetryVisible
+        visible: !(ScreenTools.isMobile) && _root.telemetryVisible && !videoControl.hideUiOverVideo
     }
 
     AndroidTelemetry {
@@ -411,7 +411,7 @@ Item {
         anchors.top:            parent.top
         z:                      QGroundControl.zOrderWidgets
         maxHeight:              parent.height/* - y - parentToolInsets.bottomEdgeLeftInset - _toolsMargin*/
-        visible:                !QGroundControl.videoManager.fullScreen && _root.toolStripVisible
+        visible:                !QGroundControl.videoManager.fullScreen && _root.toolStripVisible && !videoControl.hideUiOverVideo
         anchors.margins: ScreenTools.defaultFontPixelWidth
 
         onDisplayPreFlightChecklist: preFlightChecklistPopup.createObject(mainWindow).open()
