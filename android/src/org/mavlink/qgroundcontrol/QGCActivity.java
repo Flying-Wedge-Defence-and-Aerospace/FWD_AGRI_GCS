@@ -202,9 +202,8 @@ public class QGCActivity extends QtActivity
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
-        //super.onCreate(savedInstanceState);
-        //nativeInit();
         super.onCreate(savedInstanceState);
+        nativeInit();
         PowerManager pm = (PowerManager)_instance.getSystemService(Context.POWER_SERVICE);
         _wakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "QGroundControl");
         if(_wakeLock != null) {
@@ -262,14 +261,6 @@ public class QGCActivity extends QtActivity
         } catch(Exception e) {
            Log.e(TAG, "Exception: " + e);
         }
-    }
-    
-    @Override
-    public boolean startApplication()
-    {
-        boolean result = super.startApplication();
-        nativeInit();
-        return result;
     }
 
     @Override
