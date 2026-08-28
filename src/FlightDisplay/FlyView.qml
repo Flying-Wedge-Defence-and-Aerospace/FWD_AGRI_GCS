@@ -40,6 +40,8 @@ Item {
 
     property bool logOut: false
 
+    property bool isVideoFull: _pipOverlay._fullItem === videoControl
+
     QGCPalette { id: qgcPal }
 
     PlanMasterController {
@@ -211,6 +213,7 @@ Item {
 
     FlyViewVideo {
         id: videoControl
+        isTheVideoFull: isVideoFull
     }
 
     QGCPipOverlay {

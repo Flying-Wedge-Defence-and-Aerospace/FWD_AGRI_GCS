@@ -27,6 +27,8 @@ Item {
 
     property Item pipState: videoPipState
 
+    property bool   isTheVideoFull:         false
+
     // QGCButton {
     //     text: "Hide"
     //     anchors.left: parent.left
@@ -83,11 +85,15 @@ Item {
     // clean fullscreen video view. Only shown while the video is in fullscreen.
     QGCButton {
         id:                 hideUiOverlayButton
-        anchors.horizontalCenter:    parent.horizontalCenter
-        anchors.verticalCenter:      parent.verticalCenter
-        anchors.verticalCenterOffset: ScreenTools.defaultFontPixelHeight * 3
+        // anchors.horizontalCenter:    parent.horizontalCenter
+        // anchors.verticalCenter:      parent.verticalCenter
+        // anchors.verticalCenterOffset: ScreenTools.defaultFontPixelHeight * 3
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: ScreenTools.defaultFontPixelHeight
         z:                  QGroundControl.zOrderTopMost
-        visible:            QGroundControl.videoManager.fullScreen
+        visible:                 _root.isTheVideoFull
+        //visible:            QGroundControl.videoManager.fullScreen
         text:               hideUiOverVideo ? qsTr("Show UI") : qsTr("Hide UI")
         onClicked:          hideUiOverVideo = !hideUiOverVideo
     }
