@@ -23,7 +23,7 @@ void LogDownloadTest::downloadTest(void)
 
     _connectMockLink(MAV_AUTOPILOT_PX4);
 
-    LogDownloadController* controller = new LogDownloadController();
+    LogDownloadController* controller = new LogDownloadController(qgcApp(), qgcApp()->toolbox());
 
     _rgLogDownloadControllerSignals[requestingListChangedSignalIndex] =     SIGNAL(requestingListChanged());
     _rgLogDownloadControllerSignals[downloadingLogsChangedSignalIndex] =    SIGNAL(downloadingLogsChanged());
