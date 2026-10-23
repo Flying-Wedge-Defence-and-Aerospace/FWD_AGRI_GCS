@@ -387,3 +387,4 @@ echo ""
 echo -e "  GitHub: https://github.com/$GITHUB_OWNER/$GITHUB_REPO/releases/tag/$NEW_VERSION"
 echo ""
 echo -e "  Users running older versions will auto-update."
+
